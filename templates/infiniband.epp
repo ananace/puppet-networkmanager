@@ -1,0 +1,52 @@
+<%- |
+    String $identifier,
+    String $mac,
+    String $ip_method,
+    String $ip6_method,
+    Optional[Integer[1280,65520]] $mtu = 2044,
+    Optional[String] $uuid = undef,
+    Optional[Stdlib::IP::Address::V4::CIDR] $ip = undef,
+    Optional[Array[Stdlib::IP::Address::V4::CIDR]] $extra_ip = undef,
+    Optional[Stdlib::IP::Address::V4::Nosubnet] $ip_gateway = undef,
+    Optional[Array[Stdlib::IP::Address::V4::Nosubnet]] $ip4_dns = undef,
+    Optional[String] $ip4_dns_search = undef,
+    Optional[Stdlib::IP::Address::V6] $ip6 = undef,
+    Optional[Array[Stdlib::IP::Address::V6]] $extra_ip6 = undef,
+    Optional[Stdlib::IP::Address::V6::Nosubnet] $ip6_gateway = undef,
+    Optional[Array[Stdlib::IP::Address::V6::Nosubnet]] $ip6_dns = undef,
+    Optional[String] $ip6_dns_search = undef,
+| -%>
+[infiniband]
+transport-mode=datagram
+mac-address=<%= $mac %>
+<% if $mtu { -%>
+mtu=<%= $mtu %>
+<% } -%>
+
+[connection]
+id=<%= $identifier %>
+<% if $uuid { -%>
+uuid=<%= $uuid %>
+<% } -%>
+interface-name=<%= $identifier %>
+type=infiniband
+autoconnect=true
+
+[ipv4]
+method=<%= $ip_method %>
+address1=<%= $ip %>
+<% if $extra_ip { -%>
+<%   $extra_ip.each |$index, $ip| { -%>
+address<%= $index + 2 %>=<%= $ip %>
+<%   } -%>
+<% } -%>
+<% if $ip4_dns { -%>
+dns=<%= join($ip4_dns, ';') %>
+<% } -%>
+<% if $ip4_dns_search { -%>
+dns-search=<%= $ip4_dns_search %>
+<% } -%>
+never-default=true
+
+#https://developer.gnome.org/NetworkManager/0.9/ref-settings.html
+#may-fail=false
