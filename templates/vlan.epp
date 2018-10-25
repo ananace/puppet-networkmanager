@@ -1,0 +1,71 @@
+<%- |
+    String $identifier,
+    Stdlib::MAC $mac,
+    Integer[1,4096] $vlanid,
+    String $ip_method,
+    String $ip6_method,
+    Optional[Integer[1280]] $mtu = undef,
+    Optional[String] $uuid = undef,
+    Optional[Stdlib::IP::Address::V4::CIDR] $ip = undef,
+    Optional[Array[Stdlib::IP::Address::V4::CIDR]] $extra_ip = undef,
+    Optional[Stdlib::IP::Address::V4::Nosubnet] $ip_gateway = undef,
+    Optional[Array[Stdlib::IP::Address::V4::Nosubnet]] $ip4_dns = undef,
+    Optional[String] $ip4_dns_search = undef,
+    Optional[Stdlib::IP::Address::V6] $ip6 = undef,
+    Optional[Array[Stdlib::IP::Address::V6]] $extra_ip6 = undef,
+    Optional[Stdlib::IP::Address::V6::Nosubnet] $ip6_gateway = undef,
+    Optional[Array[Stdlib::IP::Address::V6::Nosubnet]] $ip6_dns = undef,
+    Optional[String] $ip6_dns_search = undef,
+| -%>
+[vlan]
+interface-name=<%= $identifier %>
+id=<%= $vlanid %>
+
+[ethernet]
+mac-address=<%= $mac %>
+<% if $mtu { -%>
+mtu=<%= $mtu %>
+<% } -%>
+
+[connection]
+id=<%= $identifier %>
+<% if $uuid { -%>
+uuid=<%= $uuid %>
+<% } -%>
+interface-name=<%= $identifier %>
+type=vlan
+autoconnect=true
+
+[ipv6]
+method=<%= $ip6_method %>
+<% if $ip6 { -%>
+address1=<%= $ip6 %>,<%= $ip6_gateway %>
+<% } -%>
+<% if $extra_ip6 { -%>
+<%   $extra_ip6.each |$index, $ip6| { -%>
+address<%= $index + 2 %>=<%= $ip6 %>
+<%   } -%>
+<% } -%>
+<% if $ip6_dns { -%>
+dns=<%= join($ip6_dns, ';') %>;
+<% } -%>
+<% if $ip6_dns_search { -%>
+dns-search=<%= $ip6_dns_search %>;
+<% } -%>
+
+[ipv4]
+method=<%= $ip_method %>
+<% if $ip { -%>
+address1=<%= $ip %>,<%= $ip_gateway %>
+<% } -%>
+<% if $extra_ip { -%>
+<%   $extra_ip.each |$index, $ip| { -%>
+address<%= $index + 2 %>=<%= $ip %>
+<%   } -%>
+<% } -%>
+<% if $ip4_dns { -%>
+dns=<%= join($ip4_dns, ';') %>;
+<% } -%>
+<% if $ip4_dns_search { -%>
+dns-search=<%= $ip4_dns_search %>;
+<% } -%>
