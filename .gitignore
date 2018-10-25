@@ -1,0 +1,44 @@
+# Artefacts of the skeleton itself
+.token
+
+# Artefacts of editing:
+*~
+\#*\#
+.\#*
+/*.samples
+/.project
+.idea/
+
+# Artifacts of ruby:
+*.gem
+*.rbc
+/pkg/
+/spec/reports/
+/spec/example.txt
+.rspec
+/.rvmrc
+.bundle/
+results
+tags
+.*.sw[op]
+.ruby-version
+.ruby-gemset
+ext/packaging
+pkg/
+Gemfile.lock
+Gemfile.local
+
+# YARD
+/.yardoc/
+/_yardoc/
+/doc/
+/rdoc/
+
+# OS-specific things
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+thumbs.db

@@ -1,0 +1,17 @@
+{
+  "name": "liuit-networkmanager",
+  "version": "0.0.0",
+  "author": "LiU-IT",
+  "summary": "Module for liuit/networkmanager",
+  "license": "TBD",
+  "source": "https://gitlab.it.liu.se/pm-liuit/networkmanager/tree/production",
+  "project_page": "https://gitlab.it.liu.se/pm-liuit/networkmanager",
+  "issues_url": "https://gitlab.it.liu.se/pm-liuit/networkmanager/issues",
+  "dependencies": [
+    { "name": "puppetlabs-stdlib", "version_requirement": ">= 1.0.0" }
+  ],
+  "requirements": [
+    { "name": "puppet", "version_requirement": ">= 4.5.0" }
+  ],
+  "data_provider": null
+}

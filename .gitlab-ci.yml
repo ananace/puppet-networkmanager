@@ -1,0 +1,45 @@
+---
+stages:
+  - puppet
+
+variables:
+  GIT_LFS_SKIP_SMUDGE: 1  # Disable LFS by default
+
+puppet-lint:
+  tags: [puppet]
+  stage: puppet
+  image: ananace/puppetlint:latest-checks
+  script:
+    - puppet-lint
+      --no-documentation-check
+      --no-autoloader_layout-check
+      --with-filename
+      --config .puppet-lint.rc
+      --log-format '%{path}:%{line}:%{check}:%{KIND}:%{message}'
+      manifests
+
+puppet-parser:
+  tags: [puppet]
+  stage: puppet
+  image: ananace/puppetlint:latest
+  script:
+    - puppet parser validate
+      --strict_variables
+      --render-as s
+      --modulepath="$(pwd)/.."
+      manifests/
+    - "[ -d templates/ ] && find templates/ -type f -name '*.epp' -print0 |
+        xargs -0r puppet epp validate --render-as s || true"
+    - metadata-json-lint
+      --no-strict-license
+      metadata.json
+
+ruby:
+  tags: [puppet]
+  stage: puppet
+  image: ruby:alpine
+  script:
+    - "[ -d lib/ ] && find lib/ -type f -name '*.rb' -print0 |
+      xargs -0rn1 sh -c 'printf \"$0: \"; cat $0 | ruby -c 2>&1' || true"
+    - "[ -d templates/ ] && find templates/ -type f -name '*.erb' -print0 |
+      xargs -0rn1 sh -c 'printf \"$0: \"; erb -PxT \"-\" \"$0\" | ruby -c 2>&1' || true"
