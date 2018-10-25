@@ -1,0 +1,6 @@
+# This filei managed with puppet
+#
+# The network is managed with NetworkManager and puppet.
+#loopback
+auto lo
+iface lo inet loopback

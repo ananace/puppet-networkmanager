@@ -1,0 +1,2 @@
+---
+networkmanager::nm_package: network-manager
