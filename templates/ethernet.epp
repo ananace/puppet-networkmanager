@@ -9,11 +9,13 @@
     Optional[Array[Stdlib::IP::Address::V4::CIDR]] $extra_ip = undef,
     Optional[Stdlib::IP::Address::V4::Nosubnet] $ip_gateway = undef,
     Optional[Array[Stdlib::IP::Address::V4::Nosubnet]] $ip4_dns = undef,
+    Optional[Array[Stdlib::IP::Address::V4::CIDR]] $ip4_routes = undef,
     Optional[String] $ip4_dns_search = undef,
     Optional[Stdlib::IP::Address::V6] $ip6 = undef,
     Optional[Array[Stdlib::IP::Address::V6]] $extra_ip6 = undef,
     Optional[Stdlib::IP::Address::V6::Nosubnet] $ip6_gateway = undef,
     Optional[Array[Stdlib::IP::Address::V6::Nosubnet]] $ip6_dns = undef,
+    Optional[Array[Stdlib::IP::Address::V6]] $ip6_routes = undef,
     Optional[String] $ip6_dns_search = undef,
 | -%>
 [ethernet]
@@ -34,11 +36,7 @@ autoconnect=true
 [ipv6]
 method=<%= $ip6_method %>
 <% if $ip6 { -%>
-<% if $ip6_gateway { -%>
 address1=<%= $ip6 %>,<%= $ip6_gateway %>
-<% else -%>
-address1=<%= $ip6 %>
-<% end -%>
 <% } -%>
 <% if $extra_ip6 { -%>
 <%   $extra_ip6.each |$index, $ip6| { -%>
@@ -50,6 +48,11 @@ dns=<%= join($ip6_dns, ';') %>;
 <% } -%>
 <% if $ip6_dns_search { -%>
 dns-search=<%= $ip6_dns_search %>;
+<% } -%>
+<% if $ip6_routes { -%>
+<% $ip6_routes.each |$i,$route| { -%>
+route<%= $i + 1 %>=<%= $route %>,::,1
+<% } -%>
 <% } -%>
 
 [ipv4]
@@ -67,4 +70,9 @@ dns=<%= join($ip4_dns, ';') %>;
 <% } -%>
 <% if $ip4_dns_search { -%>
 dns-search=<%= $ip4_dns_search %>;
+<% } -%>
+<% if $ip4_routes { -%>
+<% $ip4_routes.each |$i,$route| { -%>
+route<%= $i + 1 %>=<%= $route %>,0.0.0.0,1
+<% } -%>
 <% } -%>
