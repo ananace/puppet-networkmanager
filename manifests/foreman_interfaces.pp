@@ -41,26 +41,31 @@ class networkmanager::foreman_interfaces {
     }
   }.each |$identifier, $iface| {
     if length($iface['ip_addresses']) > 1 {
-      $_ip_gateway = $iface['ip_addresses'][0]['subnet']['gateway']
       $_ip_method = 'manual'
     } elsif length($iface['ip_addresses']) == 1 {
-      $_ip_gateway = $iface['ip_addresses'][0]['subnet']['gateway']
       $_ip_method = ($iface['ip_addresses'][0]['subnet']['boot_mode'] ? {
           'DHCP'   => 'auto',
           'Static' => 'manual',
           default  => undef,
       })
     }
+
+    if length($iface['ip_addresses'][0]['subnet']['gateway']) > 1 {
+      $_ip_gateway = $iface['ip_addresses'][0]['subnet']['gateway']
+    }
+
     if length($iface['ip6_addresses']) > 1 {
-      $_ip6_gateway = $iface['ip6_addresses'][0]['subnet']['gateway']
       $_ip6_method = 'manual'
     } elsif length($iface['ip6_addresses']) == 1 {
-      $_ip6_gateway = $iface['ip6_addresses'][0]['subnet']['gateway']
       $_ip6_method = ($iface['ip6_addresses'][0]['subnet']['boot_mode'] ? {
           'DHCP'   => 'auto',
           'Static' => 'manual',
           default  => undef,
       })
+    }
+
+    if length($iface['ip6_addresses'][0]['subnet']['gateway']) > 1 {
+      $_ip6_gateway = $iface['ip6_addresses'][0]['subnet']['gateway']
     }
 
     $_ips = $iface['ip_addresses'].map |$if| {
@@ -122,18 +127,19 @@ class networkmanager::foreman_interfaces {
       }
     } elsif length($iface['mac']) == 59 {
       networkmanager::infiniband { $identifier:
-        mac            => upcase($iface['mac']),
-        mtu            => $_mtus[0],
-        ip4_addresses  => $_ips,
-        ip4_gateway    => $_ip_gateway,
-        ip4_dns        => $_dns4,
-        ip4_dns_search => $::domainname,
-        ip4_method     => $_ip_method,
-        ip6_addresses  => $_ip6s,
-        ip6_gateway    => $_ip6_gateway,
-        ip6_dns        => $_dns6,
-        ip6_dns_search => $::domainname,
-        ip6_method     => $_ip6_method,
+        connection_name => $identifier,
+        mac             => upcase($iface['mac']),
+        mtu             => $_mtus[0],
+        ip4_addresses   => $_ips,
+        ip4_gateway     => $_ip_gateway,
+        ip4_dns         => $_dns4,
+        ip4_dns_search  => $::domainname,
+        ip4_method      => $_ip_method,
+        ip6_addresses   => $_ip6s,
+        ip6_gateway     => $_ip6_gateway,
+        ip6_dns         => $_dns6,
+        ip6_dns_search  => $::domainname,
+        ip6_method      => $_ip6_method,
       }
     }
   }
