@@ -41,31 +41,26 @@ class networkmanager::foreman_interfaces {
     }
   }.each |$identifier, $iface| {
     if length($iface['ip_addresses']) > 1 {
+      $_ip_gateway = $iface['ip_addresses'][0]['subnet']['gateway']
       $_ip_method = 'manual'
     } elsif length($iface['ip_addresses']) == 1 {
+      $_ip_gateway = $iface['ip_addresses'][0]['subnet']['gateway']
       $_ip_method = ($iface['ip_addresses'][0]['subnet']['boot_mode'] ? {
           'DHCP'   => 'auto',
           'Static' => 'manual',
           default  => undef,
       })
     }
-
-    if length($iface['ip_addresses'][0]['subnet']['gateway']) > 1 {
-      $_ip_gateway = $iface['ip_addresses'][0]['subnet']['gateway']
-    }
-
     if length($iface['ip6_addresses']) > 1 {
+      $_ip6_gateway = $iface['ip6_addresses'][0]['subnet']['gateway']
       $_ip6_method = 'manual'
     } elsif length($iface['ip6_addresses']) == 1 {
+      $_ip6_gateway = $iface['ip6_addresses'][0]['subnet']['gateway']
       $_ip6_method = ($iface['ip6_addresses'][0]['subnet']['boot_mode'] ? {
           'DHCP'   => 'auto',
           'Static' => 'manual',
           default  => undef,
       })
-    }
-
-    if length($iface['ip6_addresses'][0]['subnet']['gateway']) > 1 {
-      $_ip6_gateway = $iface['ip6_addresses'][0]['subnet']['gateway']
     }
 
     $_ips = $iface['ip_addresses'].map |$if| {
