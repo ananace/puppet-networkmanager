@@ -37,6 +37,7 @@ autoconnect=true
 method=<%= $ip6_method %>
 <% if $ip6 { -%>
 address1=<%= $ip6 %><% if $ip6_gateway { %>,<%= $ip6_gateway %><% } %>
+may-fail=false
 <% } -%>
 <% if $extra_ip6 { -%>
 <%   $extra_ip6.each |$index, $ip6| { -%>
@@ -59,6 +60,7 @@ route<%= $i + 1 %>=<%= $route %>,::,1
 method=<%= $ip_method %>
 <% if $ip { -%>
 address1=<%= $ip %>,<%= $ip_gateway %>
+may-fail=false
 <% } -%>
 <% if $extra_ip { -%>
 <%   $extra_ip.each |$index, $ip| { -%>

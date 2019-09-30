@@ -40,6 +40,7 @@ autoconnect=true
 method=<%= $ip6_method %>
 <% if $ip6 { -%>
 address1=<%= $ip6 %>,<%= $ip6_gateway %>
+may-fail=false
 <% } -%>
 <% if $extra_ip6 { -%>
 <%   $extra_ip6.each |$index, $ip6| { -%>
@@ -57,6 +58,7 @@ dns-search=<%= $ip6_dns_search %>;
 method=<%= $ip_method %>
 <% if $ip { -%>
 address1=<%= $ip %>,<%= $ip_gateway %>
+may-fail=false
 <% } -%>
 <% if $extra_ip { -%>
 <%   $extra_ip.each |$index, $ip| { -%>
