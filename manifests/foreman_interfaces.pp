@@ -6,7 +6,7 @@ class networkmanager::foreman_interfaces {
       $identifier = $iface['identifier']
     } else {
       $identifier = fact('networking.interfaces').filter |$id, $data| {
-        $data['mac'].downcase() == $iface['mac'].downcase()
+        $data['mac'] and $data['mac'].downcase() == $iface['mac'].downcase()
       }.map |$id, $data| { $id }[0]
     }
 
