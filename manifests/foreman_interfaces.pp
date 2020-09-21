@@ -2,6 +2,14 @@ class networkmanager::foreman_interfaces {
   $::foreman_interfaces.filter |$iface| {
     $iface['managed'] and $iface['type'] == 'Interface'
   }.reduce({}) |$hash, $iface| {
+    if $iface['identifier'] or $iface['attached_to'] {
+      $identifier = $iface['identifier']
+    } else {
+      $identifier = fact('networking.interfaces').filter |$id, $data| {
+        $data['mac'] and $data['mac'].downcase() == $iface['mac'].downcase()
+      }.map |$id, $data| { $id }[0]
+    }
+
     if $iface['ip'] =~ Stdlib::IP::Address::V4 {
       $_ip = {
         ip     => $iface['ip'],
@@ -15,14 +23,14 @@ class networkmanager::foreman_interfaces {
       }
     }
 
-    if !$iface['virtual'] or $iface['identifier'] =~ /^.+\..+$/ {
+    if !$iface['virtual'] or $identifier =~ /^.+\..+$/ {
       if $iface['mac'] {
         $_mac = $iface['mac']
       } else {
         $_mac = $hash[$iface['attached_to']]['mac']
       }
       $hash + {
-        $iface['identifier'] => {
+        $identifier => {
           mac           => $_mac,
           tag           => $iface['tag'],
           ip_addresses  => delete_undef_values([ $_ip ]),
