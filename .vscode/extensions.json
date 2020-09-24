@@ -1,0 +1,8 @@
+{
+  "recommendations": [
+    "puppet.puppet-vscode",
+    "rebornix.Ruby",
+    "ms-vscode.powershell",
+    "EditorConfig.EditorConfig"
+  ]
+}
