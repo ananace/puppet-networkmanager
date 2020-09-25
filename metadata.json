@@ -1,6 +1,6 @@
 {
   "name": "liuit-networkmanager",
-  "version": "0.0.0",
+  "version": "0.0.2",
   "author": "LiU-IT",
   "summary": "Module for liuit/networkmanager",
   "license": "Apache-2.0",
@@ -21,21 +21,9 @@
       ]
     },
     {
-      "operatingsystem": "OracleLinux",
-      "operatingsystemrelease": [
-        "7"
-      ]
-    },
-    {
       "operatingsystem": "RedHat",
       "operatingsystemrelease": [
         "8"
-      ]
-    },
-    {
-      "operatingsystem": "Scientific",
-      "operatingsystemrelease": [
-        "7"
       ]
     },
     {
