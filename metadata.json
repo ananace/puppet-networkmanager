@@ -38,13 +38,6 @@
         "18.04"
       ]
     },
-    {
-      "operatingsystem": "windows",
-      "operatingsystemrelease": [
-        "2019",
-        "10"
-      ]
-    }
   ],
   "requirements": [
     {
