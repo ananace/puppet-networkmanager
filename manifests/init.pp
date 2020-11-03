@@ -29,6 +29,9 @@ class networkmanager (
       mode    => '0644',
       notify  => Service['NetworkManager'],
     }
+    service { 'network':
+      enable    => false,
+    }
     if $facts['os']['family'] == 'Debian' {
       package { 'ifupdown':
         ensure => purged,
