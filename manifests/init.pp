@@ -32,6 +32,10 @@ class networkmanager (
     service { 'network':
       enable    => false,
     }
+    tidy { '/etc/sysconfig/network-scripts/':
+      recurse => true,
+      matches => [ 'ifcfg-*' ],
+    }
     if $facts['os']['family'] == 'Debian' {
       package { 'ifupdown':
         ensure => purged,
