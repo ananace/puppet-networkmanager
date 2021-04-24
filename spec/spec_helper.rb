@@ -9,6 +9,9 @@ require 'rspec-puppet-facts'
 
 require 'spec_helper_local' if File.file?(File.join(File.dirname(__FILE__), 'spec_helper_local.rb'))
 
+# LiU - Default to UTF-8 encoding
+Encoding.default_external = Encoding::UTF_8
+
 include RspecPuppetFacts
 
 default_facts = {
@@ -46,6 +49,7 @@ RSpec.configure do |c|
   end
   c.filter_run_excluding(bolt: true) unless ENV['GEM_BOLT']
   c.after(:suite) do
+    RSpec::Puppet::Coverage.report!(0)
   end
 end
 
