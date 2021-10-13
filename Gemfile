@@ -24,13 +24,13 @@ group :development do
   gem "puppet-module-posix-dev-r#{minor_version}", '~> 1.0',     require: false, platforms: [:ruby]
   gem "puppet-module-win-default-r#{minor_version}", '~> 1.0',   require: false, platforms: [:mswin, :mingw, :x64_mingw]
   gem "puppet-module-win-dev-r#{minor_version}", '~> 1.0',       require: false, platforms: [:mswin, :mingw, :x64_mingw]
-  gem "puppet-lint-absolute_classname-check", '3.0.0',           require: false
+  gem "puppet-lint-absolute_classname-check", '3.0.1',           require: false
   gem "puppet-lint-absolute_template_path", '1.0.1',             require: false
   gem "puppet-lint-empty_trailing_lines", '0.0.1',               require: false
-  gem "puppet-lint-file_ensure-check", '0.3.1',                  require: false
-  gem "puppet-lint-strict_indent-check", '2.0.7',                require: false
+  gem "puppet-lint-file_ensure-check", '1.0.0',                  require: false
+  gem "puppet-lint-strict_indent-check", '2.0.8',                require: false
   gem "puppet-lint-trailing_comma-check", '0.4.2',               require: false
-  gem "puppet-lint-unquoted_string-check", '2.0.0',              require: false
+  gem "puppet-lint-unquoted_string-check", '2.1.0',              require: false
 end
 group :system_tests do
   gem "puppet-module-posix-system-r#{minor_version}", '~> 1.0', require: false, platforms: [:ruby]
