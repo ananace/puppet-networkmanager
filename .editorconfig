@@ -1,20 +1,38 @@
-# EditorConfig is awesome: https://EditorConfig.org
+; EditorConfig is awesome: https://EditorConfig.org
 
-# top-most EditorConfig file
+;top-most EditorConfig file
 root = true
 
-# Unix-style newlines with a newline ending every file
+; Ruby style as default
+; UTF-8 charset
+; Unix-style newlines with a newline ending every file
+; 2 space indent
+; Trim trailing whitespace
 [*]
-end_of_line = lf
-insert_final_newline = true
-trim_trailing_whitespace = true
-charset = utf-8
 indent_style = space
 indent_size = 2
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
 
-# The JSON files contain newlines inconsistently
+; Markdown
+; 4 space indent
+; Trailing whitespace is potentially meaningful, leave it
+[*.md]
+indent_size = 4
+trim_trailing_whitespace = false
+
+; Shell scripts & Python
+; 4 space indent
+[*.{sh,py}]
+indent_size = 4
+
+[Makefile]
+indent_style = tab
+
+; The JSON files contain newlines inconsistently
 [*.json]
-indent_size = 2
 insert_final_newline = ignore
 
 [*.{ps1,psm1}]
