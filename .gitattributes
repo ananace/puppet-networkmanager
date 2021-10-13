@@ -3,3 +3,11 @@
 *.pp eol=lf
 *.sh eol=lf
 *.epp eol=lf
+.editorconfig eol=lf
+.gitattributes eol=lf
+.gitignore eol=lf
+.gitlab-ci.yml eol=lf
+.pdkignore eol=lf
+.vscode/* eol=lf
+Gemfile eol=lf
+metadata.json eol=lf

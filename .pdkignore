@@ -25,10 +25,12 @@
 .project
 .envrc
 /inventory.yaml
+/spec/fixtures/litmus_inventory.yaml
 *~
 \#*\#
 .\#*
 /appveyor.yml
+/.editorconfig
 /.fixtures.yml
 /Gemfile
 /.gitattributes
