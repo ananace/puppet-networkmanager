@@ -71,31 +71,31 @@ foreman_interfaces:
   type: Interface
 result:
   eno1:
-    :virtual: false
-    :mac: 5c:52:62:56:8a:c4
-    :vlan: 1010
-    :mtu: 1500
-    :dhcp4: false
-    :mtu4: 1500
-    :gateway4: 10.1.2.1
-    :ips4:
+    virtual: false
+    mac: 5c:52:62:56:8a:c4
+    vlan: 1010
+    mtu: 1500
+    dhcp4: false
+    mtu4: 1500
+    gateway4: 10.1.2.1
+    ips4:
     - 10.1.2.3
-    :netmasks4:
+    netmasks4:
     - 255.255.255.0
-    :cidrs4:
+    cidrs4:
     - 10.1.2.3/24
-    :dns4:
+    dns4:
     - 1.1.1.1
     - 1.1.2.2
-    :dhcp6: false
-    :mtu6: 1500
-    :gateway6: fc99:6b0:17:2300::1
-    :ips6:
+    dhcp6: false
+    mtu6: 1500
+    gateway6: fc99:6b0:17:2300::1
+    ips6:
     - fc99:6b0:17:2300::12
-    :netmasks6:
+    netmasks6:
     - 'ffff:ffff:ffff:ffff::'
-    :cidrs6:
+    cidrs6:
     - fc99:6b0:17:2300::12/64
-    :dns6:
+    dns6:
     - 1::1
     - 1::2

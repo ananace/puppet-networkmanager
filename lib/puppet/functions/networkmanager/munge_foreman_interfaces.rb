@@ -32,14 +32,14 @@ Puppet::Functions.create_function(:'networkmanager::munge_foreman_interfaces') d
         data = (hash[iface['attached_to']] ||= {})
       else
         data = (hash[identifier] ||= {})
-        data[:virtual] = iface['virtual']
+        data['virtual'] = iface['virtual']
         if iface['virtual']
-          data[:mac] = hash[iface['attached_to']][:mac]
-          data[:tag] = iface['tag'] unless iface['tag'] == ''
-          data[:tag] ||= iface['subnet']['vlanid'] unless iface['subnet'] == ''
-          data[:tag] ||= iface['subnet6']['vlanid'] unless iface['subnet6'] == ''
+          data['mac'] = hash[iface['attached_to']]['mac']
+          data['tag'] = iface['tag'] unless iface['tag'] == ''
+          data['tag'] ||= iface['subnet']['vlanid'] unless iface['subnet'] == ''
+          data['tag'] ||= iface['subnet6']['vlanid'] unless iface['subnet6'] == ''
         else
-          data[:mac] = iface['mac']
+          data['mac'] = iface['mac']
         end
       end
 
@@ -65,8 +65,8 @@ Puppet::Functions.create_function(:'networkmanager::munge_foreman_interfaces') d
       next hash unless data[:raw_addresses].any?
 
       subnet = data[:raw_addresses].first[:subnet]
-      data[:vlan] = subnet['vlanid']
-      data[:mtu] = subnet['mtu']
+      data['vlan'] = subnet['vlanid']
+      data['mtu'] = subnet['mtu']
 
       get_subnet(data, 4)
       get_subnet(data, 6)
@@ -93,13 +93,13 @@ Puppet::Functions.create_function(:'networkmanager::munge_foreman_interfaces') d
     subnet = data[:raw_addresses].find(&filter)&.fetch(:subnet, nil)
     return unless subnet
 
-    data[:"dhcp#{version}"] = data[:raw_addresses].select(&filter).all? { |a| a[:subnet]['boot_mode'] == 'DHCP' }
-    data[:"mtu#{version}"] = subnet['mtu']
-    data[:"gateway#{version}"] = subnet['gateway']
-    data[:"ips#{version}"] = data[:raw_addresses].select(&filter).map { |a| a[:ip].to_s }
-    data[:"netmasks#{version}"] = data[:raw_addresses].select(&filter).map { |a| a[:netmask] }
-    data[:"cidrs#{version}"] = data[:raw_addresses].select(&filter).map { |a| a[:cidr] }
-    data[:"dns#{version}"] = data[:raw_addresses].select(&filter).map { |a|
+    data["dhcp#{version}"] = data[:raw_addresses].select(&filter).all? { |a| a[:subnet]['boot_mode'] == 'DHCP' }
+    data["mtu#{version}"] = subnet['mtu']
+    data["gateway#{version}"] = subnet['gateway']
+    data["ips#{version}"] = data[:raw_addresses].select(&filter).map { |a| a[:ip].to_s }
+    data["netmasks#{version}"] = data[:raw_addresses].select(&filter).map { |a| a[:netmask] }
+    data["cidrs#{version}"] = data[:raw_addresses].select(&filter).map { |a| a[:cidr] }
+    data["dns#{version}"] = data[:raw_addresses].select(&filter).map { |a|
       addr = []
       addr << a[:subnet]['dns_primary'] unless a[:subnet]['dns_primary'] == ''
       addr << a[:subnet]['dns_secondary'] unless a[:subnet]['dns_secondary'] == ''

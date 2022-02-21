@@ -16,6 +16,15 @@ describe 'networkmanager::ethernet' do
       let(:facts) { os_facts }
 
       it { is_expected.to compile }
+
+      it do
+        is_expected.to contain_file('/etc/NetworkManager/system-connections/Ethernet')
+          .with_owner('root')
+          .with_group('root')
+          .with_mode('0600')
+          .that_notifies('Exec[reload_ethernet_Ethernet]')
+      end
+      it { is_expected.to contain_exec('reload_ethernet_Ethernet') }
     end
   end
 end

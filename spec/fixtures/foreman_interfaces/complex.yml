@@ -98,6 +98,98 @@ foreman_interfaces:
     tag:
     attached_to:
     type: Interface
+  - ip: 1.2.3.5
+    ip6:
+    mac: 00:11:22:33:44:55
+    name: ''
+    attrs: {}
+    virtual: true
+    link: true
+    identifier: enp5s0f0:1
+    managed: true
+    primary: false
+    provision: false
+    subnet:
+      name: Server network
+      network: 1.0.0.0
+      mask: 255.0.0.0
+      gateway: 1.0.0.1
+      dns_primary: 1.0.1.1
+      dns_secondary: 1.0.1.2
+      from: 1.2.0.0
+      to: 1.2.255.255
+      boot_mode: Static
+      ipam: DHCP
+      vlanid: 1000
+      mtu: 1500
+      nic_delay:
+      network_type: IPv4
+      description: ''
+    subnet6:
+      name: Local only
+      network: 'fe80::'
+      mask: 'ffc0::'
+      gateway: ''
+      dns_primary: ''
+      dns_secondary: ''
+      from: ''
+      to: ''
+      boot_mode: Static
+      ipam: None
+      vlanid:
+      mtu: 1500
+      nic_delay:
+      network_type: IPv6
+      description: ''
+    tag:
+    attached_to: enp5s0f0
+    type: Interface
+  - ip: 1.2.3.6
+    ip6:
+    mac: 00:11:22:33:44:55
+    name: ''
+    attrs: {}
+    virtual: true
+    link: true
+    identifier: enp5s0f0.1000
+    managed: true
+    primary: false
+    provision: false
+    subnet:
+      name: Server network
+      network: 1.0.0.0
+      mask: 255.0.0.0
+      gateway: 1.0.0.1
+      dns_primary: 1.0.1.1
+      dns_secondary: 1.0.1.2
+      from: 1.2.0.0
+      to: 1.2.255.255
+      boot_mode: Static
+      ipam: DHCP
+      vlanid: 1000
+      mtu: 1500
+      nic_delay:
+      network_type: IPv4
+      description: ''
+    subnet6:
+      name: Local only
+      network: 'fe80::'
+      mask: 'ffc0::'
+      gateway: ''
+      dns_primary: ''
+      dns_secondary: ''
+      from: ''
+      to: ''
+      boot_mode: Static
+      ipam: None
+      vlanid:
+      mtu: 1500
+      nic_delay:
+      network_type: IPv6
+      description: ''
+    tag:
+    attached_to: enp5s0f0
+    type: Interface
   - ip: 192.168.2.34
     ip6: ''
     mac: 00:11:22:33:44:55:66:77:88:99:00:11:22:33:44:55:66:77:88:99
@@ -131,33 +223,54 @@ foreman_interfaces:
     type: Interface
 result:
   enp5s0f0:
-    :virtual: false
-    :mac: 00:11:22:33:44:55
-    :vlan: 1000
-    :mtu: 1500
-    :dhcp4: false
-    :mtu4: 1500
-    :gateway4: 1.0.0.1
-    :ips4:
+    virtual: false
+    mac: 00:11:22:33:44:55
+    vlan: 1000
+    mtu: 1500
+    dhcp4: false
+    mtu4: 1500
+    gateway4: 1.0.0.1
+    ips4:
     - 1.2.3.4
-    :netmasks4:
+    - 1.2.3.5
+    netmasks4:
     - 255.0.0.0
-    :cidrs4:
+    - 255.0.0.0
+    cidrs4:
     - 1.2.3.4/8
-    :dns4:
+    - 1.2.3.5/8
+    dns4:
+    - 1.0.1.1
+    - 1.0.1.2
+  enp5s0f0.1000:
+    virtual: true
+    mac: 00:11:22:33:44:55
+    tag: 1000
+    vlan: 1000
+    mtu: 1500
+    dhcp4: false
+    mtu4: 1500
+    gateway4: 1.0.0.1
+    ips4:
+    - 1.2.3.6
+    netmasks4:
+    - 255.0.0.0
+    cidrs4:
+    - 1.2.3.6/8
+    dns4:
     - 1.0.1.1
     - 1.0.1.2
   ibp4s0:
-    :virtual: false
-    :mac: 00:11:22:33:44:55:66:77:88:99:00:11:22:33:44:55:66:77:88:99
-    :mtu: 2044
-    :dhcp4: false
-    :mtu4: 2044
-    :gateway4: 192.168.2.1
-    :ips4:
+    virtual: false
+    mac: 00:11:22:33:44:55:66:77:88:99:00:11:22:33:44:55:66:77:88:99
+    mtu: 2044
+    dhcp4: false
+    mtu4: 2044
+    gateway4: 192.168.2.1
+    ips4:
     - 192.168.2.34
-    :netmasks4:
+    netmasks4:
     - 255.255.255.0
-    :cidrs4:
+    cidrs4:
     - 192.168.2.34/24
-    :dns4: []
+    dns4: []
