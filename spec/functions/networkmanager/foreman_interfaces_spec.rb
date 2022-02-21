@@ -3,13 +3,13 @@
 require 'spec_helper'
 
 CONTEXTS = begin
-  data = {}
+  ctx = {}
 
   Dir[File.join('spec', 'fixtures', 'foreman_interfaces', '*.yml')].each do |file|
-    data[File.basename(file).gsub('.yml', '')] = Psych.load(open(file).read)
+    ctx[File.basename(file).gsub('.yml', '')] = Psych.load(open(file).read)
   end
 
-  data
+  ctx
 end
 
 describe 'networkmanager::munge_foreman_interfaces' do
@@ -26,4 +26,3 @@ describe 'networkmanager::munge_foreman_interfaces' do
     end
   end
 end
-
