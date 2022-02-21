@@ -3,9 +3,12 @@
 require 'spec_helper'
 
 describe 'networkmanager::ethernet' do
-  let(:title) { 'namevar' }
+  let(:title) { 'Ethernet' }
   let(:params) do
-    {}
+    {
+      mac: '00:01:02:03:04:05',
+      mtu: 1400
+    }
   end
 
   on_supported_os.each do |os, os_facts|
