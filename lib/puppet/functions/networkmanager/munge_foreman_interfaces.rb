@@ -15,7 +15,7 @@ Puppet::Functions.create_function(:'networkmanager::munge_foreman_interfaces') d
 
     return {} if foreman_interfaces.nil?
 
-    host_interfaces = scope['facts'].dig(*%w[networking interfaces]) || {}
+    host_interfaces = (scope['facts'].dig(*%w[networking interfaces]) || {}).select { |_, hiface| hiface.key? 'mac' }
     munged = foreman_interfaces.each_with_object({}) do |iface, hash|
       identifier = iface['identifier'] unless iface['identifier'] == ''
       identifier ||= host_interfaces.find { |_, hiface| hiface['mac'].downcase == iface['mac'].downcase }&.first
@@ -24,7 +24,7 @@ Puppet::Functions.create_function(:'networkmanager::munge_foreman_interfaces') d
 
       if identifier.nil?
         scope.call_function('warning', ["Unable to find an identifier for foreman_interface #{iface}, skipping it"])
-        next
+        next hash
       end
 
       if iface['virtual'] && identifier !~ /^.+\..+$/
@@ -45,7 +45,7 @@ Puppet::Functions.create_function(:'networkmanager::munge_foreman_interfaces') d
       end
 
       data[:raw_addresses] ||= []
-      if iface['ip'] != ''
+      if iface['ip'] && iface['ip'] != ''
         cidr = "#{iface['ip']}/#{IPAddr.new(iface.dig(*%w[subnet mask])).to_i.to_s(2).count('1')}"
         data[:raw_addresses] << {
           ip: IPAddr.new(iface['ip']),
@@ -54,7 +54,7 @@ Puppet::Functions.create_function(:'networkmanager::munge_foreman_interfaces') d
           subnet: iface['subnet']
         }
       end
-      if iface['ip6'] != ''
+      if iface['ip6'] && iface['ip6'] != ''
         cidr = "#{iface['ip6']}/#{IPAddr.new(iface.dig(*%w[subnet6 mask])).to_i.to_s(2).count('1')}"
         data[:raw_addresses] << {
           ip: IPAddr.new(iface['ip6']),
