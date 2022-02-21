@@ -11,8 +11,8 @@ describe 'networkmanager::foreman_interfaces' do
     end
   end
 
-  context "With complex.yml fixture" do
-    data = Psych.load(File.read(File.join('spec','fixtures','foreman_interfaces','complex.yml')))
+  context 'With complex.yml fixture' do
+    data = Psych.load(File.read(File.join('spec', 'fixtures', 'foreman_interfaces', 'complex.yml')))
 
     let(:facts) { data['facts'] }
     let(:node_params) do
