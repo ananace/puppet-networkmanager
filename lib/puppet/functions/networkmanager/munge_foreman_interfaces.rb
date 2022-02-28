@@ -19,8 +19,12 @@ Puppet::Functions.create_function(:'networkmanager::munge_foreman_interfaces') d
     munged = foreman_interfaces.each_with_object({}) do |iface, hash|
       identifier = iface['identifier'] unless iface['identifier'] == ''
       identifier ||= host_interfaces.find { |_, hiface| hiface['mac'].casecmp(iface['mac']).zero? }&.first
-      identifier ||= host_interfaces.find { |_, hiface| hiface['ip'] == iface['ip'] }&.first
-      identifier ||= host_interfaces.select { |_, hiface| hiface.key? 'ip6' }.find { |_, hiface| hiface['ip6'] == iface['ip6'] }&.first if iface['ip6'] != ''
+      identifier ||= host_interfaces.find { |_, hiface| hiface['ip'] == iface['ip'] }&.first if iface['ip'] != '' && !iface['ip'].nil?
+      identifier ||= host_interfaces.select { |_, hiface| hiface.key? 'ip6' }.find { |_, hiface| hiface['ip6'] == iface['ip6'] }&.first if iface['ip6'] != '' && !iface['ip6'].nil?
+      hidentifier = host_interfaces.find { |_, hiface| hiface['mac'].casecmp(iface['mac']).zero? }&.first
+      hidentifier ||= host_interfaces.find { |_, hiface| hiface['ip'] == iface['ip'] }&.first if iface['ip'] != '' && !iface['ip'].nil?
+      hidentifier ||= host_interfaces.select { |_, hiface| hiface.key? 'ip6' }.find { |_, hiface| hiface['ip6'] == iface['ip6'] }&.first if iface['ip6'] != '' && !iface['ip6'].nil?
+      hidentifier ||= iface['identifier'] unless iface['identifier'] == ''
 
       if identifier.nil?
         scope.call_function('warning', ["Unable to find an identifier for foreman_interface #{iface}, skipping it"])
@@ -31,16 +35,17 @@ Puppet::Functions.create_function(:'networkmanager::munge_foreman_interfaces') d
         # Extra address for existing interface
         data = (hash[iface['attached_to']] ||= {})
       else
-        data = (hash[identifier] ||= {})
-        data['virtual'] = iface['virtual']
         if iface['virtual']
+          data = (hash[identifier] ||= {})
           data['mac'] = hash[iface['attached_to']]['mac']
           data['tag'] = iface['tag'] unless iface['tag'] == ''
           data['tag'] ||= iface['subnet']['vlanid'] unless iface['subnet'] == ''
           data['tag'] ||= iface['subnet6']['vlanid'] unless iface['subnet6'] == ''
         else
+          data = (hash[hidentifier] ||= {})
           data['mac'] = iface['mac']
         end
+        data['virtual'] = iface['virtual']
       end
 
       data[:raw_addresses] ||= []
