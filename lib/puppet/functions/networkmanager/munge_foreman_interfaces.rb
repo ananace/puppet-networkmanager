@@ -18,10 +18,10 @@ Puppet::Functions.create_function(:'networkmanager::munge_foreman_interfaces') d
     host_interfaces = (scope['facts'].dig('networking', 'interfaces') || {}).select { |_, hiface| hiface.key? 'mac' }
     munged = foreman_interfaces.each_with_object({}) do |iface, hash|
       identifier = iface['identifier'] unless iface['identifier'] == ''
-      identifier ||= host_interfaces.find { |_, hiface| hiface['mac'].casecmp(iface['mac']).zero? }&.first
+      identifier ||= host_interfaces.find { |_, hiface| hiface['mac'].casecmp(iface['mac'])&.zero? }&.first
       identifier ||= host_interfaces.find { |_, hiface| hiface['ip'] == iface['ip'] }&.first if iface['ip'] != '' && !iface['ip'].nil?
       identifier ||= host_interfaces.select { |_, hiface| hiface.key? 'ip6' }.find { |_, hiface| hiface['ip6'] == iface['ip6'] }&.first if iface['ip6'] != '' && !iface['ip6'].nil?
-      hidentifier = host_interfaces.find { |_, hiface| hiface['mac'].casecmp(iface['mac']).zero? }&.first
+      hidentifier = host_interfaces.find { |_, hiface| hiface['mac'].casecmp(iface['mac'])&.zero? }&.first
       hidentifier ||= host_interfaces.find { |_, hiface| hiface['ip'] == iface['ip'] }&.first if iface['ip'] != '' && !iface['ip'].nil?
       hidentifier ||= host_interfaces.select { |_, hiface| hiface.key? 'ip6' }.find { |_, hiface| hiface['ip6'] == iface['ip6'] }&.first if iface['ip6'] != '' && !iface['ip6'].nil?
       hidentifier ||= iface['identifier'] unless iface['identifier'] == ''
