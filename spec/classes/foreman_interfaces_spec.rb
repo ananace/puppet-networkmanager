@@ -34,6 +34,31 @@ describe 'networkmanager::foreman_interfaces' do
         .with_ip4_method('manual')
         .with_ip6_addresses(nil)
     end
+    it do
+      is_expected.to contain_networkmanager_connection_setting('enp5s0f0/ipv4/address1')
+        .with_value('1.2.3.4/8,1.0.0.1')
+    end
+    it do
+      is_expected.to contain_networkmanager_connection_setting('enp5s0f0/ipv4/address2')
+        .with_value('1.2.3.5/8')
+    end
+    it do
+      is_expected.to contain_networkmanager_connection_setting('enp5s0f0/ipv4/dns')
+        .with_value('1.0.1.1;1.0.1.2')
+    end
+    it do
+      is_expected.to contain_networkmanager_connection_setting('enp5s0f0/ipv4/dns-search')
+        .with_value('example.com')
+    end
+    it do
+      is_expected.to contain_networkmanager_connection_setting('enp5s0f0/ipv4/may-fail')
+        .with_value(false)
+    end
+    it do
+      is_expected.to contain_networkmanager_connection_setting('enp5s0f0/ipv4/method')
+        .with_value('manual')
+    end
+
     it { is_expected.to contain_networkmanager__vlan('enp5s0f0.1000') }
     it { is_expected.to contain_networkmanager__infiniband('ibp4s0') }
   end
