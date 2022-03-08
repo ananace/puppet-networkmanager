@@ -53,14 +53,14 @@ define networkmanager::team(
   }
 
   $slaves.each |$slave| {
-    $name = "teamslave-${connection_name}-${slave}"
+    $name = "teamslave-${identifier}-${slave}"
     networkmanager::connection { "team ${title} - teamslave ${slave}":
       type            => 'ethernet',
       connection_name => $name,
     }
     networkmanager_connection_setting {
       "${name}/connection/slave-type": value => 'team';
-      "${name}/connection/master": value     => $connection_name;
+      "${name}/connection/master": value     => $identifier;
     }
   }
 }
