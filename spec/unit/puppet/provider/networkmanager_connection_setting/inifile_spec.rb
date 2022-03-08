@@ -5,12 +5,12 @@ describe Puppet::Type.type(:networkmanager_connection_setting).provider(:inifile
 
   describe 'simple setting usage' do
     let(:name) { 'em1/connection/type' }
-    let(:parameters) {
+    let(:parameters) do
       {
         name: name,
         value: 'ethernet',
       }
-    }
+    end
 
     let(:resource) { Puppet::Type::Networkmanager_connection_setting.new(parameters) }
     let(:provider) { described_class.new(resource) }
@@ -24,7 +24,8 @@ describe Puppet::Type.type(:networkmanager_connection_setting).provider(:inifile
 
     context 'with existing connection' do
       let(:nmconn_file) { tmpfilename('nm-connection') }
-      before { allow(provider).to receive(:file_path).and_return nmconn_file }
+
+      before(:each) { allow(provider).to receive(:file_path).and_return nmconn_file }
 
       it 'acts idempotently' do
         content = <<~NMCONN
@@ -34,8 +35,8 @@ describe Puppet::Type.type(:networkmanager_connection_setting).provider(:inifile
         NMCONN
         File.open(nmconn_file, 'w') { |f| f.write(content) }
 
-        expect(provider).to_not receive(:set_value)
-        expect(provider.send(:ini_file)).to_not receive(:store)
+        expect(provider).not_to receive(:set_value)
+        expect(provider.send(:ini_file)).not_to receive(:store)
 
         expect(provider.exists?).to be true
         provider.create
@@ -48,7 +49,7 @@ describe Puppet::Type.type(:networkmanager_connection_setting).provider(:inifile
         NMCONN
         File.open(nmconn_file, 'w') { |f| f.write(content) }
 
-        expect(provider).to receive(:set_value).with('connection','type','ethernet')
+        expect(provider).to receive(:set_value).with('connection', 'type', 'ethernet')
         expect(provider.send(:ini_file)).to receive(:store)
 
         expect(provider.exists?).to be false
@@ -63,7 +64,7 @@ describe Puppet::Type.type(:networkmanager_connection_setting).provider(:inifile
         NMCONN
         File.open(nmconn_file, 'w') { |f| f.write(content) }
 
-        expect(provider).to receive(:set_value).with('connection','type','ethernet')
+        expect(provider).to receive(:set_value).with('connection', 'type', 'ethernet')
         expect(provider.send(:ini_file)).to receive(:store)
 
         expect(provider.exists?).to be true
@@ -78,7 +79,7 @@ describe Puppet::Type.type(:networkmanager_connection_setting).provider(:inifile
         NMCONN
         File.open(nmconn_file, 'w') { |f| f.write(content) }
 
-        expect(provider).to_not receive(:set_value)
+        expect(provider).not_to receive(:set_value)
         expect(provider).to receive(:remove_value).with('connection', 'type')
         expect(provider.send(:ini_file)).to receive(:store)
 
@@ -90,7 +91,6 @@ describe Puppet::Type.type(:networkmanager_connection_setting).provider(:inifile
 
   describe 'when building a full connection' do
     let(:nmconn_file) { tmpfilename('nm-connection') }
-    before { allow_any_instance_of(described_class).to receive(:file_path).and_return nmconn_file }
 
     it 'creates a fully-featured file from nothing' do
       entries = {
@@ -105,9 +105,10 @@ describe Puppet::Type.type(:networkmanager_connection_setting).provider(:inifile
       entries.each do |key, value|
         parameters = {
           name: "connection/#{key}",
-          value: value
+          value: value,
         }
         provider = described_class.new(Puppet::Type::Networkmanager_connection_setting.new(parameters))
+        allow(provider).to receive(:file_path).and_return nmconn_file
 
         provider.create
       end
@@ -127,19 +128,19 @@ describe Puppet::Type.type(:networkmanager_connection_setting).provider(:inifile
 
     it 'correctly inserts missing data' do
       File.open(nmconn_file, 'w') do |f|
-        f.write(
-          <<~FILE
-          [connection]
-          id=connection
-          type=ethernet
+        content = <<~FILE
+        [connection]
+        id=connection
+        type=ethernet
 
-          [ipv4]
-          method=auto
+        [ipv4]
+        method=auto
 
-          [ipv6]
-          method=auto
-          FILE
-        )
+        [ipv6]
+        method=auto
+        FILE
+
+        f.write content
       end
 
       entries = {
@@ -153,9 +154,10 @@ describe Puppet::Type.type(:networkmanager_connection_setting).provider(:inifile
       entries.each do |key, value|
         parameters = {
           name: "connection/#{key}",
-          value: value
+          value: value,
         }
         provider = described_class.new(Puppet::Type::Networkmanager_connection_setting.new(parameters))
+        allow(provider).to receive(:file_path).and_return nmconn_file
 
         provider.create
       end
@@ -178,21 +180,20 @@ describe Puppet::Type.type(:networkmanager_connection_setting).provider(:inifile
 
   describe 'when showing diff' do
     let(:name) { 'em1/connection/type' }
-
     let(:resource) { Puppet::Type::Networkmanager_connection_setting.new(parameters) }
-    let(:provider) { described_class.new(resource) }
 
     let(:nmconn_file) { tmpfilename('nm-connection') }
-    before { allow_any_instance_of(described_class).to receive(:file_path).and_return nmconn_file }
+
+    before(:each) { allow_any_instance_of(described_class).to receive(:file_path).and_return nmconn_file } # rubocop:disable RSpec/AnyInstance
 
     describe 'gives good creation message' do
-      let(:parameters) {
+      let(:parameters) do
         {
           ensure: :present,
           name: name,
           value: 'ethernet',
         }
-      }
+      end
 
       it do
         allow(Puppet::Util::Storage).to receive(:store)
@@ -207,12 +208,12 @@ describe Puppet::Type.type(:networkmanager_connection_setting).provider(:inifile
     end
 
     describe 'gives good removal message' do
-      let(:parameters) {
+      let(:parameters) do
         {
           ensure: :absent,
           name: name,
         }
-      }
+      end
 
       it do
         content = <<~NMCONN
@@ -234,13 +235,13 @@ describe Puppet::Type.type(:networkmanager_connection_setting).provider(:inifile
     end
 
     describe 'gives good modification message' do
-      let(:parameters) {
+      let(:parameters) do
         {
           ensure: :present,
           name: name,
           value: 'vlan',
         }
-      }
+      end
 
       it do
         content = <<~NMCONN
@@ -251,7 +252,6 @@ describe Puppet::Type.type(:networkmanager_connection_setting).provider(:inifile
         File.open(nmconn_file, 'w') { |f| f.write(content) }
 
         allow(Puppet::Util::Storage).to receive(:store)
-        expect_any_instance_of(described_class).to receive(:set_value).with('connection', 'type', 'vlan')
 
         Puppet[:show_diff] = true
         catalog = Puppet::Resource::Catalog.new

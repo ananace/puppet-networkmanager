@@ -69,7 +69,7 @@ Puppet::Type.type(:networkmanager_connection_setting).provide(:inifile) do
     return unless section?(section)
 
     section = ini_file.get_section(section)
-    section.entries.delete_if { |(k,_)| k == setting }
+    section.entries.delete_if { |(k, _)| k == setting }
     section.mark_dirty
   end
 
@@ -82,7 +82,7 @@ Puppet::Type.type(:networkmanager_connection_setting).provide(:inifile) do
   def ini_file
     @ini_file ||= begin
       file = Puppet::Util::IniConfig::PhysicalFile.new(file_path)
-      file.read if File.exists? file_path
+      file.read if File.exist? file_path
       file
     end
   end

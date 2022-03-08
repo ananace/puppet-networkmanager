@@ -5,7 +5,7 @@ describe Puppet::Type.type(:networkmanager_connection_setting) do
   let(:resource) do
     described_class.new(
       name: 'em1/connection/type',
-      value: 'ethernet'
+      value: 'ethernet',
     )
   end
 
