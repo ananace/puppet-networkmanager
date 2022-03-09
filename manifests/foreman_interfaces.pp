@@ -2,8 +2,8 @@ class networkmanager::foreman_interfaces {
   networkmanager::munge_foreman_interfaces().each |$identifier, $iface| {
     $base_params = {
       mac               => ($iface['mac'] ? {
-        undef   => undef,
-        default => upcase($iface['mac']),
+          undef   => undef,
+          default => upcase($iface['mac']),
       }),
       mtu               => $iface['mtu'],
 
@@ -56,7 +56,7 @@ class networkmanager::foreman_interfaces {
               runner => {
                 name    => $team_mode,
                 tx_hash => [ 'eth', 'ip' ],
-              }
+              },
             },
           }
         } else {
@@ -75,6 +75,8 @@ class networkmanager::foreman_interfaces {
           slaves => $iface['attached_devices'],
         }
       }
+
+      default: {}
     }
 
     ensure_resource($type, $identifier, $base_params + $addn_params)

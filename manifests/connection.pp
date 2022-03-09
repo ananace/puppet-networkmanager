@@ -25,12 +25,12 @@ define networkmanager::connection(
   if length($_ip4_addresses) > 0 {
     $_ip4_method = pick($ip4_method, 'manual')
   } else {
-    $_ip4_method = $ip4_method
+    $_ip4_method = pick($ip4_method, 'auto')
   }
   if length($_ip6_addresses) > 0 {
     $_ip6_method = pick($ip6_method, 'manual')
   } else {
-    $_ip6_method = $ip6_method
+    $_ip6_method = pick($ip6_method, 'auto')
   }
 
   networkmanager_connection_setting {
@@ -40,15 +40,13 @@ define networkmanager::connection(
     "${connection_name}/connection/uuid":
       value   => inline_template("<% require 'securerandom' -%><%= SecureRandom.uuid %>"),
       replace => false;
+    "${connection_name}/ipv4/method": value            => $_ip4_method;
+    "${connection_name}/ipv6/method": value            => $_ip6_method;
   }
-  if $_ip4_method {
-    networkmanager_connection_setting { "${connection_name}/ipv4/method":
-      value => $_ip4_method,
-    }
-  }
-  if $_ip4_addresses {
+
+  if length($_ip4_addresses) > 0 {
     networkmanager_connection_setting { "${connection_name}/ipv4/may-fail":
-      value =>  false,
+      value => false,
     }
     $_ip4_addresses.each |$idx, $address| {
       networkmanager_connection_setting { "${connection_name}/ipv4/address${$idx + 1}":
@@ -57,6 +55,10 @@ define networkmanager::connection(
             default => $address,
         }),
       }
+    }
+  } elsif $ip4_method == 'auto' {
+    networkmanager_connection_setting { "${connection_name}/ipv4/may-fail":
+      value => true,
     }
   }
   if $ip4_dns {
@@ -82,12 +84,7 @@ define networkmanager::connection(
     }
   }
 
-  if $_ip6_method {
-    networkmanager_connection_setting { "${connection_name}/ipv6/method":
-      value => $_ip6_method,
-    }
-  }
-  if $_ip6_addresses {
+  if length($_ip6_addresses) > 0 {
     networkmanager_connection_setting { "${connection_name}/ipv6/may-fail":
       value =>  false,
     }
@@ -98,6 +95,10 @@ define networkmanager::connection(
             default => $address,
         }),
       }
+    }
+  } elsif $ip6_method == 'auto' {
+    networkmanager_connection_setting { "${connection_name}/ipv6/may-fail":
+      value => true,
     }
   }
   if $ip6_dns {

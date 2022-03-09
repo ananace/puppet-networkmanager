@@ -74,6 +74,8 @@ Puppet::Type.newtype(:networkmanager_connection_setting) do
     end
 
     def insync?(current)
+      return true unless @resource[:replace]
+
       current == should
     end
   end

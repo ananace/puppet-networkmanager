@@ -8,7 +8,7 @@ define networkmanager::team(
     'runner' => {
       'name'    => 'lacp',
       'tx_hash' => [ 'eth', 'ip' ],
-    }
+    },
   },
   Array[String] $slaves = [],
 
