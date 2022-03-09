@@ -124,6 +124,14 @@ define networkmanager::connection(
   }
 
   $_file = "/etc/NetworkManager/system-connections/${connection_name}.nmconnection"
+  file { $_file:
+    ensure  => file,
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0600',
+    content => '', # Placeholder
+    replace => false,
+  }
   exec { "reload_networkmanager_${connection_name}":
     command     => "/usr/bin/nmcli c load ${_file} && /usr/bin/nmcli c up id '${connection_name}'",
     refreshonly => true,
