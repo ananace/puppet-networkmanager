@@ -57,11 +57,11 @@ define networkmanager::team(
     networkmanager::connection { "team ${title} - teamslave ${slave}":
       type            => 'ethernet',
       connection_name => $name,
-      identifier      => $slave,
     }
     networkmanager_connection_setting {
-      "${name}/connection/slave-type": value => 'team';
-      "${name}/connection/master": value     => $identifier;
+      "${name}/connection/interface-name": value => $slave;
+      "${name}/connection/slave-type": value     => 'team';
+      "${name}/connection/master": value         => $identifier;
     }
   }
 }
