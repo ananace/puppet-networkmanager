@@ -38,7 +38,7 @@ class networkmanager::foreman_interfaces {
       }
 
       'Bond': {
-        if $iface['identifier'] =~ /team.*/ {
+        if $identifier =~ /team.*/ {
           $type = 'networkmanager::team'
           $team_mode = $iface['mode'] ? {
             '802.3ad'       => 'lacp',

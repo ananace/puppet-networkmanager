@@ -46,10 +46,10 @@ Puppet::Functions.create_function(:'networkmanager::munge_foreman_interfaces') d
             data['mac'] = iface['mac'] unless (iface['mac'] || '') == ''
             data['mode'] = iface['mode']
             data['bond_options'] = Hash[iface['bond_options'].split(' ').map { |part| part.split('=') }]
-            data['attached_devices'] = iface['attached_devices'].split(',')
+            data['attached_devices'] = iface['attached_devices'].split(',').map(&:strip)
           elsif iface['type'] == 'Bridge'
             data['mac'] = iface['mac'] unless (iface['mac'] || '') == ''
-            data['attached_devices'] = iface['attached_devices'].split(',')
+            data['attached_devices'] = iface['attached_devices'].split(',').map(&:strip)
           end
         else
           data = (hash[hidentifier] ||= {})
