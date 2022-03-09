@@ -2,6 +2,7 @@ define networkmanager::connection(
   String $type,
   String $connection_name = $title,
   Boolean $autoconnect = true,
+  Boolean $slave = false,
 
   Optional[Enum[disabled,shared,manual,auto]] $ip4_method = undef,
   Optional[Variant[Stdlib::IP::Address::V4::CIDR, Array[Stdlib::IP::Address::V4::CIDR]]] $ip4_addresses = undef,
@@ -40,87 +41,92 @@ define networkmanager::connection(
     "${connection_name}/connection/uuid":
       value   => inline_template("<% require 'securerandom' -%><%= SecureRandom.uuid %>"),
       replace => false;
-    "${connection_name}/ipv4/method": value            => $_ip4_method;
-    "${connection_name}/ipv6/method": value            => $_ip6_method;
   }
 
-  if length($_ip4_addresses) > 0 {
-    networkmanager_connection_setting { "${connection_name}/ipv4/may-fail":
-      value => false,
+  if !$slave {
+    networkmanager_connection_setting {
+      "${connection_name}/ipv4/method": value            => $_ip4_method;
+      "${connection_name}/ipv6/method": value            => $_ip6_method;
     }
-    $_ip4_addresses.each |$idx, $address| {
-      networkmanager_connection_setting { "${connection_name}/ipv4/address${$idx + 1}":
-        value => (($idx == 0 and $ip4_gateway) ? {
-            true    => "${address},${ip4_gateway}",
-            default => $address,
-        }),
-      }
-    }
-  } elsif $ip4_method == 'auto' {
-    networkmanager_connection_setting { "${connection_name}/ipv4/may-fail":
-      value => true,
-    }
-  }
-  if $ip4_dns {
-    networkmanager_connection_setting { "${connection_name}/ipv4/dns":
-      value => $ip4_dns.join(';'),
-    }
-  }
-  if $ip4_dns_search {
-    networkmanager_connection_setting { "${connection_name}/ipv4/dns-search":
-      value => $ip4_dns_search,
-    }
-  }
-  if $ip4_routes {
-    $ip4_routes.each |$idx, $route| {
-      networkmanager_connection_setting { "${connection_name}/ipv4/route${$idx + 1}":
-        value => "${route},0.0.0.0,1",
-      }
-    }
-  }
-  if $ip4_never_default != undef {
-    networkmanager_connection_setting { "${connection_name}/ipv4/never-default":
-      value => $ip4_never_default,
-    }
-  }
 
-  if length($_ip6_addresses) > 0 {
-    networkmanager_connection_setting { "${connection_name}/ipv6/may-fail":
-      value =>  false,
-    }
-    $_ip6_addresses.each |$idx, $address| {
-      networkmanager_connection_setting { "${connection_name}/ipv6/address${$idx + 1}":
-        value => (($idx == 0 and $ip6_gateway) ? {
-            true    => "${address},${ip6_gateway}",
-            default => $address,
-        }),
+    if length($_ip4_addresses) > 0 {
+      networkmanager_connection_setting { "${connection_name}/ipv4/may-fail":
+        value => false,
+      }
+      $_ip4_addresses.each |$idx, $address| {
+        networkmanager_connection_setting { "${connection_name}/ipv4/address${$idx + 1}":
+          value => (($idx == 0 and $ip4_gateway) ? {
+              true    => "${address},${ip4_gateway}",
+              default => $address,
+          }),
+        }
+      }
+    } elsif $ip4_method == 'auto' {
+      networkmanager_connection_setting { "${connection_name}/ipv4/may-fail":
+        value => true,
       }
     }
-  } elsif $ip6_method == 'auto' {
-    networkmanager_connection_setting { "${connection_name}/ipv6/may-fail":
-      value => true,
-    }
-  }
-  if $ip6_dns {
-    networkmanager_connection_setting { "${connection_name}/ipv6/dns":
-      value => $ip6_dns.join(';'),
-    }
-  }
-  if $ip6_dns_search {
-    networkmanager_connection_setting { "${connection_name}/ipv6/dns-search":
-      value => $ip6_dns_search,
-    }
-  }
-  if $ip6_routes {
-    $ip6_routes.each |$idx, $route| {
-      networkmanager_connection_setting { "${connection_name}/ipv6/route${$idx + 1}":
-        value => "${route},::,1",
+    if $ip4_dns {
+      networkmanager_connection_setting { "${connection_name}/ipv4/dns":
+        value => $ip4_dns.join(';'),
       }
     }
-  }
-  if $ip6_never_default != undef {
-    networkmanager_connection_setting { "${connection_name}/ipv6/never-default":
-      value => $ip6_never_default,
+    if $ip4_dns_search {
+      networkmanager_connection_setting { "${connection_name}/ipv4/dns-search":
+        value => $ip4_dns_search,
+      }
+    }
+    if $ip4_routes {
+      $ip4_routes.each |$idx, $route| {
+        networkmanager_connection_setting { "${connection_name}/ipv4/route${$idx + 1}":
+          value => "${route},0.0.0.0,1",
+        }
+      }
+    }
+    if $ip4_never_default != undef {
+      networkmanager_connection_setting { "${connection_name}/ipv4/never-default":
+        value => $ip4_never_default,
+      }
+    }
+
+    if length($_ip6_addresses) > 0 {
+      networkmanager_connection_setting { "${connection_name}/ipv6/may-fail":
+        value =>  false,
+      }
+      $_ip6_addresses.each |$idx, $address| {
+        networkmanager_connection_setting { "${connection_name}/ipv6/address${$idx + 1}":
+          value => (($idx == 0 and $ip6_gateway) ? {
+              true    => "${address},${ip6_gateway}",
+              default => $address,
+          }),
+        }
+      }
+    } elsif $ip6_method == 'auto' {
+      networkmanager_connection_setting { "${connection_name}/ipv6/may-fail":
+        value => true,
+      }
+    }
+    if $ip6_dns {
+      networkmanager_connection_setting { "${connection_name}/ipv6/dns":
+        value => $ip6_dns.join(';'),
+      }
+    }
+    if $ip6_dns_search {
+      networkmanager_connection_setting { "${connection_name}/ipv6/dns-search":
+        value => $ip6_dns_search,
+      }
+    }
+    if $ip6_routes {
+      $ip6_routes.each |$idx, $route| {
+        networkmanager_connection_setting { "${connection_name}/ipv6/route${$idx + 1}":
+          value => "${route},::,1",
+        }
+      }
+    }
+    if $ip6_never_default != undef {
+      networkmanager_connection_setting { "${connection_name}/ipv6/never-default":
+        value => $ip6_never_default,
+      }
     }
   }
 

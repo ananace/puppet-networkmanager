@@ -69,6 +69,7 @@ define networkmanager::team(
     networkmanager::connection { "team ${title} - teamslave ${slave}":
       type            => 'ethernet',
       connection_name => $name,
+      slave           => true,
     }
     networkmanager_connection_setting {
       "${name}/connection/interface-name": value => $slave;

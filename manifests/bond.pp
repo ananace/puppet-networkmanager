@@ -71,6 +71,7 @@ define networkmanager::bond(
     networkmanager::connection { "bond ${title} - bondslave ${slave}":
       type            => 'ethernet',
       connection_name => $name,
+      slave           => true,
     }
     networkmanager_connection_setting {
       "${name}/connection/interface-name": value => $slave;
