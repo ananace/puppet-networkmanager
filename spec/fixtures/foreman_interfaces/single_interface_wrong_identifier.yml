@@ -73,6 +73,7 @@ result:
   em1:
     type: Interface
     virtual: false
+    primary: true
     mac: 5c:52:62:56:8a:c4
     vlan: 1010
     mtu: 1500

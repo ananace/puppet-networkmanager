@@ -1,17 +1,25 @@
 class networkmanager::foreman_interfaces {
   networkmanager::munge_foreman_interfaces().each |$identifier, $iface| {
     $base_params = {
-      mtu            => $iface['mtu'],
-      ip4_addresses  => $iface['cidrs4'],
-      ip4_gateway    => $iface['gateway4'],
-      ip4_dns        => $iface['dns4'],
-      ip4_dns_search => $::domainname,
-      ip4_method     => ($iface['dhcp4'] ? { true => 'auto', default => 'manual' }),
-      ip6_addresses  => $iface['cidrs6'],
-      ip6_gateway    => $iface['gateway6'],
-      ip6_dns        => $iface['dns6'],
-      ip6_dns_search => $::domainname,
-      ip6_method     => ($iface['dhcp6'] ? { true => 'auto', default => 'manual' }),
+      mac               => ($iface['mac'] ? {
+        undef   => undef,
+        default => upcase($iface['mac']),
+      }),
+      mtu               => $iface['mtu'],
+
+      ip4_addresses     => $iface['cidrs4'],
+      ip4_gateway       => $iface['gateway4'],
+      ip4_dns           => $iface['dns4'],
+      ip4_dns_search    => $::domainname,
+      ip4_method        => ($iface['dhcp4'] ? { true => 'auto', default => 'manual' }),
+      ip4_never_default => !$iface['primary'],
+
+      ip6_addresses     => $iface['cidrs6'],
+      ip6_gateway       => $iface['gateway6'],
+      ip6_dns           => $iface['dns6'],
+      ip6_dns_search    => $::domainname,
+      ip6_method        => ($iface['dhcp6'] ? { true => 'auto', default => 'manual' }),
+      ip6_never_default => !$iface['primary'],
     }
 
     case $iface['type'] {
@@ -20,20 +28,15 @@ class networkmanager::foreman_interfaces {
           if $iface['virtual'] {
             $type = 'networkmanager::vlan'
             $addn_params = {
-              mac    => upcase($iface['mac']),
               vlanid => Integer(pick($iface['tag'], $iface['vlan'])),
             }
           } else {
             $type = 'networkmanager::ethernet'
-            $addn_params = {
-              mac => upcase($iface['mac']),
-            }
+            $addn_params = {}
           }
         } else {
           $type = 'networkmanager::infiniband'
-          $addn_params = {
-            mac => upcase($iface['mac']),
-          }
+          $addn_params = {}
         }
       }
 

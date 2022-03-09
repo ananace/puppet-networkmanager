@@ -2,7 +2,7 @@ facts:
   networking:
     interfaces:
       enp5s0f0:
-        mac: "00:11:22:33:44:55"
+        mac: "00:11:22:33:44:aa"
         mtu: 1500
       enp5s0f1:
         mac: "00:11:22:33:44:66"
@@ -103,7 +103,7 @@ foreman_interfaces:
     type: Interface
   - ip: 1.2.3.4
     ip6:
-    mac: 00:11:22:33:44:55
+    mac: 00:11:22:33:44:aa
     name: host.example.com
     attrs: {}
     virtual: false
@@ -274,6 +274,7 @@ result:
   bond0:
     type: Bond
     virtual: true
+    primary: true
     vlan: 1000
     mtu: 1500
     dhcp4: false
@@ -299,7 +300,8 @@ result:
   enp5s0f0:
     type: Interface
     virtual: false
-    mac: 00:11:22:33:44:55
+    primary: true
+    mac: 00:11:22:33:44:aa
     vlan: 1000
     mtu: 1500
     dhcp4: false
@@ -320,7 +322,8 @@ result:
   enp5s0f0.1000:
     type: Interface
     virtual: true
-    mac: 00:11:22:33:44:55
+    primary: false
+    mac: 00:11:22:33:44:aa
     tag: 1000
     vlan: 1000
     mtu: 1500
@@ -339,6 +342,7 @@ result:
   ibp4s0:
     type: Interface
     virtual: false
+    primary: false
     mac: 00:11:22:33:44:55:66:77:88:99:00:11:22:33:44:55:66:77:88:99
     mtu: 2044
     dhcp4: false

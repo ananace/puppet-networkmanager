@@ -1,0 +1,243 @@
+facts:
+  networking:
+    domain: example.com
+    fqdn: node.example.com
+    hostname: node
+    interfaces:
+      enp2s0f0:
+        bindings:
+        - address: 10.216.252.20
+          netmask: 255.255.255.0
+          network: 10.216.252.0
+        bindings6:
+        - address: fcdd:ef55:17:f080::20
+          netmask: 'ffff:ffff:ffff:ffff::'
+          network: 'fcdd:ef55:17:f080::'
+        - address: fe80::3e4a:92ff:fef6:ce10
+          netmask: 'ffff:ffff:ffff:ffff::'
+          network: 'fe80::'
+        ip: 10.216.252.20
+        ip6: fcdd:ef55:17:f080::20
+        mac: 3c:4a:92:f6:ce:10
+        mtu: 1500
+        netmask: 255.255.255.0
+        netmask6: 'ffff:ffff:ffff:ffff::'
+        network: 10.216.252.0
+        network6: 'fcdd:ef55:17:f080::'
+        scope6: global
+      enp2s0f0.1:
+        bindings:
+        - address: 172.31.0.107
+          netmask: 255.255.255.0
+          network: 172.31.0.0
+        bindings6:
+        - address: fe80::3e4a:92ff:fef6:ce10
+          netmask: 'ffff:ffff:ffff:ffff::'
+          network: 'fe80::'
+        ip: 172.31.0.107
+        ip6: fe80::3e4a:92ff:fef6:ce10
+        mac: 3c:4a:92:f6:ce:10
+        mtu: 1500
+        netmask: 255.255.255.0
+        netmask6: 'ffff:ffff:ffff:ffff::'
+        network: 172.31.0.0
+        network6: 'fe80::'
+        scope6: link
+      enp2s0f1:
+        mac: 3c:4a:92:f6:ce:14
+        mtu: 1500
+      lo:
+        bindings:
+        - address: 127.0.0.1
+          netmask: 255.0.0.0
+          network: 127.0.0.0
+        bindings6:
+        - address: "::1"
+          netmask: ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff
+          network: "::1"
+        ip: 127.0.0.1
+        ip6: "::1"
+        mtu: 65536
+        netmask: 255.0.0.0
+        netmask6: ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff
+        network: 127.0.0.0
+        network6: "::1"
+        scope6: host
+      wg0:
+        bindings:
+        - address: 172.32.0.0
+          netmask: 255.255.255.0
+          network: 172.32.0.0
+        bindings6:
+        - address: fd86:ea04:1115::1
+          netmask: 'ffff:ffff:ffff:ffff::'
+          network: 'fd86:ea04:1115::'
+        ip: 172.32.0.0
+        ip6: fd86:ea04:1115::1
+        netmask: 255.255.255.0
+        netmask6: 'ffff:ffff:ffff:ffff::'
+        network: 172.32.0.0
+        network6: 'fd86:ea04:1115::'
+        scope6: global
+    ip: 10.216.252.20
+    ip6: fcdd:ef55:17:f080::20
+    mac: 3c:4a:92:f6:ce:10
+    mtu: 1500
+    netmask: 255.255.255.0
+    netmask6: 'ffff:ffff:ffff:ffff::'
+    network: 10.216.252.0
+    network6: 'fcdd:ef55:17:f080::'
+    primary: enp2s0f0
+    scope6: global
+foreman_interfaces:
+  - ip: 10.216.252.20
+    ip6: fcdd:ef55:17:f080::20
+    mac: 3c:4a:92:f6:ce:10
+    name: node.example.com
+    attrs:
+      network: 10.216.252.0
+      ipaddress6: fcdd:ef55:17:f080:21b:78ff:fee0:ddb0
+      netmask: 255.255.255.0
+      mtu: 1500
+      speed: '1000'
+      duplex: full
+      port: FIBRE
+      auto_negotiation: 'true'
+      wol: false
+    virtual: false
+    link: true
+    identifier: enp2s0f0
+    managed: true
+    primary: true
+    provision: true
+    subnet:
+      name: Example prod
+      network: 10.216.252.0
+      mask: 255.255.255.0
+      gateway: 10.216.252.1
+      dns_primary: 10.216.252.21
+      dns_secondary: 10.216.252.23
+      from: 10.216.252.12
+      to: 10.216.252.199
+      boot_mode: Static
+      ipam: DHCP
+      vlanid: 2
+      mtu: 1500
+      nic_delay:
+      network_type: IPv4
+      description: ''
+    subnet6:
+      name: Example prod IPv6
+      network: 'fcdd:ef55:17:f080::'
+      mask: 'ffff:ffff:ffff:ffff::'
+      gateway: fcdd:ef55:17:f080::1
+      dns_primary: fcdd:ef55:17:f080::17
+      dns_secondary: fcdd:ef55:17:f080::19
+      from: fcdd:ef55:17:f080::1000
+      to: fcdd:ef55:17:f080::2000
+      boot_mode: Static
+      ipam: Internal DB
+      vlanid: 2
+      mtu: 1500
+      nic_delay:
+      network_type: IPv6
+      description: ''
+    tag:
+    attached_to:
+    type: Interface
+  - ip: 172.31.0.107
+    ip6: ''
+    mac:
+    name: node.internal.example.com
+    attrs: {}
+    virtual: true
+    link: true
+    identifier: enp2s0f0.1
+    managed: true
+    primary: false
+    provision: false
+    subnet:
+      name: Internt
+      network: 172.31.0.0
+      mask: 255.255.255.0
+      gateway: 172.31.0.1
+      dns_primary: 172.31.0.127
+      dns_secondary: 172.31.0.129
+      from: 172.31.0.100
+      to: 172.31.0.200
+      boot_mode: Static
+      ipam: DHCP
+      vlanid: 1
+      mtu: 1500
+      nic_delay:
+      network_type: IPv4
+      description: ''
+    subnet6:
+    tag: ''
+    attached_to: enp2s0f0
+    type: Interface
+  - ip:
+    ip6: ''
+    mac: 3c:4a:92:f6:ce:14
+    name: ''
+    attrs:
+      mtu: 1500
+      speed: '1000'
+      duplex: full
+      port: FIBRE
+      auto_negotiation: 'true'
+      wol: false
+    virtual: false
+    link: true
+    identifier: enp2s0f1
+    managed: false
+    primary: false
+    provision: false
+    subnet:
+    subnet6:
+    tag:
+    attached_to:
+    type: Interface
+  - ip: 172.31.0.30
+    ip6: ''
+    mac: 3c:4a:92:e3:b7:ca
+    name: node.console.example.com
+    attrs:
+      enabled: true
+      ipaddress_source: DHCP Address
+      subnet_mask: 255.255.255.0
+      gateway: 172.31.0.1
+      2_ipaddress_source: DHCP Address
+      2_ipaddress: 172.31.0.30
+      2_subnet_mask: 255.255.255.0
+      2_macaddress: 00:1b:78:e0:ce:64
+      2_gateway: 172.31.0.1
+    virtual: false
+    link: true
+    identifier: ipmi
+    managed: true
+    primary: false
+    provision: false
+    subnet:
+      name: Internt
+      network: 172.31.0.0
+      mask: 255.255.255.0
+      gateway: 172.31.0.1
+      dns_primary: 172.31.0.127
+      dns_secondary: 172.31.0.129
+      from: 172.31.0.100
+      to: 172.31.0.200
+      boot_mode: Static
+      ipam: DHCP
+      vlanid: 1
+      mtu: 1500
+      nic_delay:
+      network_type: IPv4
+      description: ''
+    subnet6:
+    tag:
+    attached_to:
+    type: BMC
+    provider: IPMI
+    username: admin
+    password: password

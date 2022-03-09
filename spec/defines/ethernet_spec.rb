@@ -6,7 +6,7 @@ describe 'networkmanager::ethernet' do
   let(:title) { 'Ethernet' }
   let(:params) do
     {
-      mac: '00:01:02:03:04:05',
+      mac: '00:01:02:03:04:0a',
       mtu: 1400
     }
   end
@@ -47,19 +47,11 @@ describe 'networkmanager::ethernet' do
       end
       it do
         is_expected.to contain_networkmanager_connection_setting('Ethernet/ethernet/mac-address')
-          .with_value('00:01:02:03:04:05')
+          .with_value('00:01:02:03:04:0a')
           .that_notifies('Exec[reload_networkmanager_Ethernet]')
       end
-      it do
-        is_expected.to contain_networkmanager_connection_setting('Ethernet/ipv4/method')
-          .with_value('auto')
-          .that_notifies('Exec[reload_networkmanager_Ethernet]')
-      end
-      it do
-        is_expected.to contain_networkmanager_connection_setting('Ethernet/ipv6/method')
-          .with_value('auto')
-          .that_notifies('Exec[reload_networkmanager_Ethernet]')
-      end
+      it { is_expected.not_to contain_networkmanager_connection_setting('Ethernet/ipv4/method') }
+      it { is_expected.not_to contain_networkmanager_connection_setting('Ethernet/ipv6/method') }
       it { is_expected.to contain_exec('reload_networkmanager_Ethernet') }
     end
   end

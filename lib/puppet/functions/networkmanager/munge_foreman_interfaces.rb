@@ -57,6 +57,7 @@ Puppet::Functions.create_function(:'networkmanager::munge_foreman_interfaces') d
         end
         data['virtual'] = iface['virtual']
         data['type'] = iface['type']
+        data['primary'] = iface['primary']
       end
 
       data[:raw_addresses] ||= []

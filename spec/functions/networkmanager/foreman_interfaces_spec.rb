@@ -16,6 +16,8 @@ describe 'networkmanager::munge_foreman_interfaces' do
   it { is_expected.not_to eq(nil) }
 
   CONTEXTS.each do |name, data|
+    next unless data.key? 'result'
+
     context "with #{name}" do
       before(:each) do
         expect(scope).to receive(:[]).with('facts').and_return(data['facts'])

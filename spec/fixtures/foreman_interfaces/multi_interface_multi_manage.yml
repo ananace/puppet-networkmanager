@@ -160,6 +160,7 @@ result:
   eno1:
     type: Interface
     virtual: false
+    primary: true
     mac: 5c:52:62:56:8a:a3
     vlan: 1010
     mtu: 1500
@@ -190,6 +191,7 @@ result:
   eno2:
     type: Interface
     virtual: false
+    primary: true
     mac: 5c:52:62:56:8a:a4
     vlan: 1010
     mtu: 1500

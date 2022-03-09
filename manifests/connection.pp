@@ -7,25 +7,31 @@ define networkmanager::connection(
   Optional[Variant[Stdlib::IP::Address::V4::CIDR, Array[Stdlib::IP::Address::V4::CIDR]]] $ip4_addresses = undef,
   Optional[Stdlib::IP::Address::V4::Nosubnet] $ip4_gateway = undef,
   Optional[Array[Stdlib::IP::Address::V4::Nosubnet]] $ip4_dns = undef,
+  Optional[Array[Stdlib::IP::Address::V4::CIDR]] $ip4_routes = undef,
   Optional[String] $ip4_dns_search = undef,
+  Optional[Boolean] $ip4_never_default = undef,
 
   Optional[Enum[dhcp,'link-local',manual,auto,ignore]] $ip6_method = undef,
   Optional[Variant[Stdlib::IP::Address::V6::CIDR, Array[Stdlib::IP::Address::V6::CIDR]]] $ip6_addresses = undef,
   Optional[Stdlib::IP::Address::V6::Nosubnet] $ip6_gateway = undef,
   Optional[Array[Stdlib::IP::Address::V6::Nosubnet]] $ip6_dns = undef,
+  Optional[Array[Stdlib::IP::Address::V6::CIDR]] $ip6_routes = undef,
   Optional[String] $ip6_dns_search = undef,
+  Optional[Boolean] $ip6_never_default = undef,
 ) {
   $_ip4_addresses = flatten([pick($ip4_addresses, [])])
   $_ip6_addresses = flatten([pick($ip6_addresses, [])])
 
-  $_ip4_method = pick($ip4_method, (length($_ip4_addresses) > 0) ? {
-      true  => 'manual',
-      false => 'auto',
-  })
-  $_ip6_method = pick($ip6_method, (length($_ip6_addresses) > 0) ? {
-      true  => 'manual',
-      false => 'auto',
-  })
+  if length($_ip4_addresses) > 0 {
+    $_ip4_method = pick($ip4_method, 'manual')
+  } else {
+    $_ip4_method = $ip4_method
+  }
+  if length($_ip6_addresses) > 0 {
+    $_ip6_method = pick($ip6_method, 'manual')
+  } else {
+    $_ip6_method = $ip6_method
+  }
 
   networkmanager_connection_setting {
     "${connection_name}/connection/autoconnect": value => $autoconnect;
@@ -34,9 +40,11 @@ define networkmanager::connection(
     "${connection_name}/connection/uuid":
       value   => inline_template("<% require 'securerandom' -%><%= SecureRandom.uuid %>"),
       replace => false;
-
-    "${connection_name}/ipv4/method": value            => $_ip4_method;
-    "${connection_name}/ipv6/method": value            => $_ip6_method;
+  }
+  if $_ip4_method {
+    networkmanager_connection_setting { "${connection_name}/ipv4/method":
+      value => $_ip4_method,
+    }
   }
   if $_ip4_addresses {
     networkmanager_connection_setting { "${connection_name}/ipv4/may-fail":
@@ -61,11 +69,24 @@ define networkmanager::connection(
       value => $ip4_dns_search,
     }
   }
-  # $ip4_routes.each |$idx, $route| {
-  #   networkmanager_connection_setting { "${connection_name}/ipv4/route${$idx + 1}":
-  #     value => "${route},0.0.0.0,1",
-  #   }
-  # }
+  if $ip4_routes {
+    $ip4_routes.each |$idx, $route| {
+      networkmanager_connection_setting { "${connection_name}/ipv4/route${$idx + 1}":
+        value => "${route},0.0.0.0,1",
+      }
+    }
+  }
+  if $ip4_never_default != undef {
+    networkmanager_connection_setting { "${connection_name}/ipv4/never-default":
+      value => $ip4_never_default,
+    }
+  }
+
+  if $_ip6_method {
+    networkmanager_connection_setting { "${connection_name}/ipv6/method":
+      value => $_ip6_method,
+    }
+  }
   if $_ip6_addresses {
     networkmanager_connection_setting { "${connection_name}/ipv6/may-fail":
       value =>  false,
@@ -89,11 +110,18 @@ define networkmanager::connection(
       value => $ip6_dns_search,
     }
   }
-  # $ip6_routes.each |$idx, $route| {
-  #   networkmanager_connection_setting { "${connection_name}/ipv6/route${$idx + 1}":
-  #     value => "${route},::,1",
-  #   }
-  # }
+  if $ip6_routes {
+    $ip6_routes.each |$idx, $route| {
+      networkmanager_connection_setting { "${connection_name}/ipv6/route${$idx + 1}":
+        value => "${route},::,1",
+      }
+    }
+  }
+  if $ip6_never_default != undef {
+    networkmanager_connection_setting { "${connection_name}/ipv6/never-default":
+      value => $ip6_never_default,
+    }
+  }
 
   $_file = "/etc/NetworkManager/system-connections/${connection_name}.nmconnection"
   exec { "reload_networkmanager_${connection_name}":
