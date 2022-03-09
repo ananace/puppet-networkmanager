@@ -223,6 +223,7 @@ foreman_interfaces:
     type: Interface
 result:
   enp5s0f0:
+    type: Interface
     virtual: false
     mac: 00:11:22:33:44:55
     vlan: 1000
@@ -243,6 +244,7 @@ result:
     - 1.0.1.1
     - 1.0.1.2
   enp5s0f0.1000:
+    type: Interface
     virtual: true
     mac: 00:11:22:33:44:55
     tag: 1000
@@ -261,6 +263,7 @@ result:
     - 1.0.1.1
     - 1.0.1.2
   ibp4s0:
+    type: Interface
     virtual: false
     mac: 00:11:22:33:44:55:66:77:88:99:00:11:22:33:44:55:66:77:88:99
     mtu: 2044

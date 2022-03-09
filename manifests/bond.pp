@@ -1,15 +1,11 @@
-define networkmanager::team(
+define networkmanager::bond(
   String $identifier = $title,
   String $connection_name = $title,
   Optional[Integer[1280]] $mtu = undef,
   Optional[Stdlib::MAC] $mac = undef,
 
-  Hash[String,Data] $config = {
-    'runner' => {
-      'name'    => 'lacp',
-      'tx_hash' => [ 'eth', 'ip' ],
-    }
-  },
+  Enum['balance-rr','active-backup','balance-xor','broadcast','802.3ad','balance-tlb','balance-alb'] $mode = 'balance-rr',
+  Hash[String,Data] $options = {},
   Array[String] $slaves = [],
 
   Optional[Enum[disabled,shared,manual,auto]] $ip4_method = undef,
@@ -24,8 +20,8 @@ define networkmanager::team(
   Optional[Array[Stdlib::IP::Address::V6::Nosubnet]] $ip6_dns = undef,
   Optional[String] $ip6_dns_search = undef,
 ) {
-  networkmanager::connection { "team ${title} - base connection":
-    type            => 'team',
+  networkmanager::connection { "bond ${title} - base connection":
+    type            => 'bond',
     connection_name => $connection_name,
 
     ip4_method      => $ip4_method,
@@ -43,8 +39,14 @@ define networkmanager::team(
 
   networkmanager_connection_setting {
     "${connection_name}/connection/interface-name": value => $identifier;
-    "${connection_name}/team/config": value               => to_json($config);
+    "${connection_name}/bond/mode": value                 => $mode;
   }
+  $options.each |$option, $value| {
+    networkmanager_connection_setting {
+      "${connection_name}/bond/${option}": value => $value;
+    }
+  }
+
   if $mac {
     networkmanager_connection_setting {
       "${connection_name}/ethernet/mac-address": value => $mac;
@@ -57,14 +59,14 @@ define networkmanager::team(
   }
 
   $slaves.each |$slave| {
-    $name = "teamslave-${identifier}-${slave}"
-    networkmanager::connection { "team ${title} - teamslave ${slave}":
+    $name = "bondslave-${identifier}-${slave}"
+    networkmanager::connection { "bond ${title} - bondslave ${slave}":
       type            => 'ethernet',
       connection_name => $name,
     }
     networkmanager_connection_setting {
       "${name}/connection/interface-name": value => $slave;
-      "${name}/connection/slave-type": value     => 'team';
+      "${name}/connection/slave-type": value     => 'bond';
       "${name}/connection/master": value         => $identifier;
     }
   }
