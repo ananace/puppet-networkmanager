@@ -61,7 +61,7 @@ define networkmanager::bridge(
     networkmanager::connection { "bridge ${title} - bridgeslave ${slave}":
       type            => 'ethernet',
       connection_name => $name,
-      slave           => true,
+      bare            => true,
     }
     networkmanager_connection_setting {
       "${name}/connection/interface-name": value => $slave;

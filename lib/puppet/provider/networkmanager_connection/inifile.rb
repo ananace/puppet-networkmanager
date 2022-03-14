@@ -4,19 +4,17 @@ require 'puppet/util/inifile'
 require 'securerandom'
 
 Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
-  commands :nmcli => '/usr/bin/nmcli'
+  commands nmcli: '/usr/bin/nmcli'
 
   def exists?
     File.exist? file_path
   end
 
   def active?
-    uuid = settings['connection/uuid']
-
     data = if uuid
-             nmcli(:connection, :show, '--active', 'uuid', uuid)
+             nmcli(:connection, :show, '--active', :uuid, uuid)
            else
-             nmcli(:connection, :show, '--active', 'id', resource[:name])
+             nmcli(:connection, :show, '--active', :id, resource[:name])
            end
 
     !data.empty?
@@ -47,8 +45,6 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
     create
 
     return unless dirty || force
-
-    uuid = settings['connection/uuid']
 
     if uuid
       nmcli :connection, :up, :uuid, uuid
@@ -85,15 +81,12 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
   def default_settings
     {
       'connection/id' => resource[:name],
-      'connection/uuid' => resource[:uuid],
+      'connection/uuid' => resource[:uuid] || uuid || SecureRandom.uuid,
     }.compact
   end
 
   def ensure_default_settings
-    to_set = default_settings
-    to_set['connection/uuid'] ||= SecureRandom.uuid unless settings.keys.include? 'connection/uuid'
-
-    to_set.each do |key, value|
+    default_settings.each do |key, value|
       section, setting = key.split('/')
 
       store = ini_file.get_section(section) || ini_file.add_section(section)
@@ -116,16 +109,23 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
     return if resource[:ensure] == :absent
 
     ensure_default_settings
-    new_settings = new_settings
     cur_settings = settings
 
+    # Find externally managed settings, to not interfere
+    externally_managed = \
+      catalog.resources
+             .select { |r| r.is_a? Puppet::Type::Networkmanager_connection_setting }
+             .map(&:generate_full_name)
+
     to_set = Hash[*(new_settings.to_a - cur_settings.to_a).flatten]
-    to_remove = new_settings.keys - cur_settings.keys if resource[:purge_settings]
-    to_remove ||= []
+    to_remove = (new_settings.keys - cur_settings.keys)
 
     default_settings.each { |k, _| to_remove.delete k }
 
     to_remove.each do |key|
+      # Don't remove settings managed elsewhere
+      next if externally_managed.include? "#{resource[:name]}/#{key}"
+
       section, setting = key.split('/')
       next unless ini_file.section? section
 
@@ -134,6 +134,9 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
       store.mark_dirty
     end
     to_set.each do |key, value|
+      # Don't override settings managed elsewhere
+      next if externally_managed.include? "#{resource[:name]}/#{key}"
+
       section, setting = key.split('/')
 
       store = ini_file.get_section(section) || ini_file.add_section(section)

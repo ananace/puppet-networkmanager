@@ -2,7 +2,7 @@ define networkmanager::connection(
   String $type,
   String $connection_name = $title,
   Boolean $autoconnect = true,
-  Boolean $slave = false,
+  Boolean $bare = false,
 
   Enum[present,absent,active] $ensure = 'active',
   Boolean $purge_settings = true,
@@ -46,7 +46,7 @@ define networkmanager::connection(
     "${connection_name}/connection/type": value        => $type;
   }
 
-  if !$slave {
+  if !$bare {
     networkmanager_connection_setting {
       "${connection_name}/ipv4/method": value            => $_ip4_method;
       "${connection_name}/ipv6/method": value            => $_ip6_method;

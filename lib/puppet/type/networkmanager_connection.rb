@@ -38,6 +38,8 @@ Puppet::Type.newtype(:networkmanager_connection) do
       when :active
         return true if current != :absent && provider.active?
       end
+
+      false
     end
   end
 
@@ -48,7 +50,7 @@ Puppet::Type.newtype(:networkmanager_connection) do
   end
 
   def generate
-    purge_services if self[:purge_settings]
+    purge_settings if self[:purge_settings]
     []
   end
 
@@ -92,8 +94,8 @@ Puppet::Type.newtype(:networkmanager_connection) do
   end
   autorequire(:file) do
     [
-      self[:path] || "/etc/NetworkManager/system-connections/#{self[:name]}.nmconnection",
-      File.basename(self[:path] || '/etc/NetworkManager/system-connections/placeholder'),
+      self[:path] || provider&.file_path || "/etc/NetworkManager/system-connections/#{self[:name]}.nmconnection",
+      File.basename(self[:path] || provider&.file_path || '/etc/NetworkManager/system-connections/placeholder'),
     ]
   end
 
@@ -110,7 +112,7 @@ Puppet::Type.newtype(:networkmanager_connection) do
     end
   end
 
-  def purge_services
+  def purge_settings
     return [] unless provider.exists?
 
     managed_services = []
