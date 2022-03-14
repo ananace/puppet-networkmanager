@@ -4,6 +4,9 @@ define networkmanager::connection(
   Boolean $autoconnect = true,
   Boolean $slave = false,
 
+  Enum[present,absent,active] $ensure = 'active',
+  Boolean $purge_settings = true,
+
   Optional[Enum[disabled,shared,manual,auto]] $ip4_method = undef,
   Optional[Variant[Stdlib::IP::Address::V4::CIDR, Array[Stdlib::IP::Address::V4::CIDR]]] $ip4_addresses = undef,
   Optional[Stdlib::IP::Address::V4::Nosubnet] $ip4_gateway = undef,
@@ -34,13 +37,13 @@ define networkmanager::connection(
     $_ip6_method = pick($ip6_method, 'auto')
   }
 
+  networkmanager_connection { $connection_name:
+    ensure         => $ensure,
+    purge_settings => $purge_settings,
+  }
   networkmanager_connection_setting {
     "${connection_name}/connection/autoconnect": value => $autoconnect;
-    "${connection_name}/connection/id": value          => $connection_name;
     "${connection_name}/connection/type": value        => $type;
-    "${connection_name}/connection/uuid":
-      value   => inline_template("<% require 'securerandom' -%><%= SecureRandom.uuid %>"),
-      replace => false;
   }
 
   if !$slave {
@@ -138,9 +141,5 @@ define networkmanager::connection(
     mode    => '0600',
     content => '', # Placeholder
     replace => false,
-  }
-  exec { "reload_networkmanager_${connection_name}":
-    command     => "/usr/bin/nmcli c load ${_file} && /usr/bin/nmcli c up id '${connection_name}'",
-    refreshonly => true,
   }
 }

@@ -20,39 +20,38 @@ describe 'networkmanager::ethernet' do
       it do
         is_expected.to contain_networkmanager_connection_setting('Ethernet/connection/autoconnect')
           .with_value(true)
-          .that_notifies('Exec[reload_networkmanager_Ethernet]')
-      end
-      it do
-        is_expected.to contain_networkmanager_connection_setting('Ethernet/connection/id')
-          .with_value('Ethernet')
-          .that_notifies('Exec[reload_networkmanager_Ethernet]')
+          .that_notifies('Networkmanager_connection[Ethernet]')
       end
       it do
         is_expected.to contain_networkmanager_connection_setting('Ethernet/connection/interface-name')
           .with_value('Ethernet')
-          .that_notifies('Exec[reload_networkmanager_Ethernet]')
+          .that_notifies('Networkmanager_connection[Ethernet]')
       end
       it do
         is_expected.to contain_networkmanager_connection_setting('Ethernet/connection/type')
           .with_value('ethernet')
-          .that_notifies('Exec[reload_networkmanager_Ethernet]')
-      end
-      it do
-        is_expected.to contain_networkmanager_connection_setting('Ethernet/connection/uuid')
-          .with(
-            value: %r{[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}}i,
-            replace: false,
-          )
-          .that_notifies('Exec[reload_networkmanager_Ethernet]')
+          .that_notifies('Networkmanager_connection[Ethernet]')
       end
       it do
         is_expected.to contain_networkmanager_connection_setting('Ethernet/ethernet/mac-address')
           .with_value('00:01:02:03:04:0a')
-          .that_notifies('Exec[reload_networkmanager_Ethernet]')
+          .that_notifies('Networkmanager_connection[Ethernet]')
       end
-      it { is_expected.not_to contain_networkmanager_connection_setting('Ethernet/ipv4/method') }
-      it { is_expected.not_to contain_networkmanager_connection_setting('Ethernet/ipv6/method') }
-      it { is_expected.to contain_exec('reload_networkmanager_Ethernet') }
+      it do
+        is_expected.to contain_networkmanager_connection_setting('Ethernet/ipv4/method')
+          .with_value('auto')
+      end
+      it do
+        is_expected.to contain_networkmanager_connection_setting('Ethernet/ipv6/method')
+          .with_value('auto')
+      end
+      it { is_expected.not_to contain_networkmanager_connection_setting('Ethernet/ipv4/may-fail').with_value(false) }
+      it { is_expected.not_to contain_networkmanager_connection_setting('Ethernet/ipv6/may-fail').with_value(false) }
+      it do
+        is_expected.to contain_networkmanager_connection('Ethernet')
+          .with_ensure('active')
+          .with_purge_settings(true)
+      end
     end
   end
 end

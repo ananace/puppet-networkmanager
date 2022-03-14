@@ -19,16 +19,16 @@ describe Puppet::Type.type(:networkmanager_connection_setting) do
   end
 
   describe 'exec autonotify' do
-    let(:exec_resource) { Puppet::Type.type(:exec).new(name: 'reload_networkmanager_em1', command: '/bin/true') }
+    let(:connection_resource) { Puppet::Type.type(:networkmanager_connection).new(name: 'em1') }
     let(:auto_notify) do
       catalog = Puppet::Resource::Catalog.new
-      catalog.add_resource(exec_resource)
+      catalog.add_resource(connection_resource)
       catalog.add_resource(resource)
 
       resource.autonotify
     end
 
-    it { expect(auto_notify.first.target).to eq exec_resource }
+    it { expect(auto_notify.first.target).to eq connection_resource }
     it { expect(auto_notify.first.source).to eq resource }
   end
 

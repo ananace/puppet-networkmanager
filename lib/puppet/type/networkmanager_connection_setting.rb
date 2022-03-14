@@ -107,8 +107,12 @@ Puppet::Type.newtype(:networkmanager_connection_setting) do
   end
 
   validate do
-    if self[:name] !~ %r{\S+/\S+/\S+} && !(self[:connection] && self[:section] && self[:setting])
-      raise("Invalid networkmanager_connection_setting #{self[:name]}, either specify connection, section, and setting, or provide a name in the form of \"connection/section/setting\".")
+    need_connection = !(self[:connection] || self[:path])
+    need_section = !self[:section]
+
+    if (need_connection && self[:name] !~ %r{\S+/\S+/\S+}) ||
+       (need_section && self[:name] !~ %r{\S+/\S+})
+      raise("Invalid networkmanager_connection_setting #{self[:name]}, either specify connection/path, section, and setting, or provide a name in the form of \"connection/section/setting\".")
     end
 
     if self[:ensure] == :present
@@ -118,7 +122,7 @@ Puppet::Type.newtype(:networkmanager_connection_setting) do
     end
   end
 
-  autonotify(:exec) do
-    "reload_networkmanager_#{self[:name].split('/').first}"
+  autonotify(:networkmanager_connection) do
+    [ provider.connection ]
   end
 end

@@ -15,6 +15,10 @@ Puppet::Type.type(:networkmanager_connection_setting).provide(:inifile) do
     resource[:setting] || resource[:name].split('/', 3).last
   end
 
+  def generate_full_name
+    "#{connection}/#{section}/#{setting}"
+  end
+
   def exists?
     !get_value(section, setting).nil?
   end
