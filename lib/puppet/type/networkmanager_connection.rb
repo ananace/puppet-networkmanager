@@ -56,7 +56,6 @@ Puppet::Type.newtype(:networkmanager_connection) do
     provider.activate(true)
   end
 
-
   newparam(:name, namevar: true) do
     desc 'Connection name/identifier'
   end
@@ -114,11 +113,10 @@ Puppet::Type.newtype(:networkmanager_connection) do
       Puppet.debug "Purging Networkmanager_connection_setting[#{self[:name]}/#{purge}]"
 
       section, setting = purge.split('/')
-      provider.remove_setting(section, setting)
+      provider.send(:connection).remove_setting(section, setting)
 
       # Flag as changed, so the connection will reload
       @settings_purgable = true
     end
-    provider.flush
   end
 end

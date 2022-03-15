@@ -151,7 +151,7 @@ describe Puppet::Type.type(:networkmanager_connection).provider(:inifile) do
           'ipv6/may-fail' => true,
         },
         purge_settings: true,
-        path: nmconn_file
+        path: nmconn_file,
       ))
       catalog.add_resource(Puppet::Type::Networkmanager_connection_setting.new(
         name: 'Wired Connection 1/ethernet/mac-address',
@@ -190,11 +190,11 @@ describe Puppet::Type.type(:networkmanager_connection).provider(:inifile) do
     before(:each) do
       allow(Puppet::Util::Storage).to receive(:store)
 
-      expect_any_instance_of(described_class).to receive(:nmcli).with(:connection, :load, nmconn_file)
+      expect_any_instance_of(described_class).to receive(:nmcli).with(:connection, :load, nmconn_file) # rubocop:disable RSpec/AnyInstance
     end
 
     it 'generates a valid connection with no prior art' do
-      expect(File.exist? nmconn_file).to eq false
+      expect(File.exist?(nmconn_file)).to eq false
 
       catalog.apply
 

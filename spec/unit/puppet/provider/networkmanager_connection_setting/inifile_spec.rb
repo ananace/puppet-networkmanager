@@ -16,13 +16,10 @@ describe Puppet::Type.type(:networkmanager_connection_setting).provider(:inifile
     let(:provider) { described_class.new(resource) }
 
     it 'discovers setting information' do
-      expect(provider.connection).to eq 'em1'
+      expect(provider.connection_name).to eq 'em1'
       expect(provider.section).to eq 'connection'
       expect(provider.setting).to eq 'type'
       expect(provider.file_path).to eq '/etc/NetworkManager/system-connections/em1.nmconnection'
-    end
-
-    it 'generates full name for purge purposes' do
       expect(provider.generate_full_name).to eq 'em1/connection/type'
     end
 
@@ -39,8 +36,8 @@ describe Puppet::Type.type(:networkmanager_connection_setting).provider(:inifile
         NMCONN
         File.open(nmconn_file, 'w') { |f| f.write(content) }
 
-        expect(provider).not_to receive(:set_value)
-        expect(provider.send(:ini_file)).not_to receive(:store)
+        expect(provider.send(:connection)).not_to receive(:set_setting)
+        expect(provider.send(:connection).send(:ini_file)).not_to receive(:store)
 
         expect(provider.exists?).to be true
         provider.create
@@ -53,8 +50,8 @@ describe Puppet::Type.type(:networkmanager_connection_setting).provider(:inifile
         NMCONN
         File.open(nmconn_file, 'w') { |f| f.write(content) }
 
-        expect(provider).to receive(:set_value).with('connection', 'type', 'ethernet')
-        expect(provider.send(:ini_file)).to receive(:store)
+        expect(provider.send(:connection)).to receive(:set_setting).with('connection', 'type', 'ethernet')
+        expect(provider.send(:connection).send(:ini_file)).to receive(:store)
 
         expect(provider.exists?).to be false
         provider.create
@@ -68,8 +65,8 @@ describe Puppet::Type.type(:networkmanager_connection_setting).provider(:inifile
         NMCONN
         File.open(nmconn_file, 'w') { |f| f.write(content) }
 
-        expect(provider).to receive(:set_value).with('connection', 'type', 'ethernet')
-        expect(provider.send(:ini_file)).to receive(:store)
+        expect(provider.send(:connection)).to receive(:set_setting).with('connection', 'type', 'ethernet')
+        expect(provider.send(:connection).send(:ini_file)).to receive(:store)
 
         expect(provider.exists?).to be true
         provider.create
@@ -83,9 +80,9 @@ describe Puppet::Type.type(:networkmanager_connection_setting).provider(:inifile
         NMCONN
         File.open(nmconn_file, 'w') { |f| f.write(content) }
 
-        expect(provider).not_to receive(:set_value)
-        expect(provider).to receive(:remove_value).with('connection', 'type')
-        expect(provider.send(:ini_file)).to receive(:store)
+        expect(provider.send(:connection)).not_to receive(:set_setting)
+        expect(provider.send(:connection)).to receive(:remove_setting).with('connection', 'type')
+        expect(provider.send(:connection).send(:ini_file)).to receive(:store)
 
         expect(provider.exists?).to be true
         provider.destroy

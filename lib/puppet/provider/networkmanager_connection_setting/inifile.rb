@@ -1,9 +1,18 @@
 # frozen_string_literal: true
 
-require 'puppet/util/inifile'
+begin
+  require 'puppet_x/networkmanager/connection'
+rescue LoadError
+  require 'pathname' # WORK_AROUND #14073 and #7788
+
+  nmmodule = Puppet::Module.find('networkmanager', Puppet[:environment].to_s)
+  raise(LoadError, "Unable to find networkmanager module in modulepath #{Puppet[:basemodulepath] || Puppet[:modulepath]}") unless nmmodule
+
+  require File.join nmmodule.path, 'lib/puppet_x/networkmanager/connection'
+end
 
 Puppet::Type.type(:networkmanager_connection_setting).provide(:inifile) do
-  def connection
+  def connection_name
     resource[:connection] || resource[:name].split('/', 3).first
   end
 
@@ -16,11 +25,11 @@ Puppet::Type.type(:networkmanager_connection_setting).provide(:inifile) do
   end
 
   def generate_full_name
-    "#{connection}/#{section}/#{setting}"
+    "#{connection_name}/#{section}/#{setting}"
   end
 
   def exists?
-    !get_value(section, setting).nil?
+    !connection.get_setting(section, setting).nil?
   end
 
   def create
@@ -28,66 +37,42 @@ Puppet::Type.type(:networkmanager_connection_setting).provide(:inifile) do
   end
 
   def destroy
-    remove_value(section, setting)
-    ini_file.store
+    connection.remove_setting(section, setting)
+    connection.flush
   end
 
   def value
-    get_value(section, setting)
+    connection.get_setting(section, setting)
   end
 
   def value=(_value)
     return if !resource[:replace] && exists?
-    return if get_value(section, setting) == resource[:value]
+    return if connection.get_setting(section, setting) == resource[:value]
 
     if setting.nil? && resource[:value].nil?
       remove_section(section)
     else
-      set_value(section, setting, resource[:value])
+      connection.set_setting(section, setting, resource[:value])
     end
-    ini_file.store
+
+    connection.flush
   end
 
   def file_path
-    resource[:path] || "/etc/NetworkManager/system-connections/#{connection}.nmconnection"
+    resource[:path] || "/etc/NetworkManager/system-connections/#{connection_name}.nmconnection"
   end
 
   private
 
-  def section?(name)
-    !ini_file.get_section(name).nil?
-  end
+  def remove_section(section)
+    section = connection.get_section(section)
+    return unless section
 
-  def get_value(section, setting)
-    return unless section?(section)
-
-    ini_file.get_section(section)[setting]
-  end
-
-  def set_value(section, setting, value)
-    store = ini_file.get_section(section) || ini_file.add_section(section)
-    store[setting] = value
-  end
-
-  def remove_value(section, setting)
-    return unless section?(section)
-
-    section = ini_file.get_section(section)
-    section.entries.delete_if { |(k, _)| k == setting }
+    section.destroy = true
     section.mark_dirty
   end
 
-  def remove_section(section)
-    return unless section?(section)
-
-    ini_file.get_section(section).destroy = true
-  end
-
-  def ini_file
-    @ini_file ||= begin
-      file = Puppet::Util::IniConfig::PhysicalFile.new(file_path)
-      file.read if File.exist? file_path
-      file
-    end
+  def connection
+    @connection ||= PuppetX::Networkmanager::Connection[file_path]
   end
 end
