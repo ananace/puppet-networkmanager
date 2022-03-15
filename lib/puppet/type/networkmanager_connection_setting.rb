@@ -125,4 +125,13 @@ Puppet::Type.newtype(:networkmanager_connection_setting) do
   autonotify(:networkmanager_connection) do
     [ provider.connection ]
   end
+  autorequire(:service) do
+    [ 'NetworkManager' ]
+  end
+  autorequire(:file) do
+    [
+      self[:path] || provider&.file_path || "/etc/NetworkManager/system-connections/#{self[:connection] || self[:name].split('/').first}.nmconnection",
+      File.basename(self[:path] || provider&.file_path || '/etc/NetworkManager/system-connections/placeholder'),
+    ]
+  end
 end

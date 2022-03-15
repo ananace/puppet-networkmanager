@@ -17,7 +17,7 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
              nmcli(:connection, :show, '--active', :id, resource[:name])
            end
 
-    !data.empty?
+    !data.strip.empty?
   rescue StandardError => ex
     Puppet.debug "#{ex.class}: #{ex} when checking connection status for #{resource[:name]}, assuming inactive"
     false
@@ -27,7 +27,7 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
     ensure_default_settings
 
     dirty = ini_file.sections.any?(&:dirty?)
-    ini_file.store
+    flush
 
     return false unless dirty
 
@@ -37,7 +37,13 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
 
   def destroy
     ini_file.sections.each { |s| s.destroy = true }
+    flush
+  end
+
+  def flush
+    cleanup_sections
     ini_file.store
+    @ini_file = nil
   end
 
   def activate(force = false)
@@ -71,8 +77,8 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
     end
   end
 
-  def get_settings_for_purge
-    settings.map { |s| "#{resource[:name]}/#{s}" }
+  def all_settings
+    default_settings.merge(settings)
   end
 
   def default_settings
@@ -95,6 +101,8 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
     found = {}
     ini_file.sections.each do |section|
       section.entries.each do |entry|
+        next unless entry.is_a? Array
+
         found["#{section.name}/#{entry.first}"] = entry.last
       end
     end
@@ -108,11 +116,11 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
     ensure_default_settings
     cur_settings = settings
 
-    # Find externally managed settings, to not interfere
-    externally_managed = \
-      resource.catalog.resources
-              .select { |r| r.is_a? Puppet::Type::Networkmanager_connection_setting }
-              .map(&:generate_full_name)
+    # Find externally managed settings, to not interfere with them
+    externally_managed = resource&.catalog&.resources
+                                 &.select { |r| r.is_a? Puppet::Type::Networkmanager_connection_setting }
+                                 &.map { |r| r.provider.generate_full_name }
+    externally_managed ||= []
 
     to_set = Hash[*(new_settings.to_a - cur_settings.to_a).flatten]
     to_remove = (cur_settings.keys - new_settings.keys)
@@ -120,27 +128,19 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
     default_settings.each { |k, _| to_remove.delete k }
 
     to_remove.each do |key|
-      # Don't remove settings managed elsewhere
       next if externally_managed.include? "#{resource[:name]}/#{key}"
 
       section, setting = key.split('/')
-      next unless ini_file.get_section(section)
-
-      store = ini_file.get_section(section)
-      store.entries.delete_if { |(k, _)| k == setting }
-      store.destroy = true if store.entries.empty?
-      store.mark_dirty
+      remove_setting(section, setting)
     end
     to_set.each do |key, value|
-      # Don't override settings managed elsewhere
       next if externally_managed.include? "#{resource[:name]}/#{key}"
 
       section, setting = key.split('/')
-
-      store = ini_file.get_section(section) || ini_file.add_section(section)
-      store.destroy = false
-      store[setting] = value
+      set_setting(section, setting, value)
     end
+
+    cleanup_sections
 
     if resource[:ensure] == :present
       create
@@ -149,7 +149,29 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
     end
   end
 
+  def remove_setting(section, setting)
+    store = ini_file.get_section(section)
+    return unless store
+
+    store.entries.delete_if { |(k, _)| k == setting }
+    store.mark_dirty
+  end
+
+  def set_setting(section, setting, value)
+    store = ini_file.get_section(section) || ini_file.add_section(section)
+    store[setting] = value
+  end
+
   private
+
+  def cleanup_sections
+    ini_file.sections.each do |section|
+      next if section.entries.any? { |e| e.is_a? Array }
+
+      section.destroy = true
+      section.mark_dirty
+    end
+  end
 
   def ini_file
     @ini_file ||= begin

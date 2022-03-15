@@ -22,6 +22,10 @@ describe Puppet::Type.type(:networkmanager_connection_setting).provider(:inifile
       expect(provider.file_path).to eq '/etc/NetworkManager/system-connections/em1.nmconnection'
     end
 
+    it 'generates full name for purge purposes' do
+      expect(provider.generate_full_name).to eq 'em1/connection/type'
+    end
+
     context 'with existing connection' do
       let(:nmconn_file) { tmpfilename('nm-connection') }
 

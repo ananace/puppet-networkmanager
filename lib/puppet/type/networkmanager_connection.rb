@@ -16,6 +16,13 @@ Puppet::Type.newtype(:networkmanager_connection) do
 
   Puppet::Type.type(:networkmanager_connection_setting)
 
+  attr_reader :settings_purgable
+
+  def generate
+    purge_settings if self[:purge_settings]
+    []
+  end
+
   ensurable do
     newvalue(:present) do
       provider.create
@@ -49,10 +56,6 @@ Puppet::Type.newtype(:networkmanager_connection) do
     provider.activate(true)
   end
 
-  def generate
-    purge_settings if self[:purge_settings]
-    []
-  end
 
   newparam(:name, namevar: true) do
     desc 'Connection name/identifier'
@@ -85,7 +88,7 @@ Puppet::Type.newtype(:networkmanager_connection) do
       return false if @resource[:purge_settings] == false
 
       # Return value that's guaranteed to be different to force change
-      provider.resource.services_purgable? ? :purgeable : true
+      provider.resource.settings_purgable ? :purgeable : true
     end
   end
 
@@ -99,37 +102,23 @@ Puppet::Type.newtype(:networkmanager_connection) do
     ]
   end
 
-  def settings_purgable?
-    @settings_purgable
-  end
-
-  def purge_setting(nmset)
-    if Puppet.settings[:noop] || self[:noop]
-      Puppet.debug "Would have purged #{nmset.ref}, (noop)"
-    else
-      Puppet.debug "Purging #{nmset.ref}"
-      nmset.provider.destroy if nmset.provider.exists?
-    end
-  end
-
   def purge_settings
-    return [] unless provider.exists?
+    return [] unless provider&.exists?
 
-    managed_services = []
-    catalog.resources.select { |r| r.is_a? Puppet::Type::Networkmanager_connection_setting }.each do |nmset|
-      managed_services << nmset.provider.generate_full_name
-    end
+    externally_managed = catalog.resources.select { |r| r.is_a? Puppet::Type::Networkmanager_connection_setting }.map { |r| r.provider.generate_full_name }
 
-    provider.get_services_for_purge.reject { |p| managed_services.include? p }.each do |purge|
-      nmset = Puppet::Type.type(:networkmanager_connection_setting).new(
-        ensure: :absent,
-        name: purge,
-        file_path: self[:path],
-      )
-      purge_setting(nmset)
+    externally_managed += (self[:settings] || {}).keys.map { |s| "#{self[:name]}/#{s}" }
+    externally_managed += provider.default_settings.keys.map { |s| "#{self[:name]}/#{s}" }
+
+    provider.settings.keys.reject { |p| externally_managed.include? "#{self[:name]}/#{p}" }.each do |purge|
+      Puppet.debug "Purging Networkmanager_connection_setting[#{self[:name]}/#{purge}]"
+
+      section, setting = purge.split('/')
+      provider.remove_setting(section, setting)
 
       # Flag as changed, so the connection will reload
-      @services_purgable = true
+      @settings_purgable = true
     end
+    provider.flush
   end
 end
