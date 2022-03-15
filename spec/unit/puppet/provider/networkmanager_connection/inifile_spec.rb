@@ -86,6 +86,41 @@ describe Puppet::Type.type(:networkmanager_connection).provider(:inifile) do
       DOC
     end
 
+    it 'handles existing connections' do
+      expect(provider).to receive(:nmcli).with(:connection, :load, nmconn_file)
+      expect(provider).to receive(:nmcli).with(:connection, :up, :uuid, 'c2fec85c-d2ba-4db9-bed3-cf0471623963')
+
+      catalog = instance_double('catalog')
+      expect(catalog).to receive(:resources).and_return([])
+      expect(resource).to receive(:catalog).and_return(catalog)
+
+      File.write nmconn_file, <<~DOC
+      [connection]
+      id=Wired Connection 1
+      uuid=c2fec85c-d2ba-4db9-bed3-cf0471623963
+      interface-name=eno1
+      permissions=
+      [ipv4]
+      may-fail=false
+      address1=192.168.0.1
+      [ethernet]
+      auto-negotiate=true
+      DOC
+
+      provider.settings = nmconn_settings
+      # provider.activate # called implicitly
+
+      data = File.read nmconn_file
+      expect(data).to eq <<~DOC
+      [connection]
+      id=Wired Connection 1
+      uuid=c2fec85c-d2ba-4db9-bed3-cf0471623963
+      interface-name=eno1
+      [ethernet]
+      mac-address=00:01:02:03:04:05
+      DOC
+    end
+
     it 'acts idempotently' do
       expect(provider).to receive(:nmcli).with(:connection, :load, nmconn_file)
       expect(provider).to receive(:nmcli).with(:connection, :up, :uuid, 'c2fec85c-d2ba-4db9-bed3-cf0471623963')

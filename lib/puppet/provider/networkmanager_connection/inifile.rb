@@ -36,7 +36,6 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
   end
 
   def destroy
-    ini_file.destroy_empty = true
     ini_file.sections.each { |s| s.destroy = true }
     ini_file.store
   end
@@ -116,7 +115,7 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
               .map(&:generate_full_name)
 
     to_set = Hash[*(new_settings.to_a - cur_settings.to_a).flatten]
-    to_remove = (new_settings.keys - cur_settings.keys)
+    to_remove = (cur_settings.keys - new_settings.keys)
 
     default_settings.each { |k, _| to_remove.delete k }
 
@@ -129,6 +128,7 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
 
       store = ini_file.get_section(section)
       store.entries.delete_if { |(k, _)| k == setting }
+      store.destroy = true if store.entries.empty?
       store.mark_dirty
     end
     to_set.each do |key, value|
@@ -138,6 +138,7 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
       section, setting = key.split('/')
 
       store = ini_file.get_section(section) || ini_file.add_section(section)
+      store.destroy = false
       store[setting] = value
     end
 
@@ -153,6 +154,7 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
   def ini_file
     @ini_file ||= begin
       file = Puppet::Util::IniConfig::PhysicalFile.new(file_path)
+      file.destroy_empty = true
       file.read if File.exist? file_path
       file
     end
