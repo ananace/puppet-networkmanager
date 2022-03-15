@@ -127,10 +127,9 @@ describe Puppet::Type.type(:networkmanager_connection) do
       auto-negotiate=true
 
       [ipv4]
-
       may-fail=true
-      [ipv6]
 
+      [ipv6]
       may-fail=true
       DOC
     end

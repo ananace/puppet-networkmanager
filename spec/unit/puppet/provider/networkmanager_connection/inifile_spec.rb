@@ -81,6 +81,7 @@ describe Puppet::Type.type(:networkmanager_connection).provider(:inifile) do
       id=Wired Connection 1
       uuid=c2fec85c-d2ba-4db9-bed3-cf0471623963
       interface-name=eno1
+
       [ethernet]
       mac-address=00:01:02:03:04:05
       DOC
@@ -116,6 +117,7 @@ describe Puppet::Type.type(:networkmanager_connection).provider(:inifile) do
       uuid=c2fec85c-d2ba-4db9-bed3-cf0471623963
       id=Wired Connection 1
       interface-name=eno1
+
       [ethernet]
       mac-address=00:01:02:03:04:05
       DOC
@@ -202,15 +204,18 @@ describe Puppet::Type.type(:networkmanager_connection).provider(:inifile) do
       [ethernet]
       mac-address=48:0F:CF:5F:D2:6D
       auto-negotiate=true
+
       [ipv4]
       method=auto
       dns-search=example.com
       may-fail=true
+
       [ipv6]
       method=manual
       dns-search=example.com
       address1=fe80::c275:d67f:fc22:2b22/64
       may-fail=true
+
       [connection]
       id=Wired Connection 1
       uuid=c2fec85c-d2ba-4db9-bed3-cf0471623963
@@ -237,15 +242,18 @@ describe Puppet::Type.type(:networkmanager_connection).provider(:inifile) do
       id=Wired Connection 1
       uuid=c2fec85c-d2ba-4db9-bed3-cf0471623963
       type=ethernet
+
       [ipv4]
       method=auto
       dns-search=example.com
       may-fail=true
+
       [ipv6]
       method=manual
       dns-search=example.com
       address1=fe80::c275:d67f:fc22:2b22/64
       may-fail=true
+
       [ethernet]
       mac-address=48:0F:CF:5F:D2:6D
       auto-negotiate=true
@@ -293,13 +301,12 @@ describe Puppet::Type.type(:networkmanager_connection).provider(:inifile) do
       [ipv4]
       dns-search=example.com
       method=auto
-
       may-fail=true
+
       [ipv6]
       address1=fe80::c275:d67f:fc22:2b22/64
       dns-search=example.com
       method=manual
-
       may-fail=true
       DOC
     end

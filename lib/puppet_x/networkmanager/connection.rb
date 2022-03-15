@@ -79,6 +79,15 @@ module PuppetX # rubocop:disable Style/ClassAndModuleChildren
           section.destroy = true
           section.mark_dirty
         end
+        existing_sections = ini_file.sections.reject { |e| e.destroy? }
+        ini_file.sections.each do |section|
+          next unless section.entries.any? { |e| e.is_a? Array }
+
+          before = section.entries.dup
+          section.entries.delete_if { |e| e.is_a?(String) && e.strip.empty? }
+          section.entries << "\n" unless section == existing_sections.last
+          section.mark_dirty if before != section.entries
+        end
       end
 
       def ini_file

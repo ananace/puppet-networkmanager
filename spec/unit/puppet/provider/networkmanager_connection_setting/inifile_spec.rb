@@ -119,9 +119,11 @@ describe Puppet::Type.type(:networkmanager_connection_setting).provider(:inifile
       autoconnect=true
       id=connection
       type=ethernet
+
       [ipv4]
       method=manual
       address1=10.0.0.2/8,10.0.0.1
+
       [ipv6]
       method=auto
       FILE
@@ -167,12 +169,12 @@ describe Puppet::Type.type(:networkmanager_connection_setting).provider(:inifile
       [connection]
       id=connection
       type=ethernet
-
       autoconnect=true
+
       [ipv4]
       method=manual
-
       address1=10.0.0.2/8,10.0.0.1
+
       [ipv6]
       method=auto
       FILE
