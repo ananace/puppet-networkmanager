@@ -58,6 +58,8 @@ describe Puppet::Type.type(:networkmanager_connection).provider(:inifile) do
 
       data = File.read nmconn_file
       expect(data).to eq <<~DOC
+      # Managed by Puppet
+
       [connection]
       id=Wired Connection 1
       uuid=c2fec85c-d2ba-4db9-bed3-cf0471623963
@@ -77,6 +79,8 @@ describe Puppet::Type.type(:networkmanager_connection).provider(:inifile) do
 
       data = File.read nmconn_file
       expect(data).to eq <<~DOC
+      # Managed by Puppet
+
       [connection]
       id=Wired Connection 1
       uuid=c2fec85c-d2ba-4db9-bed3-cf0471623963
@@ -113,6 +117,8 @@ describe Puppet::Type.type(:networkmanager_connection).provider(:inifile) do
 
       data = File.read nmconn_file
       expect(data).to eq <<~DOC
+      # Managed by Puppet
+
       [connection]
       uuid=c2fec85c-d2ba-4db9-bed3-cf0471623963
       id=Wired Connection 1
@@ -201,6 +207,8 @@ describe Puppet::Type.type(:networkmanager_connection).provider(:inifile) do
       catalog.apply
 
       expect(File.read(nmconn_file)).to eq <<~DOC
+      # Managed by Puppet
+
       [ethernet]
       mac-address=48:0F:CF:5F:D2:6D
       auto-negotiate=true
@@ -238,6 +246,8 @@ describe Puppet::Type.type(:networkmanager_connection).provider(:inifile) do
       catalog.apply
 
       expect(File.read(nmconn_file)).to eq <<~DOC
+      # Managed by Puppet
+
       [connection]
       id=Wired Connection 1
       uuid=c2fec85c-d2ba-4db9-bed3-cf0471623963
@@ -289,6 +299,8 @@ describe Puppet::Type.type(:networkmanager_connection).provider(:inifile) do
       catalog.apply
 
       expect(File.read(nmconn_file)).to eq <<~DOC
+      # Managed by Puppet
+
       [connection]
       id=Wired Connection 1
       uuid=c2fec85c-d2ba-4db9-bed3-cf0471623963

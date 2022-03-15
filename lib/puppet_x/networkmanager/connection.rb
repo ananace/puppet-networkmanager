@@ -64,8 +64,9 @@ module PuppetX # rubocop:disable Style/ClassAndModuleChildren
         store[setting] = value
       end
 
-      def flush(clean: true)
+      def flush(clean: true, comment: true)
         cleanup_sections if clean
+        ensure_comment if comment
         ini_file.store
         @ini_file = nil
       end
@@ -88,6 +89,14 @@ module PuppetX # rubocop:disable Style/ClassAndModuleChildren
           section.entries << "\n" unless section == existing_sections.last
           section.mark_dirty if before != section.entries
         end
+      end
+
+      COMMENT = 'Managed by Puppet'
+
+      def ensure_comment
+        return if ini_file.contents.any? { |c| c.is_a?(String) && c.include?(COMMENT) }
+
+        ini_file.contents.unshift("# #{COMMENT}\n\n")
       end
 
       def ini_file

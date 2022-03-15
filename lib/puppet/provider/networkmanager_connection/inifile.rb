@@ -131,6 +131,8 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
       next if externally_managed.include? "#{resource[:name]}/#{key}"
 
       section, setting = key.split('/')
+      next if connection.get_setting(section, setting) == value.to_s
+
       connection.set_setting(section, setting, value)
     end
 

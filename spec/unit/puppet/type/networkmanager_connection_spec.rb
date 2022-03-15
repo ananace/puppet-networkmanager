@@ -118,6 +118,47 @@ describe Puppet::Type.type(:networkmanager_connection) do
       catalog.apply
 
       expect(File.read(nmconn_file)).to eq <<~DOC
+      # Managed by Puppet
+
+      [connection]
+      id=Wired Connection 1
+      uuid=c2fec85c-d2ba-4db9-bed3-cf0471623963
+      type=ethernet
+
+      [ethernet]
+      auto-negotiate=true
+
+      [ipv4]
+      may-fail=true
+
+      [ipv6]
+      may-fail=true
+      DOC
+    end
+
+    it 'fixes formatting without reloading' do
+      File.write nmconn_file, <<~DOC
+      [connection]
+      id=Wired Connection 1
+      uuid=c2fec85c-d2ba-4db9-bed3-cf0471623963
+      type=ethernet
+      [ethernet]
+      auto-negotiate=true
+      [ipv4]
+      may-fail=true
+      [ipv6]
+      may-fail=true
+      DOC
+
+      expect(resource.provider).not_to receive(:nmcli).with(:connection, :load, nmconn_file)
+
+      allow(Puppet::Util::Storage).to receive(:store)
+      expect(catalog.resources).to include(resource)
+      catalog.apply
+
+      expect(File.read(nmconn_file)).to eq <<~DOC
+      # Managed by Puppet
+
       [connection]
       id=Wired Connection 1
       uuid=c2fec85c-d2ba-4db9-bed3-cf0471623963

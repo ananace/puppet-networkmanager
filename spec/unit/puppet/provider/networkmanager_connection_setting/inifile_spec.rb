@@ -115,6 +115,8 @@ describe Puppet::Type.type(:networkmanager_connection_setting).provider(:inifile
       end
 
       expect(File.read(nmconn_file)).to eq <<~FILE
+      # Managed by Puppet
+
       [connection]
       autoconnect=true
       id=connection
@@ -166,6 +168,8 @@ describe Puppet::Type.type(:networkmanager_connection_setting).provider(:inifile
       end
 
       expect(File.read(nmconn_file)).to eq <<~FILE
+      # Managed by Puppet
+
       [connection]
       id=connection
       type=ethernet
