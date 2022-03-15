@@ -15,6 +15,4 @@ describe Puppet::Type.type(:networkmanager_connection) do
   it 'verify resource[:path] is absolute filepath' do
     expect { resource[:path] = 'relative/file' }.to raise_error(Puppet::Error, %r{File paths must be fully qualified, not 'relative/file'})
   end
-
-
 end

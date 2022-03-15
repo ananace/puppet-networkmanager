@@ -29,9 +29,10 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
     dirty = ini_file.sections.any?(&:dirty?)
     ini_file.store
 
-    return unless dirty
+    return false unless dirty
 
     nmcli :connection, :load, file_path
+    true
   end
 
   def destroy
@@ -41,10 +42,7 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
   end
 
   def activate(force = false)
-    dirty = ini_file.sections.any?(&:dirty?)
-    create
-
-    return unless dirty || force
+    return unless create || force
 
     if uuid
       nmcli :connection, :up, :uuid, uuid
@@ -58,7 +56,7 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
   end
 
   def uuid
-    settings['connection/uuid']
+    resource[:uuid] || settings['connection/uuid']
   end
 
   def uuid=(uuid)
@@ -102,7 +100,7 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
       end
     end
 
-    found.uniq
+    found
   end
 
   def settings=(new_settings)
@@ -113,9 +111,9 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
 
     # Find externally managed settings, to not interfere
     externally_managed = \
-      catalog.resources
-             .select { |r| r.is_a? Puppet::Type::Networkmanager_connection_setting }
-             .map(&:generate_full_name)
+      resource.catalog.resources
+              .select { |r| r.is_a? Puppet::Type::Networkmanager_connection_setting }
+              .map(&:generate_full_name)
 
     to_set = Hash[*(new_settings.to_a - cur_settings.to_a).flatten]
     to_remove = (new_settings.keys - cur_settings.keys)
@@ -127,7 +125,7 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
       next if externally_managed.include? "#{resource[:name]}/#{key}"
 
       section, setting = key.split('/')
-      next unless ini_file.section? section
+      next unless ini_file.get_section(section)
 
       store = ini_file.get_section(section)
       store.entries.delete_if { |(k, _)| k == setting }
