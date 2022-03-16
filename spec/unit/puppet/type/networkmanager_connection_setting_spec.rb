@@ -42,11 +42,11 @@ describe Puppet::Type.type(:networkmanager_connection_setting) do
         end
 
         it 'tells current value' do
-          expect(value.is_to_s('not_secret_at_all')).to eq('not_secret_at_all')
+          expect(value.is_to_s('not_secret_at_all')).to eq("'not_secret_at_all'")
         end
 
         it 'tells new value' do
-          expect(value.should_to_s('not_secret_at_all')).to eq('not_secret_at_all')
+          expect(value.should_to_s('not_secret_at_all')).to eq("'not_secret_at_all'")
         end
       elsif ['md5', :md5].include?(param)
         it 'tells correct md5 hashes for multiple values' do
@@ -60,14 +60,14 @@ describe Puppet::Type.type(:networkmanager_connection_setting) do
         end
 
         it 'tells md5 of current value' do
-          expect(value.is_to_s('not_at_all_secret')).to eq('{md5}858b46aee11b780b8f5c8853668efc05')
+          expect(value.is_to_s('not_at_all_secret')).to eq("'{md5}858b46aee11b780b8f5c8853668efc05'")
         end
         it 'does not tell the current value' do
           expect(value.is_to_s('not_at_all_secret')).not_to include('not_secret_at_all')
         end
 
         it 'tells md5 of new value' do
-          expect(value.should_to_s('not_at_all_secret')).to eq('{md5}858b46aee11b780b8f5c8853668efc05')
+          expect(value.should_to_s('not_at_all_secret')).to eq("'{md5}858b46aee11b780b8f5c8853668efc05'")
         end
         it 'does not tell the new value' do
           expect(value.should_to_s('not_at_all_secret')).not_to include('not_secret_at_all')

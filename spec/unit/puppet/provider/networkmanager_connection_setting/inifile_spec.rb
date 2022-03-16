@@ -266,7 +266,7 @@ describe Puppet::Type.type(:networkmanager_connection_setting).provider(:inifile
         logs = catalog.apply.report.logs
 
         expect(logs.first.source).to eq('/Networkmanager_connection_setting[em1/connection/type]/value')
-        expect(logs.first.message).to eq('value changed ethernet to vlan')
+        expect(logs.first.message).to eq("value changed 'ethernet' to 'vlan'")
       end
     end
   end

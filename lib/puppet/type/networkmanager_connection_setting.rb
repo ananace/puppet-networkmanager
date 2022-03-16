@@ -61,9 +61,9 @@ Puppet::Type.newtype(:networkmanager_connection_setting) do
 
     def should_to_s(newvalue)
       if @resource[:show_diff] == :true
-        newvalue
+        "'#{newvalue}'"
       elsif @resource[:show_diff] == :md5
-        '{md5}' + Digest::MD5.hexdigest(newvalue.to_s)
+        "'{md5}#{Digest::MD5.hexdigest(newvalue.to_s)}'"
       else
         '[redacted sensitive information]'
       end
