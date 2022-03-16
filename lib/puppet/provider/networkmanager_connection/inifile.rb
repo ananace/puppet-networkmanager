@@ -16,8 +16,34 @@ require 'securerandom'
 Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
   commands nmcli: '/usr/bin/nmcli'
 
+  def nmcli_safe(*args)
+    cmd = Puppet::Provider::Command.new(
+      :nmcli,
+      'nmcli',
+      Puppet::Util,
+      Puppet::Util::Execution,
+      failonfail: false,
+    )
+    cmd.execute(args)
+  end
+
   def exists?
     File.exist? file_path
+  end
+
+  def loaded?
+    @connection_loaded ||= \
+      begin
+        data = if uuid
+                 nmcli_safe :connection, :show, :uuid, uuid
+               else
+                 nmcli_safe :connection, :show, :id, resource[:name]
+               end
+
+        data.exitstatus.zero?
+      rescue StandardError
+        nil
+      end
   end
 
   def active?
@@ -39,9 +65,13 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
     dirty = connection.dirty?
     connection.flush
 
-    return false unless dirty
+    return false unless dirty || !loaded?
 
-    nmcli :connection, :load, file_path
+    ret = nmcli :connection, :load, file_path
+    raise Puppet::Error, ret if ret&.downcase&.include? 'could not load file'
+
+    @connection_loaded = true
+
     true
   end
 

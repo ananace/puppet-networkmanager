@@ -123,7 +123,7 @@ Puppet::Type.newtype(:networkmanager_connection_setting) do
   end
 
   autonotify(:networkmanager_connection) do
-    [ provider&.connection_name ].compact
+    [ provider.connection_name ]
   end
   autorequire(:service) do
     [ 'NetworkManager' ]

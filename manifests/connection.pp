@@ -145,7 +145,6 @@ define networkmanager::connection(
     owner   => 'root',
     group   => 'root',
     mode    => '0600',
-    content => '', # Placeholder
     replace => false,
   }
 }

@@ -18,7 +18,19 @@ Puppet::Type.newtype(:networkmanager_connection) do
 
   def generate
     res = []
-    res.concat purge_settings if self[:purge_settings]
+
+    # TODO: Why does this cause tests to fail to write data?
+    # res << Puppet::Type.type(:file).new(
+    #   ensure: self[:ensure] == :absent ? :absent : :file,
+    #   name: provider.file_path,
+    #   owner: 'root',
+    #   group: 'root',
+    #   mode: '0600',
+    #   backup: false,
+    #   replace: false,
+    # )
+
+    res += purge_settings if self[:purge_settings]
 
     res
   end
@@ -87,16 +99,13 @@ Puppet::Type.newtype(:networkmanager_connection) do
   autorequire(:service) do
     [ 'NetworkManager' ]
   end
-  autorequire(:file) do
-    [
-      self[:path] || provider&.file_path || "/etc/NetworkManager/system-connections/#{self[:name]}.nmconnection",
-      File.basename(self[:path] || provider&.file_path || '/etc/NetworkManager/system-connections/placeholder'),
-    ]
+
+  # Put generated resources before this one
+  def depthfirst?
+    true
   end
 
   def purge_settings
-    return [] unless provider.exists?
-
     externally_managed = catalog.resources.select { |r| r.is_a? Puppet::Type::Networkmanager_connection_setting }.map { |r| r.provider.generate_full_name }
 
     externally_managed += (self[:settings] || {}).keys.map { |s| "#{self[:name]}/#{s}" }

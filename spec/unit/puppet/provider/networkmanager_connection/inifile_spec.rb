@@ -136,11 +136,43 @@ describe Puppet::Type.type(:networkmanager_connection).provider(:inifile) do
       expect(provider.exists?).to eq false
       provider.activate
 
+      execresult = double
+      allow(execresult).to receive(:exitstatus).and_return(0)
+
+      allow(provider).to receive(:nmcli_safe).with(:connection, :show, :uuid, uuid).and_return(execresult)
       expect(provider).not_to receive(:nmcli).with(:connection, :load, nmconn_file)
       expect(provider).not_to receive(:nmcli).with(:connection, :up, :uuid, uuid)
 
       expect(provider.exists?).to eq true
+      expect(provider.loaded?).to eq true
+
       provider.activate
+    end
+
+    it 'reloads if necessary' do
+      expect(provider).to receive(:nmcli).with(:connection, :load, nmconn_file)
+      expect(provider).to receive(:nmcli).with(:connection, :up, :uuid, uuid)
+
+      expect(provider.exists?).to eq false
+      provider.activate
+
+      provider.instance_variable_set :@connection_loaded, false
+
+      execresult = double
+      allow(execresult).to receive(:exitstatus).and_return(10)
+
+      allow(provider).to receive(:nmcli_safe).with(:connection, :show, :uuid, uuid).and_return(execresult)
+
+      expect(provider.exists?).to eq true
+      expect(provider.loaded?).to eq false
+
+      expect(provider).to receive(:nmcli).with(:connection, :load, nmconn_file)
+      expect(provider).to receive(:nmcli).with(:connection, :up, :uuid, uuid)
+
+      provider.activate
+
+      expect(provider.exists?).to eq true
+      expect(provider.loaded?).to eq true
     end
   end
 
@@ -192,6 +224,8 @@ describe Puppet::Type.type(:networkmanager_connection).provider(:inifile) do
         path: nmconn_file,
       ))
 
+      catalog.finalize
+
       catalog
     end
 
@@ -199,6 +233,11 @@ describe Puppet::Type.type(:networkmanager_connection).provider(:inifile) do
       allow(Puppet::Util::Storage).to receive(:store)
 
       expect_any_instance_of(described_class).to receive(:nmcli).with(:connection, :load, nmconn_file) # rubocop:disable RSpec/AnyInstance
+
+      execresult = double
+      allow(execresult).to receive(:exitstatus).and_return(0)
+
+      allow_any_instance_of(described_class).to receive(:nmcli_safe).with(:connection, :show, :uuid, uuid).and_return(execresult) # rubocop:disable RSpec/AnyInstance
     end
 
     it 'generates a valid connection with no prior art' do

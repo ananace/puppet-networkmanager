@@ -84,7 +84,7 @@ describe Puppet::Type.type(:networkmanager_connection) do
       expect(catalog.resources).to include(resource)
       res = resource.generate
 
-      expect(res.all? { |r| r.is_a? Puppet::Type::Networkmanager_connection_setting }).to eq true
+      expect(res.select { |r| r.is_a? Puppet::Type::Networkmanager_connection_setting }.all? { |r| r[:connection] == resource[:name] }).to eq true
 
       res.each { |r| r.provider.destroy }
     end
@@ -116,6 +116,7 @@ describe Puppet::Type.type(:networkmanager_connection) do
       DOC
 
       expect(resource.provider).to receive(:nmcli).with(:connection, :load, nmconn_file)
+      allow(resource.provider).to receive(:exists?).and_return(true)
 
       allow(Puppet::Util::Storage).to receive(:store)
       expect(catalog.resources).to include(resource)
@@ -154,6 +155,8 @@ describe Puppet::Type.type(:networkmanager_connection) do
       may-fail=true
       DOC
 
+      allow(resource.provider).to receive(:exists?).and_return(true)
+      allow(resource.provider).to receive(:loaded?).and_return(true)
       expect(resource.provider).not_to receive(:nmcli).with(:connection, :load, nmconn_file)
 
       allow(Puppet::Util::Storage).to receive(:store)
