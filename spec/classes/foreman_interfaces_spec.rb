@@ -65,7 +65,10 @@ describe 'networkmanager::foreman_interfaces' do
     end
 
     it { is_expected.to contain_networkmanager__vlan('enp5s0f0.1000') }
-    it { is_expected.to contain_networkmanager__infiniband('ibp4s0') }
+    it do
+      is_expected.to contain_networkmanager__infiniband('ibp4s0')
+        .with_ip6_method('ignore')
+    end
   end
 
   context 'with real-world data' do

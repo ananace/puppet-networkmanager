@@ -84,6 +84,8 @@ describe Puppet::Type.type(:networkmanager_connection) do
       expect(catalog.resources).to include(resource)
       res = resource.generate
 
+      expect(res.all? { |r| r.is_a? Puppet::Type::Networkmanager_connection_setting }).to eq true
+
       res.each { |r| r.provider.destroy }
     end
 
