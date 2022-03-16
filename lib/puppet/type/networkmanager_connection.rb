@@ -16,11 +16,11 @@ Puppet::Type.newtype(:networkmanager_connection) do
 
   Puppet::Type.type(:networkmanager_connection_setting)
 
-  attr_reader :settings_purgable
-
   def generate
-    purge_settings if self[:purge_settings]
-    []
+    res = []
+    res.concat purge_settings if self[:purge_settings]
+
+    res
   end
 
   ensurable do
@@ -80,15 +80,8 @@ Puppet::Type.newtype(:networkmanager_connection) do
     end
   end
 
-  newproperty(:purge_settings, boolean: true, parent: Puppet::Parameter::Boolean) do
+  newparam(:purge_settings, boolean: true, parent: Puppet::Parameter::Boolean) do
     defaultto false
-
-    def retrieve
-      return false if @resource[:purge_settings] == false
-
-      # Return value that's guaranteed to be different to force change
-      provider.resource.settings_purgable ? :purgeable : true
-    end
   end
 
   autorequire(:service) do
@@ -102,21 +95,23 @@ Puppet::Type.newtype(:networkmanager_connection) do
   end
 
   def purge_settings
-    return [] unless provider&.exists?
+    return [] unless provider.exists?
 
     externally_managed = catalog.resources.select { |r| r.is_a? Puppet::Type::Networkmanager_connection_setting }.map { |r| r.provider.generate_full_name }
 
     externally_managed += (self[:settings] || {}).keys.map { |s| "#{self[:name]}/#{s}" }
     externally_managed += provider.default_settings.keys.map { |s| "#{self[:name]}/#{s}" }
 
-    provider.settings.keys.reject { |p| externally_managed.include? "#{self[:name]}/#{p}" }.each do |purge|
-      Puppet.debug "Purging Networkmanager_connection_setting[#{self[:name]}/#{purge}]"
-
+    provider.settings.keys.reject { |p| externally_managed.include? "#{self[:name]}/#{p}" }.map do |purge|
       section, setting = purge.split('/')
-      provider.send(:connection).remove_setting(section, setting)
-
-      # Flag as changed, so the connection will reload
-      @settings_purgable = true
+      Puppet::Type.type(:networkmanager_connection_setting).new(
+        name: "Purge #{purge}",
+        connection: self[:name],
+        section: section,
+        setting: setting,
+        path: provider.file_path,
+        ensure: :absent,
+      )
     end
   end
 end

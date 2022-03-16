@@ -82,7 +82,9 @@ describe Puppet::Type.type(:networkmanager_connection) do
       expect(conn).to receive(:remove_setting).with('ipv6', 'method')
 
       expect(catalog.resources).to include(resource)
-      resource.generate
+      res = resource.generate
+
+      res.each { |r| r.provider.destroy }
     end
 
     it 'flushes purged changes correctly' do
