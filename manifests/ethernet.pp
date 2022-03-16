@@ -4,6 +4,9 @@ define networkmanager::ethernet(
   String $connection_name = $title,
   Optional[Integer[1280]] $mtu = undef,
 
+  Enum[present,absent,active] $ensure = 'present',
+  Boolean $purge_settings = true,
+
   Optional[Enum[disabled,shared,manual,auto]] $ip4_method = undef,
   Optional[Variant[Stdlib::IP::Address::V4::CIDR, Array[Stdlib::IP::Address::V4::CIDR]]] $ip4_addresses = undef,
   Optional[Stdlib::IP::Address::V4::Nosubnet] $ip4_gateway = undef,
@@ -21,6 +24,9 @@ define networkmanager::ethernet(
   Optional[Boolean] $ip6_never_default = undef,
 ) {
   networkmanager::connection { "ethernet ${title} - base connection":
+    ensure            => $ensure,
+    purge_settings    => $purge_settings,
+
     type              => 'ethernet',
     connection_name   => $connection_name,
 

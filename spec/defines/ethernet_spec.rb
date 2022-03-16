@@ -49,7 +49,7 @@ describe 'networkmanager::ethernet' do
       it { is_expected.not_to contain_networkmanager_connection_setting('Ethernet/ipv6/may-fail').with_value(false) }
       it do
         is_expected.to contain_networkmanager_connection('Ethernet')
-          .with_ensure('active')
+          .with_ensure('present')
           .with_purge_settings(true)
       end
     end

@@ -38,7 +38,7 @@ Puppet::Type.type(:networkmanager_connection_setting).provide(:inifile) do
 
   def destroy
     connection.remove_setting(section, setting)
-    connection.flush
+    flush
   end
 
   def value
@@ -55,7 +55,7 @@ Puppet::Type.type(:networkmanager_connection_setting).provide(:inifile) do
       connection.set_setting(section, setting, resource[:value])
     end
 
-    connection.flush
+    flush
   end
 
   def file_path
@@ -63,6 +63,13 @@ Puppet::Type.type(:networkmanager_connection_setting).provide(:inifile) do
   end
 
   private
+
+  # TODO: A better way to do this
+  def flush
+    # return if resource&.catalog&.resources&.any? { |r| r.is_a? Puppet::Type::Networkmanager_connection && r.name == connection_name }
+
+    connection.flush
+  end
 
   def remove_section(section)
     section = connection.get_section(section)

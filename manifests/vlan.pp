@@ -5,6 +5,9 @@ define networkmanager::vlan(
   Optional[Stdlib::MAC] $mac = undef,
   Optional[Integer[1280]] $mtu = undef,
 
+  Enum[present,absent,active] $ensure = 'present',
+  Boolean $purge_settings = true,
+
   Optional[Enum[disabled,shared,manual,auto]] $ip4_method = undef,
   Optional[Variant[Stdlib::IP::Address::V4::CIDR, Array[Stdlib::IP::Address::V4::CIDR]]] $ip4_addresses = undef,
   Optional[Stdlib::IP::Address::V4::Nosubnet] $ip4_gateway = undef,
@@ -22,6 +25,9 @@ define networkmanager::vlan(
   Optional[Boolean] $ip6_never_default = undef,
 ) {
   networkmanager::connection { "vlan ${title} - base connection":
+    ensure            => $ensure,
+    purge_settings    => $purge_settings,
+
     type              => 'vlan',
     connection_name   => $connection_name,
 

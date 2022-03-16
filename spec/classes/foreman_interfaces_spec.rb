@@ -35,6 +35,11 @@ describe 'networkmanager::foreman_interfaces' do
         .with_ip6_addresses(nil)
     end
     it do
+      is_expected.to contain_networkmanager_connection('enp5s0f0')
+        .with_ensure('active')
+        .with_purge_settings(true)
+    end
+    it do
       is_expected.to contain_networkmanager_connection_setting('enp5s0f0/ipv4/address1')
         .with_value('1.2.3.4/8,1.0.0.1')
     end

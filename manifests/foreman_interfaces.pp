@@ -1,6 +1,9 @@
 class networkmanager::foreman_interfaces {
   networkmanager::munge_foreman_interfaces().each |$identifier, $iface| {
     $base_params = {
+      ensure            => 'active',
+      purge_settings    => true,
+
       mac               => ($iface['mac'] ? {
           undef   => undef,
           default => upcase($iface['mac']),

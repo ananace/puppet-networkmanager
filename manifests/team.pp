@@ -4,6 +4,10 @@ define networkmanager::team(
   Optional[Integer[1280]] $mtu = undef,
   Optional[Stdlib::MAC] $mac = undef,
 
+  Enum[present,absent,active] $ensure = 'present',
+  Boolean $purge_settings = true,
+
+
   Hash[String,Data] $config = {
     'runner' => {
       'name'    => 'lacp',
@@ -29,6 +33,9 @@ define networkmanager::team(
   Optional[Boolean] $ip6_never_default = undef,
 ) {
   networkmanager::connection { "team ${title} - base connection":
+    ensure            => $ensure,
+    purge_settings    => $purge_settings,
+
     type              => 'team',
     connection_name   => $connection_name,
 

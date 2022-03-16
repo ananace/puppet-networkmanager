@@ -4,6 +4,9 @@ define networkmanager::bond(
   Optional[Integer[1280]] $mtu = undef,
   Optional[Stdlib::MAC] $mac = undef,
 
+  Enum[present,absent,active] $ensure = 'present',
+  Boolean $purge_settings = true,
+
   Enum['balance-rr','active-backup','balance-xor','broadcast','802.3ad','balance-tlb','balance-alb'] $mode = 'balance-rr',
   Hash[String,Data] $options = {},
   Array[String] $slaves = [],
@@ -25,6 +28,9 @@ define networkmanager::bond(
   Optional[Boolean] $ip6_never_default = undef,
 ) {
   networkmanager::connection { "bond ${title} - base connection":
+    ensure            => $ensure,
+    purge_settings    => $purge_settings,
+
     type              => 'bond',
     connection_name   => $connection_name,
 
@@ -69,6 +75,7 @@ define networkmanager::bond(
   $slaves.each |$slave| {
     $name = "bondslave-${identifier}-${slave}"
     networkmanager::connection { "bond ${title} - bondslave ${slave}":
+      ensure          => present,
       type            => 'ethernet',
       connection_name => $name,
       bare            => true,

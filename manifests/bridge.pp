@@ -4,6 +4,9 @@ define networkmanager::bridge(
   Optional[Integer[1280]] $mtu = undef,
   Optional[Stdlib::MAC] $mac = undef,
 
+  Enum[present,absent,active] $ensure = 'present',
+  Boolean $purge_settings = true,
+
   Hash[String,Data] $options = {},
   Array[String] $slaves = [],
 
@@ -20,6 +23,9 @@ define networkmanager::bridge(
   Optional[String] $ip6_dns_search = undef,
 ) {
   networkmanager::connection { "bridge ${title} - base connection":
+    ensure          => $ensure,
+    purge_settings  => $purge_settings,
+
     type            => 'bridge',
     connection_name => $connection_name,
 
