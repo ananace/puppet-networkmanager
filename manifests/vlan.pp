@@ -48,19 +48,21 @@ define networkmanager::vlan(
     ip6_never_default => $ip6_never_default,
   }
 
-  networkmanager_connection_setting {
-    "${connection_name}/connection/interface-name": value => $identifier;
-    "${connection_name}/vlan/id": value                   => $vlanid;
-    "${connection_name}/vlan/interface-name": value       => $identifier;
-  }
-  if $mac {
+  if $ensure != absent {
     networkmanager_connection_setting {
-      "${connection_name}/ethernet/mac-address": value => $mac;
+      "${connection_name}/connection/interface-name": value => $identifier;
+      "${connection_name}/vlan/id": value                   => $vlanid;
+      "${connection_name}/vlan/interface-name": value       => $identifier;
     }
-  }
-  if $mtu {
-    networkmanager_connection_setting { "${connection_name}/ethernet/mtu":
-      value => $mtu,
+    if $mac {
+      networkmanager_connection_setting {
+        "${connection_name}/ethernet/mac-address": value => $mac;
+      }
+    }
+    if $mtu {
+      networkmanager_connection_setting { "${connection_name}/ethernet/mtu":
+        value => $mtu,
+      }
     }
   }
 }

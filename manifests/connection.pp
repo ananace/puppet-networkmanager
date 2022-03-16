@@ -41,7 +41,7 @@ define networkmanager::connection(
     ensure         => $ensure,
     purge_settings => $purge_settings,
   }
-  if $ensure != 'absent' {
+  if $ensure != absent {
     networkmanager_connection_setting {
       "${connection_name}/connection/autoconnect": value => $autoconnect;
       "${connection_name}/connection/type": value        => $type;

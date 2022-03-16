@@ -7,7 +7,6 @@ define networkmanager::team(
   Enum[present,absent,active] $ensure = 'present',
   Boolean $purge_settings = true,
 
-
   Hash[String,Data] $config = {
     'runner' => {
       'name'    => 'lacp',
@@ -56,18 +55,20 @@ define networkmanager::team(
     ip6_never_default => $ip6_never_default,
   }
 
-  networkmanager_connection_setting {
-    "${connection_name}/connection/interface-name": value => $identifier;
-    "${connection_name}/team/config": value               => to_json($config);
-  }
-  if $mac {
+  if $ensure != absent {
     networkmanager_connection_setting {
-      "${connection_name}/ethernet/mac-address": value => $mac;
+      "${connection_name}/connection/interface-name": value => $identifier;
+      "${connection_name}/team/config": value               => to_json($config);
     }
-  }
-  if $mtu {
-    networkmanager_connection_setting { "${connection_name}/ethernet/mtu":
-      value => $mtu,
+    if $mac {
+      networkmanager_connection_setting {
+        "${connection_name}/ethernet/mac-address": value => $mac;
+      }
+    }
+    if $mtu {
+      networkmanager_connection_setting { "${connection_name}/ethernet/mtu":
+        value => $mtu,
+      }
     }
   }
 
@@ -83,10 +84,12 @@ define networkmanager::team(
       connection_name => $name,
       bare            => true,
     }
-    networkmanager_connection_setting {
-      "${name}/connection/interface-name": value => $slave;
-      "${name}/connection/slave-type": value     => 'team';
-      "${name}/connection/master": value         => $identifier;
+    if $ensure != absent {
+      networkmanager_connection_setting {
+        "${name}/connection/interface-name": value => $slave;
+        "${name}/connection/slave-type": value     => 'team';
+        "${name}/connection/master": value         => $identifier;
+      }
     }
   }
 }

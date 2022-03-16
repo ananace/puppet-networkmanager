@@ -47,14 +47,16 @@ define networkmanager::infiniband(
     ip6_never_default => $ip6_never_default,
   }
 
-  networkmanager_connection_setting {
-    "${connection_name}/connection/interface-name": value => $identifier;
-    "${connection_name}/infiniband/transport-mode": value => 'datagram';
-    "${connection_name}/infiniband/mac-address": value    => $mac;
-  }
-  if $mtu {
-    networkmanager_connection_setting { "${connection_name}/infiniband/mtu":
-      value => $mtu,
+  if $ensure != absent {
+    networkmanager_connection_setting {
+      "${connection_name}/connection/interface-name": value => $identifier;
+      "${connection_name}/infiniband/transport-mode": value => 'datagram';
+      "${connection_name}/infiniband/mac-address": value    => $mac;
+    }
+    if $mtu {
+      networkmanager_connection_setting { "${connection_name}/infiniband/mtu":
+        value => $mtu,
+      }
     }
   }
 }

@@ -42,23 +42,25 @@ define networkmanager::bridge(
     ip6_dns_search  => $ip6_dns_search,
   }
 
-  networkmanager_connection_setting {
-    "${connection_name}/connection/interface-name": value => $identifier;
-  }
-  if $mac {
+  if $ensure != absent {
     networkmanager_connection_setting {
-      "${connection_name}/bridge/mac-address": value => $mac;
+      "${connection_name}/connection/interface-name": value => $identifier;
     }
-  }
-  $options.each |$option, $value| {
-    networkmanager_connection_setting {
-      "${connection_name}/bridge/${option}": value => $value;
+    if $mac {
+      networkmanager_connection_setting {
+        "${connection_name}/bridge/mac-address": value => $mac;
+      }
     }
-  }
+    $options.each |$option, $value| {
+      networkmanager_connection_setting {
+        "${connection_name}/bridge/${option}": value => $value;
+      }
+    }
 
-  if $mtu {
-    networkmanager_connection_setting { "${connection_name}/ethernet/mtu":
-      value => $mtu,
+    if $mtu {
+      networkmanager_connection_setting { "${connection_name}/ethernet/mtu":
+        value => $mtu,
+      }
     }
   }
 
@@ -74,10 +76,12 @@ define networkmanager::bridge(
       connection_name => $name,
       bare            => true,
     }
-    networkmanager_connection_setting {
-      "${name}/connection/interface-name": value => $slave;
-      "${name}/connection/slave-type": value     => 'bridge';
-      "${name}/connection/master": value         => $identifier;
+    if $slave_ensure != absent {
+      networkmanager_connection_setting {
+        "${name}/connection/interface-name": value => $slave;
+        "${name}/connection/slave-type": value     => 'bridge';
+        "${name}/connection/master": value         => $identifier;
+      }
     }
   }
 }

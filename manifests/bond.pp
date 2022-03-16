@@ -51,24 +51,26 @@ define networkmanager::bond(
     ip6_never_default => $ip6_never_default,
   }
 
-  networkmanager_connection_setting {
-    "${connection_name}/connection/interface-name": value => $identifier;
-    "${connection_name}/bond/mode": value                 => $mode;
-  }
-  $options.each |$option, $value| {
+  if $ensure != absent {
     networkmanager_connection_setting {
-      "${connection_name}/bond/${option}": value => $value;
+      "${connection_name}/connection/interface-name": value => $identifier;
+      "${connection_name}/bond/mode": value                 => $mode;
     }
-  }
+    $options.each |$option, $value| {
+      networkmanager_connection_setting {
+        "${connection_name}/bond/${option}": value => $value;
+      }
+    }
 
-  if $mac {
-    networkmanager_connection_setting {
-      "${connection_name}/ethernet/mac-address": value => $mac;
+    if $mac {
+      networkmanager_connection_setting {
+        "${connection_name}/ethernet/mac-address": value => $mac;
+      }
     }
-  }
-  if $mtu {
-    networkmanager_connection_setting { "${connection_name}/ethernet/mtu":
-      value => $mtu,
+    if $mtu {
+      networkmanager_connection_setting { "${connection_name}/ethernet/mtu":
+        value => $mtu,
+      }
     }
   }
 
@@ -84,10 +86,12 @@ define networkmanager::bond(
       connection_name => $name,
       bare            => true,
     }
-    networkmanager_connection_setting {
-      "${name}/connection/interface-name": value => $slave;
-      "${name}/connection/slave-type": value     => 'bond';
-      "${name}/connection/master": value         => $identifier;
+    if $slave_ensure != absent {
+      networkmanager_connection_setting {
+        "${name}/connection/interface-name": value => $slave;
+        "${name}/connection/slave-type": value     => 'bond';
+        "${name}/connection/master": value         => $identifier;
+      }
     }
   }
 }
