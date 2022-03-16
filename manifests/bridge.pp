@@ -63,8 +63,13 @@ define networkmanager::bridge(
   }
 
   $slaves.each |$slave| {
+    $slave_ensure = $ensure ? {
+      absent  => absent,
+      default => present,
+    }
     $name = "bridgeslave-${identifier}-${slave}"
     networkmanager::connection { "bridge ${title} - bridgeslave ${slave}":
+      ensure          => $slave_ensure,
       type            => 'ethernet',
       connection_name => $name,
       bare            => true,

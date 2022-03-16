@@ -4,9 +4,11 @@ require 'spec_helper'
 
 describe 'networkmanager::bond' do
   let(:title) { 'namevar' }
+  let(:_ensure) { :active }
+
   let(:params) do
     {
-      ensure: :active,
+      ensure: _ensure,
       mac: '00:01:02:03:04:05',
       mtu: 1400,
       slaves: ['em1', 'em2'],
@@ -23,6 +25,10 @@ describe 'networkmanager::bond' do
         is_expected.to contain_networkmanager_connection('namevar')
           .with_ensure('active')
           .with_purge_settings(true)
+      end
+      it do
+        is_expected.to contain_file('/etc/NetworkManager/system-connections/namevar.nmconnection')
+          .with_ensure('file')
       end
       it { is_expected.to contain_networkmanager_connection_setting('namevar/ipv4/method') }
       it { is_expected.to contain_networkmanager_connection_setting('namevar/ipv6/method') }
@@ -48,6 +54,30 @@ describe 'networkmanager::bond' do
 
         it { is_expected.not_to contain_networkmanager_connection_setting("bondslave-namevar-#{slave}/ipv4/method") }
         it { is_expected.not_to contain_networkmanager_connection_setting("bondslave-namevar-#{slave}/ipv6/method") }
+      end
+
+      context 'with ensure => absent' do
+        let(:_ensure) { :absent }
+
+        it { is_expected.to compile }
+
+        it do
+          is_expected.to contain_networkmanager_connection('namevar')
+            .with_ensure('absent')
+        end
+        it do
+          is_expected.to contain_file('/etc/NetworkManager/system-connections/namevar.nmconnection')
+            .with_ensure('absent')
+        end
+        it { is_expected.not_to contain_networkmanager_connection_setting('namevar/ipv4/method') }
+        it { is_expected.not_to contain_networkmanager_connection_setting('namevar/ipv6/method') }
+
+        ['em1', 'em2'].each do |slave|
+          it do
+            is_expected.to contain_networkmanager_connection("bondslave-namevar-#{slave}")
+              .with_ensure('absent')
+          end
+        end
       end
     end
   end

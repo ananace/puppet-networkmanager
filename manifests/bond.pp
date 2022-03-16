@@ -73,9 +73,13 @@ define networkmanager::bond(
   }
 
   $slaves.each |$slave| {
+    $slave_ensure = $ensure ? {
+      absent  => absent,
+      default => present,
+    }
     $name = "bondslave-${identifier}-${slave}"
     networkmanager::connection { "bond ${title} - bondslave ${slave}":
-      ensure          => present,
+      ensure          => $slave_ensure,
       type            => 'ethernet',
       connection_name => $name,
       bare            => true,

@@ -72,8 +72,13 @@ define networkmanager::team(
   }
 
   $slaves.each |$slave| {
+    $slave_ensure = $ensure ? {
+      absent  => absent,
+      default => present,
+    }
     $name = "teamslave-${identifier}-${slave}"
     networkmanager::connection { "team ${title} - teamslave ${slave}":
+      ensure          => $slave_ensure,
       type            => 'ethernet',
       connection_name => $name,
       bare            => true,
