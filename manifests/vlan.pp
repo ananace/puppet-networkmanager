@@ -63,6 +63,13 @@ define networkmanager::vlan(
     mode    => '0600',
     notify  => Exec["reload_ethernet_${title}"],
   }
+  file { "${_file}.nmconnection":
+    ensure => file,
+    owner  => 'root',
+    group  => 'root',
+    mode   => '0600',
+    source => "file://${_file}",
+  }
   exec { "reload_ethernet_${title}":
     command     => "/usr/bin/nmcli c load ${_file} && /usr/bin/nmcli c up uuid ${_uuid}",
     refreshonly => true,
