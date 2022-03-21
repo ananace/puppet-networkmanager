@@ -101,4 +101,32 @@ describe 'networkmanager::foreman_interfaces' do
         .without_ip6_addresses
     end
   end
+
+  context 'with magic network' do
+    data = Psych.load(File.read(File.join('spec', 'fixtures', 'foreman_interfaces', 'single_interface_zeroes.yml')))
+
+    let(:facts) { data['facts'] }
+    let(:node_params) do
+      {
+        'foreman_interfaces' => data['foreman_interfaces'],
+        'domainname' => 'example.com'
+      }
+    end
+
+    it { is_expected.to compile }
+
+    it do
+      is_expected.to contain_networkmanager__ethernet('eno1')
+        .with_mac('5C:52:62:56:8A:C4')
+        .without_ip4_addresses
+        .with_ip4_dns_search('example.com')
+        .without_ip4_dns
+        .with_ip4_method('auto')
+        .with_ip4_never_default(false)
+        .without_ip4_routes
+        .without_ip6_addresses
+        .with_ip6_method('ignore')
+        .without_ip6_routes
+    end
+  end
 end

@@ -111,16 +111,21 @@ Puppet::Functions.create_function(:'networkmanager::munge_foreman_interfaces') d
     return unless subnet
 
     data["dhcp#{version}"] = data[:raw_addresses].select(&filter).all? { |a| a[:subnet]['boot_mode'] == 'DHCP' }
-    data["mtu#{version}"] = subnet['mtu']
-    data["gateway#{version}"] = subnet['gateway']
+    data["mtu#{version}"] = subnet['mtu'] unless (subnet['mtu'] || '') == ''
+
+    data["gateway#{version}"] = subnet['gateway'] unless (subnet['gateway'] || '') == ''
+    dnses = data[:raw_addresses].select(&filter).map { |a|
+      addr = []
+      addr << a[:subnet]['dns_primary'] unless (a[:subnet]['dns_primary'] || '') == ''
+      addr << a[:subnet]['dns_secondary'] unless (a[:subnet]['dns_secondary'] || '') == ''
+      addr
+    }.flatten.uniq
+    data["dns#{version}"] = dnses unless dnses.empty?
+
+    return unless data[:raw_addresses].any? { |a| filter.call(a) && a[:ip].to_s != '0.0.0.0' }
+
     data["ips#{version}"] = data[:raw_addresses].select(&filter).map { |a| a[:ip].to_s }
     data["netmasks#{version}"] = data[:raw_addresses].select(&filter).map { |a| a[:netmask] }
     data["cidrs#{version}"] = data[:raw_addresses].select(&filter).map { |a| a[:cidr] }
-    data["dns#{version}"] = data[:raw_addresses].select(&filter).map { |a|
-      addr = []
-      addr << a[:subnet]['dns_primary'] unless a[:subnet]['dns_primary'] == ''
-      addr << a[:subnet]['dns_secondary'] unless a[:subnet]['dns_secondary'] == ''
-      addr
-    }.flatten.uniq
   end
 end
