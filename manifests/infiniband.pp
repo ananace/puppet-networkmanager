@@ -60,6 +60,13 @@ define networkmanager::infiniband(
     mode    => '0600',
     notify  => Exec["reload_infiniband_${title}"],
   }
+  file { "${_file}.nmconnection":
+    ensure => file,
+    owner  => 'root',
+    group  => 'root',
+    mode   => '0600',
+    source => "file://${_file}",
+  }
   exec { "reload_infiniband_${title}":
     command     => "/usr/bin/nmcli c load ${_file} && /usr/bin/nmcli c up uuid ${_uuid}",
     refreshonly => true,
