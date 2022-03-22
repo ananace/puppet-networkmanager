@@ -5,6 +5,7 @@ define networkmanager::bond(
   Optional[Stdlib::MAC] $mac = undef,
 
   Enum[present,absent,active] $ensure = 'present',
+  Boolean $autoconnect = true,
   Boolean $purge_settings = true,
 
   Enum['balance-rr','active-backup','balance-xor','broadcast','802.3ad','balance-tlb','balance-alb'] $mode = 'balance-rr',
@@ -29,6 +30,7 @@ define networkmanager::bond(
 ) {
   networkmanager::connection { "bond ${title} - base connection":
     ensure            => $ensure,
+    autoconnect       => $autoconnect,
     purge_settings    => $purge_settings,
 
     type              => 'bond',

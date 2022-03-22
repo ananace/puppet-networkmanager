@@ -6,6 +6,7 @@ define networkmanager::vlan(
   Optional[Integer[1280]] $mtu = undef,
 
   Enum[present,absent,active] $ensure = 'present',
+  Boolean $autoconnect = true,
   Boolean $purge_settings = true,
 
   Optional[Enum[disabled,shared,manual,auto]] $ip4_method = undef,
@@ -26,6 +27,7 @@ define networkmanager::vlan(
 ) {
   networkmanager::connection { "vlan ${title} - base connection":
     ensure            => $ensure,
+    autoconnect       => $autoconnect,
     purge_settings    => $purge_settings,
 
     type              => 'vlan',

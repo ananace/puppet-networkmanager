@@ -5,6 +5,7 @@ define networkmanager::team(
   Optional[Stdlib::MAC] $mac = undef,
 
   Enum[present,absent,active] $ensure = 'present',
+  Boolean $autoconnect = true,
   Boolean $purge_settings = true,
 
   Hash[String,Data] $config = {
@@ -33,6 +34,7 @@ define networkmanager::team(
 ) {
   networkmanager::connection { "team ${title} - base connection":
     ensure            => $ensure,
+    autoconnect       => $autoconnect,
     purge_settings    => $purge_settings,
 
     type              => 'team',
