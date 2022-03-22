@@ -5,6 +5,7 @@ define networkmanager::infiniband(
   Optional[Integer[1280,65520]] $mtu = 2044,
 
   Enum[present,absent,active] $ensure = 'present',
+  Boolean $autoconnect = true,
   Boolean $purge_settings = true,
 
   Optional[Enum[disabled,shared,manual,auto]] $ip4_method = undef,
@@ -25,6 +26,7 @@ define networkmanager::infiniband(
 ) {
   networkmanager::connection { "infiniband ${title} - base connection":
     ensure            => $ensure,
+    autoconnect       => $autoconnect,
     purge_settings    => $purge_settings,
 
     type              => 'infiniband',

@@ -5,6 +5,7 @@ define networkmanager::bridge(
   Optional[Stdlib::MAC] $mac = undef,
 
   Enum[present,absent,active] $ensure = 'present',
+  Boolean $autoconnect = true,
   Boolean $purge_settings = true,
 
   Hash[String,Data] $options = {},
@@ -15,31 +16,36 @@ define networkmanager::bridge(
   Optional[Stdlib::IP::Address::V4::Nosubnet] $ip4_gateway = undef,
   Optional[Array[Stdlib::IP::Address::V4::Nosubnet]] $ip4_dns = undef,
   Optional[String] $ip4_dns_search = undef,
+  Optional[Boolean] $ip4_never_default = undef,
 
   Optional[Enum[dhcp,'link-local',manual,auto,ignore]] $ip6_method = undef,
   Optional[Variant[Stdlib::IP::Address::V6::CIDR, Array[Stdlib::IP::Address::V6::CIDR]]] $ip6_addresses = undef,
   Optional[Stdlib::IP::Address::V6::Nosubnet] $ip6_gateway = undef,
   Optional[Array[Stdlib::IP::Address::V6::Nosubnet]] $ip6_dns = undef,
   Optional[String] $ip6_dns_search = undef,
+  Optional[Boolean] $ip6_never_default = undef,
 ) {
   networkmanager::connection { "bridge ${title} - base connection":
-    ensure          => $ensure,
-    purge_settings  => $purge_settings,
+    ensure            => $ensure,
+    autoconnect       => $autoconnect,
+    purge_settings    => $purge_settings,
 
-    type            => 'bridge',
-    connection_name => $connection_name,
+    type              => 'bridge',
+    connection_name   => $connection_name,
 
-    ip4_method      => $ip4_method,
-    ip4_addresses   => $ip4_addresses,
-    ip4_gateway     => $ip4_gateway,
-    ip4_dns         => $ip4_dns,
-    ip4_dns_search  => $ip4_dns_search,
+    ip4_method        => $ip4_method,
+    ip4_addresses     => $ip4_addresses,
+    ip4_gateway       => $ip4_gateway,
+    ip4_dns           => $ip4_dns,
+    ip4_dns_search    => $ip4_dns_search,
+    ip4_never_default => $ip4_never_default,
 
-    ip6_method      => $ip6_method,
-    ip6_addresses   => $ip6_addresses,
-    ip6_gateway     => $ip6_gateway,
-    ip6_dns         => $ip6_dns,
-    ip6_dns_search  => $ip6_dns_search,
+    ip6_method        => $ip6_method,
+    ip6_addresses     => $ip6_addresses,
+    ip6_gateway       => $ip6_gateway,
+    ip6_dns           => $ip6_dns,
+    ip6_dns_search    => $ip6_dns_search,
+    ip6_never_default => $ip6_never_default,
   }
 
   if $ensure != absent {
