@@ -1,12 +1,19 @@
-define networkmanager::vlan(
-  Integer[1,4096] $vlanid,
+define networkmanager::team(
   String $identifier = $title,
   String $connection_name = $title,
-  Optional[Stdlib::MAC] $mac = undef,
   Optional[Integer[1280]] $mtu = undef,
+  Optional[Stdlib::MAC] $mac = undef,
 
   Enum[present,absent,active] $ensure = 'present',
   Boolean $purge_settings = true,
+
+  Hash[String,Data] $config = {
+    'runner' => {
+      'name'    => 'lacp',
+      'tx_hash' => [ 'eth', 'ip' ],
+    },
+  },
+  Array[String] $slaves = [],
 
   Optional[Enum[disabled,shared,manual,auto]] $ip4_method = undef,
   Optional[Variant[Stdlib::IP::Address::V4::CIDR, Array[Stdlib::IP::Address::V4::CIDR]]] $ip4_addresses = undef,
@@ -24,11 +31,11 @@ define networkmanager::vlan(
   Optional[Array[Stdlib::IP::Address::V6::CIDR]] $ip6_routes = undef,
   Optional[Boolean] $ip6_never_default = undef,
 ) {
-  networkmanager::connection { "vlan ${title} - base connection":
+  networkmanager::connection { "team ${title} - base connection":
     ensure            => $ensure,
     purge_settings    => $purge_settings,
 
-    type              => 'vlan',
+    type              => 'team',
     connection_name   => $connection_name,
 
     ip4_method        => $ip4_method,
@@ -51,8 +58,7 @@ define networkmanager::vlan(
   if $ensure != absent {
     networkmanager_connection_setting {
       "${connection_name}/connection/interface-name": value => $identifier;
-      "${connection_name}/vlan/id": value                   => $vlanid;
-      "${connection_name}/vlan/interface-name": value       => $identifier;
+      "${connection_name}/team/config": value               => to_json($config);
     }
     if $mac {
       networkmanager_connection_setting {
@@ -62,6 +68,27 @@ define networkmanager::vlan(
     if $mtu {
       networkmanager_connection_setting { "${connection_name}/ethernet/mtu":
         value => $mtu,
+      }
+    }
+  }
+
+  $slaves.each |$slave| {
+    $slave_ensure = $ensure ? {
+      absent  => absent,
+      default => present,
+    }
+    $name = "teamslave-${identifier}-${slave}"
+    networkmanager::connection { "team ${title} - teamslave ${slave}":
+      ensure          => $slave_ensure,
+      type            => 'ethernet',
+      connection_name => $name,
+      bare            => true,
+    }
+    if $ensure != absent {
+      networkmanager_connection_setting {
+        "${name}/connection/interface-name": value => $slave;
+        "${name}/connection/slave-type": value     => 'team';
+        "${name}/connection/master": value         => $identifier;
       }
     }
   }

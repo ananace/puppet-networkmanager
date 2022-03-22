@@ -6,7 +6,7 @@ describe 'networkmanager::ethernet' do
   let(:title) { 'Ethernet' }
   let(:params) do
     {
-      mac: '00:01:02:03:04:05',
+      mac: '00:01:02:03:04:0a',
       mtu: 1400
     }
   end
@@ -18,13 +18,40 @@ describe 'networkmanager::ethernet' do
       it { is_expected.to compile }
 
       it do
-        is_expected.to contain_file('/etc/NetworkManager/system-connections/Ethernet')
-          .with_owner('root')
-          .with_group('root')
-          .with_mode('0600')
-          .that_notifies('Exec[reload_ethernet_Ethernet]')
+        is_expected.to contain_networkmanager_connection_setting('Ethernet/connection/autoconnect')
+          .with_value(true)
+          .that_notifies('Networkmanager_connection[Ethernet]')
       end
-      it { is_expected.to contain_exec('reload_ethernet_Ethernet') }
+      it do
+        is_expected.to contain_networkmanager_connection_setting('Ethernet/connection/interface-name')
+          .with_value('Ethernet')
+          .that_notifies('Networkmanager_connection[Ethernet]')
+      end
+      it do
+        is_expected.to contain_networkmanager_connection_setting('Ethernet/connection/type')
+          .with_value('ethernet')
+          .that_notifies('Networkmanager_connection[Ethernet]')
+      end
+      it do
+        is_expected.to contain_networkmanager_connection_setting('Ethernet/ethernet/mac-address')
+          .with_value('00:01:02:03:04:0a')
+          .that_notifies('Networkmanager_connection[Ethernet]')
+      end
+      it do
+        is_expected.to contain_networkmanager_connection_setting('Ethernet/ipv4/method')
+          .with_value('auto')
+      end
+      it do
+        is_expected.to contain_networkmanager_connection_setting('Ethernet/ipv6/method')
+          .with_value('auto')
+      end
+      it { is_expected.not_to contain_networkmanager_connection_setting('Ethernet/ipv4/may-fail').with_value(false) }
+      it { is_expected.not_to contain_networkmanager_connection_setting('Ethernet/ipv6/may-fail').with_value(false) }
+      it do
+        is_expected.to contain_networkmanager_connection('Ethernet')
+          .with_ensure('present')
+          .with_purge_settings(true)
+      end
     end
   end
 end
