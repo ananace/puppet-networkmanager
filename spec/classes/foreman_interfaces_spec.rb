@@ -25,6 +25,7 @@ describe 'networkmanager::foreman_interfaces' do
     it { is_expected.to compile }
     it do
       is_expected.to contain_networkmanager__ethernet('enp5s0f0')
+        .with_ensure('present')
         .with_mac('00:11:22:33:44:AA')
         .with_mtu(1500)
         .with_ip4_addresses(['1.2.3.4/8', '1.2.3.5/8'])
@@ -35,8 +36,18 @@ describe 'networkmanager::foreman_interfaces' do
         .with_ip6_addresses(nil)
     end
     it do
-      is_expected.to contain_networkmanager_connection('enp5s0f0')
+      is_expected.to contain_networkmanager_connection('bond0')
         .with_ensure('active')
+        .with_purge_settings(true)
+    end
+    it do
+      is_expected.to contain_networkmanager_connection('bondslave-bond0-enp5s0f0')
+        .with_ensure('present')
+        .with_purge_settings(true)
+    end
+    it do
+      is_expected.to contain_networkmanager_connection('bondslave-bond0-enp5s0f1')
+        .with_ensure('present')
         .with_purge_settings(true)
     end
     it do

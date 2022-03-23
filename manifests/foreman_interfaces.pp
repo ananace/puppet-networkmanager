@@ -1,7 +1,13 @@
 class networkmanager::foreman_interfaces {
   networkmanager::munge_foreman_interfaces().each |$identifier, $iface| {
+    if $iface['attached_to'] != undef {
+      $_ensure = 'present'
+    } else {
+      $_ensure = 'active'
+    }
+
     $base_params = {
-      ensure            => 'active',
+      ensure            => $_ensure,
       purge_settings    => true,
 
       mac               => ($iface['mac'] ? {
@@ -79,7 +85,9 @@ class networkmanager::foreman_interfaces {
         }
       }
 
-      default: {}
+      default: {
+        fail("Unknown interface type ${iface['type']} for ${iface}")
+      }
     }
 
     ensure_resource($type, $identifier, $base_params + $addn_params)
