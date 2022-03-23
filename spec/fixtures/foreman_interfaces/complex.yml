@@ -1,0 +1,356 @@
+facts:
+  networking:
+    interfaces:
+      enp5s0f0:
+        mac: "00:11:22:33:44:aa"
+        mtu: 1500
+      enp5s0f1:
+        mac: "00:11:22:33:44:66"
+        mtu: 1500
+      ibp4s0:
+        mac: "00:11:22:33:44:55:66:77:88:99:00:11:22:33:44:55:66:77:88:99"
+        mtu: 4092
+      ibp4s0d1:
+        mac: "00:11:22:33:44:55:66:77:88:99:00:11:22:33:44:55:66:77:88:00"
+        mtu: 4092
+      lo:
+        bindings:
+        - address: "127.0.0.1"
+          netmask: "255.0.0.0"
+          network: "127.0.0.0"
+        bindings6:
+        - address: "::1"
+          netmask: "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"
+          network: "::1"
+        ip: "127.0.0.1"
+        ip6: "::1"
+        mtu: 65536
+        netmask: "255.0.0.0"
+        netmask6: "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"
+        network: "127.0.0.0"
+        network6: "::1"
+        scope6: "host"
+foreman_interfaces:
+  - ip: 1.20.0.1
+    ip6:
+    mac:
+    name:
+    attrs: {}
+    virtual: true
+    link: true
+    identifier: bond0
+    managed: true
+    primary: true
+    provision: true
+    subnet:
+      name: Server network
+      network: 1.0.0.0
+      mask: 255.0.0.0
+      gateway: 1.0.0.1
+      dns_primary: 1.0.1.1
+      dns_secondary: 1.0.1.2
+      from: 1.2.0.0
+      to: 1.2.255.255
+      boot_mode: Static
+      ipam: DHCP
+      vlanid: 1000
+      mtu: 1500
+      nic_delay:
+      network_type: IPv4
+      description: ''
+    subnet6:
+      name: Local only
+      network: 'fe80::'
+      mask: 'ffc0::'
+      gateway: ''
+      dns_primary: ''
+      dns_secondary: ''
+      from: ''
+      to: ''
+      boot_mode: Static
+      ipam: None
+      vlanid:
+      mtu: 1500
+      nic_delay:
+      network_type: IPv6
+      description: ''
+    tag:
+    attached_to:
+    type: Bond
+    attached_devices: enp5s0f0,enp5s0f1
+    mode: balance-rr
+    bond_options: miimon=100 downdelay=0 updelay=0
+  - ip:
+    ip6: ''
+    mac: 00:11:22:33:44:66
+    name: ''
+    attrs:
+      mtu: 1500
+      duplex: unknown! (255)
+      port: FIBRE
+      auto_negotiation: 'false'
+      wol: false
+    virtual: false
+    link: false
+    identifier: enp5s0f1
+    managed: false
+    primary: false
+    provision: false
+    subnet:
+    subnet6:
+    tag:
+    attached_to:
+    type: Interface
+  - ip: 1.2.3.4
+    ip6:
+    mac: 00:11:22:33:44:aa
+    name: host.example.com
+    attrs: {}
+    virtual: false
+    link: true
+    identifier: ''
+    managed: true
+    primary: true
+    provision: true
+    subnet:
+      name: Server network
+      network: 1.0.0.0
+      mask: 255.0.0.0
+      gateway: 1.0.0.1
+      dns_primary: 1.0.1.1
+      dns_secondary: 1.0.1.2
+      from: 1.2.0.0
+      to: 1.2.255.255
+      boot_mode: Static
+      ipam: DHCP
+      vlanid: 1000
+      mtu: 1500
+      nic_delay:
+      network_type: IPv4
+      description: ''
+    subnet6:
+      name: Local only
+      network: 'fe80::'
+      mask: 'ffc0::'
+      gateway: ''
+      dns_primary: ''
+      dns_secondary: ''
+      from: ''
+      to: ''
+      boot_mode: Static
+      ipam: None
+      vlanid:
+      mtu: 1500
+      nic_delay:
+      network_type: IPv6
+      description: ''
+    tag:
+    attached_to:
+    type: Interface
+  - ip: 1.2.3.5
+    ip6:
+    mac: 00:11:22:33:44:55
+    name: ''
+    attrs: {}
+    virtual: true
+    link: true
+    identifier: enp5s0f0:1
+    managed: true
+    primary: false
+    provision: false
+    subnet:
+      name: Server network
+      network: 1.0.0.0
+      mask: 255.0.0.0
+      gateway: 1.0.0.1
+      dns_primary: 1.0.1.1
+      dns_secondary: 1.0.1.2
+      from: 1.2.0.0
+      to: 1.2.255.255
+      boot_mode: Static
+      ipam: DHCP
+      vlanid: 1000
+      mtu: 1500
+      nic_delay:
+      network_type: IPv4
+      description: ''
+    subnet6:
+      name: Local only
+      network: 'fe80::'
+      mask: 'ffc0::'
+      gateway: ''
+      dns_primary: ''
+      dns_secondary: ''
+      from: ''
+      to: ''
+      boot_mode: Static
+      ipam: None
+      vlanid:
+      mtu: 1500
+      nic_delay:
+      network_type: IPv6
+      description: ''
+    tag:
+    attached_to: enp5s0f0
+    type: Interface
+  - ip: 1.2.3.6
+    ip6:
+    mac: 00:11:22:33:44:55
+    name: ''
+    attrs: {}
+    virtual: true
+    link: true
+    identifier: enp5s0f0.1000
+    managed: true
+    primary: false
+    provision: false
+    subnet:
+      name: Server network
+      network: 1.0.0.0
+      mask: 255.0.0.0
+      gateway: 1.0.0.1
+      dns_primary: 1.0.1.1
+      dns_secondary: 1.0.1.2
+      from: 1.2.0.0
+      to: 1.2.255.255
+      boot_mode: Static
+      ipam: DHCP
+      vlanid: 1000
+      mtu: 1500
+      nic_delay:
+      network_type: IPv4
+      description: ''
+    subnet6:
+      name: Local only
+      network: 'fe80::'
+      mask: 'ffc0::'
+      gateway: ''
+      dns_primary: ''
+      dns_secondary: ''
+      from: ''
+      to: ''
+      boot_mode: Static
+      ipam: None
+      vlanid:
+      mtu: 1500
+      nic_delay:
+      network_type: IPv6
+      description: ''
+    tag:
+    attached_to: enp5s0f0
+    type: Interface
+  - ip: 192.168.2.34
+    ip6: ''
+    mac: 00:11:22:33:44:55:66:77:88:99:00:11:22:33:44:55:66:77:88:99
+    name: ''
+    attrs: {}
+    virtual: false
+    link: true
+    identifier: ibp4s0
+    managed: true
+    primary: false
+    provision: false
+    subnet:
+      name: Infiniband
+      network: 192.168.2.0
+      mask: 255.255.255.0
+      gateway: 192.168.2.1
+      dns_primary: ''
+      dns_secondary: ''
+      from: 192.168.2.2
+      to: 192.168.2.254
+      boot_mode: Static
+      ipam: Internal DB
+      vlanid:
+      mtu: 2044
+      nic_delay:
+      network_type: IPv4
+      description: ''
+    subnet6:
+    tag:
+    attached_to:
+    type: Interface
+result:
+  bond0:
+    type: Bond
+    virtual: true
+    primary: true
+    vlan: 1000
+    mtu: 1500
+    dhcp4: false
+    mtu4: 1500
+    gateway4: 1.0.0.1
+    ips4:
+    - 1.20.0.1
+    netmasks4:
+    - 255.0.0.0
+    cidrs4:
+    - 1.20.0.1/8
+    dns4:
+    - 1.0.1.1
+    - 1.0.1.2
+    mode: balance-rr
+    bond_options:
+      miimon: '100'
+      downdelay: '0'
+      updelay: '0'
+    attached_devices:
+      - enp5s0f0
+      - enp5s0f1
+  enp5s0f0:
+    type: Interface
+    virtual: false
+    primary: true
+    mac: 00:11:22:33:44:aa
+    vlan: 1000
+    mtu: 1500
+    dhcp4: false
+    mtu4: 1500
+    gateway4: 1.0.0.1
+    ips4:
+    - 1.2.3.4
+    - 1.2.3.5
+    netmasks4:
+    - 255.0.0.0
+    - 255.0.0.0
+    cidrs4:
+    - 1.2.3.4/8
+    - 1.2.3.5/8
+    dns4:
+    - 1.0.1.1
+    - 1.0.1.2
+  enp5s0f0.1000:
+    type: Interface
+    virtual: true
+    primary: false
+    mac: 00:11:22:33:44:aa
+    tag: 1000
+    vlan: 1000
+    mtu: 1500
+    dhcp4: false
+    mtu4: 1500
+    gateway4: 1.0.0.1
+    ips4:
+    - 1.2.3.6
+    netmasks4:
+    - 255.0.0.0
+    cidrs4:
+    - 1.2.3.6/8
+    dns4:
+    - 1.0.1.1
+    - 1.0.1.2
+  ibp4s0:
+    type: Interface
+    virtual: false
+    primary: false
+    mac: 00:11:22:33:44:55:66:77:88:99:00:11:22:33:44:55:66:77:88:99
+    mtu: 2044
+    dhcp4: false
+    mtu4: 2044
+    gateway4: 192.168.2.1
+    ips4:
+    - 192.168.2.34
+    netmasks4:
+    - 255.255.255.0
+    cidrs4:
+    - 192.168.2.34/24

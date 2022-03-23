@@ -1,77 +1,70 @@
 define networkmanager::vlan(
-  Stdlib::MAC $mac,
   Integer[1,4096] $vlanid,
   String $identifier = $title,
   String $connection_name = $title,
-  Optional[Integer[1280]] $mtu,
+  Optional[Stdlib::MAC] $mac = undef,
+  Optional[Integer[1280]] $mtu = undef,
 
-  Optional[Enum[manual,auto]] $ip4_method = undef,
+  Enum[present,absent,active] $ensure = 'present',
+  Boolean $autoconnect = true,
+  Boolean $purge_settings = true,
+
+  Optional[Enum[disabled,shared,manual,auto]] $ip4_method = undef,
   Optional[Variant[Stdlib::IP::Address::V4::CIDR, Array[Stdlib::IP::Address::V4::CIDR]]] $ip4_addresses = undef,
   Optional[Stdlib::IP::Address::V4::Nosubnet] $ip4_gateway = undef,
   Optional[Array[Stdlib::IP::Address::V4::Nosubnet]] $ip4_dns = undef,
   Optional[String] $ip4_dns_search = undef,
+  Optional[Array[Stdlib::IP::Address::V4::CIDR]] $ip4_routes = undef,
+  Optional[Boolean] $ip4_never_default = undef,
 
-  Optional[Enum[manual,auto]] $ip6_method = undef,
-  Optional[Variant[Variant[Stdlib::IP::Address::V6::Full,Stdlib::IP::Address::V6::Compressed,Stdlib::IP::Address::V6::Alternative], Array[Variant[Stdlib::IP::Address::V6::Full,Stdlib::IP::Address::V6::Compressed,Stdlib::IP::Address::V6::Alternative]]]] $ip6_addresses = undef,
+  Optional[Enum[dhcp,'link-local',manual,auto,ignore]] $ip6_method = undef,
+  Optional[Variant[Stdlib::IP::Address::V6::CIDR, Array[Stdlib::IP::Address::V6::CIDR]]] $ip6_addresses = undef,
   Optional[Stdlib::IP::Address::V6::Nosubnet] $ip6_gateway = undef,
   Optional[Array[Stdlib::IP::Address::V6::Nosubnet]] $ip6_dns = undef,
   Optional[String] $ip6_dns_search = undef,
+  Optional[Array[Stdlib::IP::Address::V6::CIDR]] $ip6_routes = undef,
+  Optional[Boolean] $ip6_never_default = undef,
 ) {
-  $_ip4_addresses = flatten([$ip4_addresses])
-  $_extra_ip4_addresses = $_ip4_addresses[1,-1]
-  $_ip6_addresses = flatten([$ip6_addresses])
-  $_extra_ip6_addresses = $_ip6_addresses[1,-1]
+  networkmanager::connection { "vlan ${title} - base connection":
+    ensure            => $ensure,
+    autoconnect       => $autoconnect,
+    purge_settings    => $purge_settings,
 
-  $_ip4_method = pick($ip4_method, (length($_ip4_addresses) > 0) ? {
-      true  => 'manual',
-      false => 'auto',
-  })
-  $_ip6_method = pick($ip6_method, (length($_ip6_addresses) > 0) ? {
-      true  => 'manual',
-      false => 'auto',
-  })
+    type              => 'vlan',
+    connection_name   => $connection_name,
 
-  $_uuid = inline_template("<% require 'zlib' -%><%= Random.new(Zlib::crc32 '${mac}-${identifier}').bytes(16).unpack('H8H4H4H4H12').join('-').gsub(/(?<b>\\S{14})\\S(?<a>\\S+)/, '\\k<b>4\\k<a>') %>")
+    ip4_method        => $ip4_method,
+    ip4_addresses     => $ip4_addresses,
+    ip4_gateway       => $ip4_gateway,
+    ip4_dns           => $ip4_dns,
+    ip4_dns_search    => $ip4_dns_search,
+    ip4_routes        => $ip4_routes,
+    ip4_never_default => $ip4_never_default,
 
-  $_file = "/etc/NetworkManager/system-connections/${connection_name}"
-  file { $_file:
-    ensure  => file,
-    content => epp('networkmanager/vlan.epp', {
-
-        identifier     => $identifier,
-        mac            => $mac,
-        vlanid         => $vlanid,
-        mtu            => $mtu,
-        uuid           => $_uuid,
-
-        ip             => $_ip4_addresses[0],
-        extra_ip       => $_extra_ip4_addresses,
-        ip_gateway     => $ip4_gateway,
-        ip_method      => $_ip4_method,
-        ip4_dns        => $ip4_dns,
-        ip4_dns_search => $ip4_dns_search,
-
-        ip6            => $_ip6_addresses[0],
-        extra_ip6      => $_extra_ip6_addresses,
-        ip6_gateway    => $ip6_gateway,
-        ip6_method     => $_ip6_method,
-        ip6_dns        => $ip6_dns,
-        ip6_dns_search => $ip6_dns_search,
-    }),
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0600',
-    notify  => Exec["reload_ethernet_${title}"],
+    ip6_method        => $ip6_method,
+    ip6_addresses     => $ip6_addresses,
+    ip6_gateway       => $ip6_gateway,
+    ip6_dns           => $ip6_dns,
+    ip6_dns_search    => $ip6_dns_search,
+    ip6_routes        => $ip6_routes,
+    ip6_never_default => $ip6_never_default,
   }
-  file { "${_file}.nmconnection":
-    ensure => file,
-    owner  => 'root',
-    group  => 'root',
-    mode   => '0600',
-    source => "file://${_file}",
-  }
-  exec { "reload_ethernet_${title}":
-    command     => "/usr/bin/nmcli c load ${_file} && /usr/bin/nmcli c up uuid ${_uuid}",
-    refreshonly => true,
+
+  if $ensure != absent {
+    networkmanager_connection_setting {
+      "${connection_name}/connection/interface-name": value => $identifier;
+      "${connection_name}/vlan/id": value                   => $vlanid;
+      "${connection_name}/vlan/interface-name": value       => $identifier;
+    }
+    if $mac {
+      networkmanager_connection_setting {
+        "${connection_name}/ethernet/mac-address": value => $mac;
+      }
+    }
+    if $mtu {
+      networkmanager_connection_setting { "${connection_name}/ethernet/mtu":
+        value => $mtu,
+      }
+    }
   }
 }
