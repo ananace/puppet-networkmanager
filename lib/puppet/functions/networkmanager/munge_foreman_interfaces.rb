@@ -98,10 +98,10 @@ Puppet::Functions.create_function(:'networkmanager::munge_foreman_interfaces') d
 
       next unless iface['attached_devices']
 
-      iface['attached_devices'].each do |iface|
-        next unless munged[iface]
+      iface['attached_devices'].each do |attached_iface|
+        next unless munged[attached_iface]
 
-        munged[iface]['attached_to'] = ident
+        munged[attached_iface]['attached_to'] = ident
       end
     end
 
