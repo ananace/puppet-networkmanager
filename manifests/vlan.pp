@@ -4,6 +4,7 @@ define networkmanager::vlan(
   String $connection_name = $title,
   Optional[Stdlib::MAC] $mac = undef,
   Optional[Integer[1280]] $mtu = undef,
+  Optional[String[1]] $parent = undef,
 
   Enum[present,absent,active] $ensure = 'present',
   Boolean $autoconnect = true,
@@ -55,6 +56,11 @@ define networkmanager::vlan(
       "${connection_name}/connection/interface-name": value => $identifier;
       "${connection_name}/vlan/id": value                   => $vlanid;
       "${connection_name}/vlan/interface-name": value       => $identifier;
+    }
+    if $parent {
+      networkmanager_connection_setting {
+        "${connection_name}/vlan/parent": value => $parent;
+      }
     }
     if $mac {
       networkmanager_connection_setting {
