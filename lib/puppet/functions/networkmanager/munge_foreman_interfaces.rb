@@ -93,8 +93,16 @@ Puppet::Functions.create_function(:'networkmanager::munge_foreman_interfaces') d
       hash
     end
 
-    munged.each do |_, iface|
+    munged.each do |ident, iface|
       iface.delete :raw_addresses
+
+      next unless iface['attached_devices']
+
+      iface['attached_devices'].each do |attached_iface|
+        next unless munged[attached_iface]
+
+        munged[attached_iface]['attached_to'] = ident
+      end
     end
 
     munged
