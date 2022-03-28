@@ -1,9 +1,0 @@
-This is an Embedded Puppet template, information can be found on;
-https://docs.puppet.com/puppet/4.9/lang_template_epp.html
-
-# <%# Put installed file in view mode when opened with Emacs: -%>
-# <%= "Nota bene: Puppet managed file, all local changes will be reverted." %>
-# Managed by module: <%= $module_name %>
-# <%= "Local" %> <%= "variables:" %>
-# mode: view
-# <%= "End:" %>

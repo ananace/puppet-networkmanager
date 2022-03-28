@@ -1,149 +1,95 @@
 class networkmanager::foreman_interfaces {
-  $::foreman_interfaces.filter |$iface| {
-    $iface['managed'] and $iface['type'] == 'Interface'
-  }.reduce({}) |$hash, $iface| {
-    if $iface['identifier'] or $iface['attached_to'] {
-      $identifier = $iface['identifier']
+  networkmanager::munge_foreman_interfaces().each |$identifier, $iface| {
+    if $iface['attached_to'] != undef {
+      $_ensure = 'present'
     } else {
-      $identifier = fact('networking.interfaces').filter |$id, $data| {
-        $data['mac'] and $data['mac'].downcase() == $iface['mac'].downcase()
-      }.map |$id, $data| { $id }[0]
+      $_ensure = 'active'
     }
 
-    if $iface['ip'] =~ Stdlib::IP::Address::V4 {
-      $_ip = {
-        ip     => $iface['ip'],
-        subnet => $iface['subnet'],
-      }
-    }
-    if $iface['ip6'] =~  Stdlib::IP::Address::V6 {
-      $_ip6 = {
-        ip     => $iface['ip6'],
-        subnet => $iface['subnet6'],
-      }
+    $base_params = {
+      ensure            => $_ensure,
+      purge_settings    => true,
+
+      mac               => ($iface['mac'] ? {
+          undef   => undef,
+          default => upcase($iface['mac']),
+      }),
+      mtu               => $iface['mtu'],
+
+      ip4_addresses     => $iface['cidrs4'],
+      ip4_gateway       => $iface['gateway4'],
+      ip4_dns           => $iface['dns4'],
+      ip4_dns_search    => ($iface['dhcp4'] ? { undef => undef, default => $::domainname }),
+      ip4_method        => ($iface['dhcp4'] ? { true => 'auto', undef => 'disabled', default => 'manual' }),
+      ip4_never_default => !$iface['primary'],
+
+      ip6_addresses     => $iface['cidrs6'],
+      ip6_gateway       => $iface['gateway6'],
+      ip6_dns           => $iface['dns6'],
+      ip6_dns_search    => ($iface['dhcp6'] ? { undef => undef, default => $::domainname }),
+      ip6_method        => ($iface['dhcp6'] ? { true => 'auto', undef => 'ignore', default => 'manual' }),
+      ip6_never_default => !$iface['primary'],
     }
 
-    if !$iface['virtual'] or $identifier =~ /^.+\..+$/ {
-      if $iface['mac'] {
-        $_mac = $iface['mac']
-      } else {
-        $_mac = $hash[$iface['attached_to']]['mac']
-      }
-      $hash + {
-        $identifier => {
-          mac           => $_mac,
-          tag           => $iface['tag'],
-          ip_addresses  => delete_undef_values([ $_ip ]),
-          ip6_addresses => delete_undef_values([ $_ip6 ]),
+    case $iface['type'] {
+      'Interface': {
+        if length($iface['mac']) == 17 {
+          if $iface['virtual'] {
+            $type = 'networkmanager::vlan'
+            $addn_params = {
+              vlanid => Integer(pick($iface['tag'], $iface['vlan'])),
+            }
+          } else {
+            $type = 'networkmanager::ethernet'
+            $addn_params = {}
+          }
+        } else {
+          $type = 'networkmanager::infiniband'
+          $addn_params = {}
         }
       }
-    } else {
-      $existing = $hash[$iface['attached_to']]
-      $hash + {
-        $iface['attached_to'] => {
-          mac           => $existing['mac'],
-          ip_addresses  => delete_undef_values($existing['ip_addresses'] << $_ip),
-          ip6_addresses => delete_undef_values($existing['ip6_addresses'] << $_ip6),
+
+      'Bond': {
+        if $identifier =~ /team.*/ {
+          $type = 'networkmanager::team'
+          $team_mode = $iface['mode'] ? {
+            '802.3ad'       => 'lacp',
+            'broadcast'     => 'broadcast',
+            'balance-rr'    => 'roundrobin',
+            'active-backup' => 'activebackup',
+            default         => 'loadbalance',
+          }
+          $addn_params = {
+            slaves => $iface['attached_devices'],
+            config => {
+              runner => {
+                name    => $team_mode,
+                tx_hash => [ 'eth', 'ip' ],
+              },
+            },
+          }
+        } else {
+          $type = 'networkmanager::bond'
+          $addn_params = {
+            mode    => $iface['mode'],
+            options => $iface['bond_options'],
+            slaves  => $iface['attached_devices'],
+          }
         }
       }
-    }
-  }.each |$identifier, $iface| {
-    if length($iface['ip_addresses']) > 1 {
-      $_ip_gateway = $iface['ip_addresses'][0]['subnet']['gateway']
-      $_ip_method = 'manual'
-    } elsif length($iface['ip_addresses']) == 1 {
-      $_ip_gateway = $iface['ip_addresses'][0]['subnet']['gateway']
-      $_ip_method = ($iface['ip_addresses'][0]['subnet']['boot_mode'] ? {
-          'DHCP'   => 'auto',
-          'Static' => 'manual',
-          default  => undef,
-      })
-    }
-    if length($iface['ip6_addresses']) > 1 {
-      $_ip6_gateway = $iface['ip6_addresses'][0]['subnet']['gateway']
-      $_ip6_method = 'manual'
-    } elsif length($iface['ip6_addresses']) == 1 {
-      $_ip6_gateway = $iface['ip6_addresses'][0]['subnet']['gateway']
-      $_ip6_method = ($iface['ip6_addresses'][0]['subnet']['boot_mode'] ? {
-          'DHCP'   => 'auto',
-          'Static' => 'manual',
-          default  => undef,
-      })
-    }
 
-    $_ips = $iface['ip_addresses'].map |$if| {
-      $_cidr = inline_template("<% require 'ipaddr' -%>\n<%= IPAddr.new('${if['subnet']['mask']}').to_i.to_s(2).count('1') %>")
-      "${if['ip']}/${_cidr}"
-    }
-    $_mtus = $iface['ip_addresses'].map |$if| {
-      $if['subnet']['mtu']
-    }
-    $_vlans = $iface['ip_addresses'].map |$if| {
-      $if['subnet']['vlanid']
-    }
-    $_ip6s = $iface['ip6_addresses'].map |$if| {
-      $_cidr = inline_template("<% require 'ipaddr' -%>\n<%= IPAddr.new('${if['subnet']['mask']}').to_i.to_s(2).count('1') %>")
-      "${if['ip']}/${_cidr}"
-    }
-    $_mtu6s = $iface['ip6_addresses'].map |$if| {
-      $if['subnet']['mtu']
-    }
-    $_vlan6s = $iface['ip_addresses'].map |$if| {
-      $if['subnet']['vlanid']
-    }
-
-    $_dns4 = unique(flatten($iface['ip_addresses'].map |$if| { [$if['subnet']['dns_primary'], $if['subnet']['dns_secondary']] })).filter |$dns| { $dns =~ Stdlib::IP::Address::V4 }
-    $_dns6 = unique(flatten($iface['ip6_addresses'].map |$if| { [$if['subnet']['dns_primary'], $if['subnet']['dns_secondary']] })).filter |$dns| { $dns =~  Stdlib::IP::Address::V6 }
-
-    if length($iface['mac']) == 17 {
-      if $identifier =~ /^.+\..+$/ {
-        networkmanager::vlan { $identifier:
-          mac            => upcase($iface['mac']),
-          vlanid         => Integer(pick($iface['tag'], $_vlans[0])),
-          mtu            => $_mtus[0],
-          ip4_addresses  => $_ips,
-          ip4_gateway    => $_ip_gateway,
-          ip4_dns        => $_dns4,
-          ip4_dns_search => $::domainname,
-          ip4_method     => $_ip_method,
-          ip6_addresses  => $_ip6s,
-          ip6_gateway    => $_ip6_gateway,
-          ip6_dns        => $_dns6,
-          ip6_dns_search => $::domainname,
-          ip6_method     => $_ip6_method,
-        }
-      } else {
-        networkmanager::ethernet { $identifier:
-          mac            => upcase($iface['mac']),
-          mtu            => $_mtus[0],
-          ip4_addresses  => $_ips,
-          ip4_gateway    => $_ip_gateway,
-          ip4_dns        => $_dns4,
-          ip4_dns_search => $::domainname,
-          ip4_method     => $_ip_method,
-          ip6_addresses  => $_ip6s,
-          ip6_gateway    => $_ip6_gateway,
-          ip6_dns        => $_dns6,
-          ip6_dns_search => $::domainname,
-          ip6_method     => $_ip6_method,
+      'Bridge': {
+        $type = 'networkmanager::bridge'
+        $addn_params = {
+          slaves => $iface['attached_devices'],
         }
       }
-    } elsif length($iface['mac']) == 59 {
-      networkmanager::infiniband { $identifier:
-        connection_name => $identifier,
-        mac             => upcase($iface['mac']),
-        mtu             => $_mtus[0],
-        ip4_addresses   => $_ips,
-        ip4_gateway     => $_ip_gateway,
-        ip4_dns         => $_dns4,
-        ip4_dns_search  => $::domainname,
-        ip4_method      => $_ip_method,
-        ip6_addresses   => $_ip6s,
-        ip6_gateway     => $_ip6_gateway,
-        ip6_dns         => $_dns6,
-        ip6_dns_search  => $::domainname,
-        ip6_method      => $_ip6_method,
+
+      default: {
+        fail("Unknown interface type ${iface['type']} for ${iface}")
       }
     }
+
+    ensure_resource($type, $identifier, $base_params + $addn_params)
   }
 }
