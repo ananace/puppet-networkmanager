@@ -299,6 +299,7 @@ result:
       - enp5s0f1
   enp5s0f0:
     type: Interface
+    attached_to: bond0
     virtual: false
     primary: true
     mac: 00:11:22:33:44:aa
