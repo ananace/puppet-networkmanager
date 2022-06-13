@@ -20,14 +20,28 @@ class networkmanager::foreman_interfaces {
       ip4_gateway       => $iface['gateway4'],
       ip4_dns           => $iface['dns4'],
       ip4_dns_search    => ($iface['dhcp4'] ? { undef => undef, default => $::domainname }),
-      ip4_method        => ($iface['dhcp4'] ? { true => 'auto', undef => 'disabled', default => 'manual' }),
+      ip4_method        => ($iface['roaming'] ? {
+        true => 'auto',
+        default => ($iface['dhcp4'] ? {
+          true => 'auto',
+          undef => 'disabled',
+          default => 'manual',
+        }),
+      }),
       ip4_never_default => !$iface['primary'],
 
       ip6_addresses     => $iface['cidrs6'],
       ip6_gateway       => $iface['gateway6'],
       ip6_dns           => $iface['dns6'],
       ip6_dns_search    => ($iface['dhcp6'] ? { undef => undef, default => $::domainname }),
-      ip6_method        => ($iface['dhcp6'] ? { true => 'auto', undef => 'ignore', default => 'manual' }),
+      ip6_method        => ($iface['roaming'] ? {
+        true => 'auto',
+        default => ($iface['dhcp6'] ? {
+          true => 'auto',
+          undef => 'ignore',
+          default => 'manual',
+        }),
+      }),
       ip6_never_default => !$iface['primary'],
     }
 
