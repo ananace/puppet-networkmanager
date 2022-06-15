@@ -85,6 +85,9 @@ Puppet::Functions.create_function(:'networkmanager::munge_foreman_interfaces') d
       data['vlan'] = subnet['vlanid']
       data['mtu'] = subnet['mtu']
 
+      data['roaming'] = true if (iface['roaming'] || '') == 'true'
+      data['roaming'] = true if subnet['network'] == '0.0.0.0'
+
       get_subnet(data, 4)
       get_subnet(data, 6)
 

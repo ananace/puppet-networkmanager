@@ -136,8 +136,9 @@ describe 'networkmanager::foreman_interfaces' do
         .with_ip4_never_default(false)
         .without_ip4_routes
         .without_ip6_addresses
-        .with_ip6_method('ignore')
+        .with_ip6_method('auto')
         .without_ip6_routes
+        .with_ip6_never_default(false)
     end
   end
 end
