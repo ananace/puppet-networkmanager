@@ -1,4 +1,4 @@
-define networkmanager::bond(
+define networkmanager::bond (
   String $identifier = $title,
   String $connection_name = $title,
   Optional[Integer[1280]] $mtu = undef,

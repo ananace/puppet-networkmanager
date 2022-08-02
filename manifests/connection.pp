@@ -1,4 +1,4 @@
-define networkmanager::connection(
+define networkmanager::connection (
   String $type,
   String $connection_name = $title,
   Boolean $autoconnect = true,
@@ -96,7 +96,7 @@ define networkmanager::connection(
 
       if length($_ip6_addresses) > 0 {
         networkmanager_connection_setting { "${connection_name}/ipv6/may-fail":
-          value =>  false,
+          value => false,
         }
         $_ip6_addresses.each |$idx, $address| {
           networkmanager_connection_setting { "${connection_name}/ipv6/address${$idx + 1}":

@@ -3,7 +3,7 @@ class networkmanager (
   Boolean $manage_nm = true,
   Boolean $purge_connections = false,
   Boolean $purge_legacy = false,
-)  {
+) {
   if $manage_nm {
     service { 'NetworkManager':
       ensure  => running,
@@ -34,7 +34,7 @@ class networkmanager (
     }
     tidy { '/etc/sysconfig/network-scripts/':
       recurse => true,
-      matches => [ 'ifcfg-*' ],
+      matches => ['ifcfg-*'],
     }
     if $facts['os']['family'] == 'Debian' {
       package { 'ifupdown':

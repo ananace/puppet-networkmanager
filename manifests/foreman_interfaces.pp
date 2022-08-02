@@ -83,7 +83,7 @@ class networkmanager::foreman_interfaces {
             config => {
               runner => {
                 name    => $team_mode,
-                tx_hash => [ 'eth', 'ip' ],
+                tx_hash => ['eth', 'ip'],
               },
             },
           }

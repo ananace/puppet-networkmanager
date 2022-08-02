@@ -1,4 +1,4 @@
-define networkmanager::vlan(
+define networkmanager::vlan (
   Integer[1,4096] $vlanid,
   String $identifier = $title,
   String $connection_name = $title,
