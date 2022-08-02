@@ -62,7 +62,8 @@ define networkmanager::connection(
             value => (($idx == 0 and $ip4_gateway) ? {
                 true    => "${address},${ip4_gateway}",
                 default => $address,
-            }),
+              }
+            ),
           }
         }
       } elsif $ip4_method == 'auto' {
@@ -102,7 +103,8 @@ define networkmanager::connection(
             value => (($idx == 0 and $ip6_gateway) ? {
                 true    => "${address},${ip6_gateway}",
                 default => $address,
-            }),
+              }
+            ),
           }
         }
       } elsif $ip6_method == 'auto' {
@@ -137,8 +139,8 @@ define networkmanager::connection(
 
   $_file = "/etc/NetworkManager/system-connections/${connection_name}.nmconnection"
   $_file_ensure = $ensure ? {
-    absent  => absent,
-    default => file,
+    'absent' => absent,
+    default  => file,
   }
   file { $_file:
     ensure  => $_file_ensure,
