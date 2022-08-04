@@ -1,4 +1,4 @@
-define networkmanager::infiniband(
+define networkmanager::infiniband (
   String $mac,
   String $identifier = $title,
   String $connection_name = $title,

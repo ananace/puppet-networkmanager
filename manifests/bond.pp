@@ -1,4 +1,4 @@
-define networkmanager::bond(
+define networkmanager::bond (
   String $identifier = $title,
   String $connection_name = $title,
   Optional[Integer[1280]] $mtu = undef,
@@ -78,8 +78,8 @@ define networkmanager::bond(
 
   $slaves.each |$slave| {
     $slave_ensure = $ensure ? {
-      absent  => absent,
-      default => present,
+      'absent' => absent,
+      default  => present,
     }
     $name = "bondslave-${identifier}-${slave}"
     networkmanager::connection { "bond ${title} - bondslave ${slave}":

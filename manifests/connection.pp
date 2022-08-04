@@ -1,4 +1,4 @@
-define networkmanager::connection(
+define networkmanager::connection (
   String $type,
   String $connection_name = $title,
   Boolean $autoconnect = true,
@@ -62,7 +62,8 @@ define networkmanager::connection(
             value => (($idx == 0 and $ip4_gateway) ? {
                 true    => "${address},${ip4_gateway}",
                 default => $address,
-            }),
+              }
+            ),
           }
         }
       } elsif $ip4_method == 'auto' {
@@ -95,14 +96,15 @@ define networkmanager::connection(
 
       if length($_ip6_addresses) > 0 {
         networkmanager_connection_setting { "${connection_name}/ipv6/may-fail":
-          value =>  false,
+          value => false,
         }
         $_ip6_addresses.each |$idx, $address| {
           networkmanager_connection_setting { "${connection_name}/ipv6/address${$idx + 1}":
             value => (($idx == 0 and $ip6_gateway) ? {
                 true    => "${address},${ip6_gateway}",
                 default => $address,
-            }),
+              }
+            ),
           }
         }
       } elsif $ip6_method == 'auto' {
@@ -137,8 +139,8 @@ define networkmanager::connection(
 
   $_file = "/etc/NetworkManager/system-connections/${connection_name}.nmconnection"
   $_file_ensure = $ensure ? {
-    absent  => absent,
-    default => file,
+    'absent' => absent,
+    default  => file,
   }
   file { $_file:
     ensure  => $_file_ensure,
