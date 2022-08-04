@@ -1,4 +1,4 @@
-define networkmanager::ethernet(
+define networkmanager::ethernet (
   Stdlib::MAC $mac,
   String $identifier = $title,
   String $connection_name = $title,

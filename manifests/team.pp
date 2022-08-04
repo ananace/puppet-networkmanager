@@ -1,4 +1,4 @@
-define networkmanager::team(
+define networkmanager::team (
   String $identifier = $title,
   String $connection_name = $title,
   Optional[Integer[1280]] $mtu = undef,
@@ -11,7 +11,7 @@ define networkmanager::team(
   Hash[String,Data] $config = {
     'runner' => {
       'name'    => 'lacp',
-      'tx_hash' => [ 'eth', 'ip' ],
+      'tx_hash' => ['eth', 'ip'],
     },
   },
   Array[String] $slaves = [],
@@ -76,8 +76,8 @@ define networkmanager::team(
 
   $slaves.each |$slave| {
     $slave_ensure = $ensure ? {
-      absent  => absent,
-      default => present,
+      'absent' => absent,
+      default  => present,
     }
     $name = "teamslave-${identifier}-${slave}"
     networkmanager::connection { "team ${title} - teamslave ${slave}":
