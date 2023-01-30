@@ -1,10 +1,15 @@
 # frozen_string_literal: true
 
 Puppet::Functions.create_function(:'networkmanager::munge_foreman_interfaces') do
-  # Converts and instantiates a Foreman interfaces hash as networkmanager objects
+  # Combines a Foreman interfaces list into an interface hash suitable for instantiation
   #
   # @example
-  #     networkmanager::foreman_interfaces()
+  #     networkmanager::munge_foreman_interfaces().each |$identifier, $interface| {
+  #       notice("${identifier} is a ${interface['type']} with MAC ${interface['mac']}")
+  #     }
+  #
+  #     # em1 is a Interface with MAC 00:01:02:03:04:05
+  #     # ipmi is a BMC with MAC 01:02:03:04:05:06
   dispatch :munge_foreman_interfaces do
     return_type 'Hash'
   end
