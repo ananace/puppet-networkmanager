@@ -45,7 +45,7 @@
       "version_requirement": ">= 4.5.0"
     }
   ],
-  "pdk-version": "2.6.1",
+  "pdk-version": "2.7.0",
   "template-url": "https://gitlab.it.liu.se/puppet-infra/pdk-templates#liu",
-  "template-ref": "heads/liu-0-g09dd5f0"
+  "template-ref": "heads/liu-0-g6052ec1"
 }
