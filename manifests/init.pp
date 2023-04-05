@@ -3,6 +3,9 @@ class networkmanager (
   Boolean $manage_nm = true,
   Boolean $purge_connections = false,
   Boolean $purge_legacy = false,
+
+  Hash[String,Hash[String,Data]] $connections = {},
+  Hash[String,Hash[String,Data]] $connection_settings = {},
 ) {
   if $manage_nm {
     service { 'NetworkManager':
@@ -49,4 +52,7 @@ class networkmanager (
       }
     }
   }
+
+  ensure_resources('networkmanager::connection', $connections)
+  ensure_resources('networkmanager_connection', $connection_settings)
 }
