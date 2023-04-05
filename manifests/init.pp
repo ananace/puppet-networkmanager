@@ -5,7 +5,7 @@ class networkmanager (
   Boolean $purge_legacy = false,
 
   Hash[String,Hash[String,Data]] $connections = {},
-  Hash[String,Hash[String,Data]] $connection_settings = {},
+  Hash[String,Data] $connection_settings = {},
 ) {
   if $manage_nm {
     service { 'NetworkManager':
