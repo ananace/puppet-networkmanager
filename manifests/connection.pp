@@ -136,12 +136,8 @@ define networkmanager::connection (
   }
 
   $_file = "/etc/NetworkManager/system-connections/${connection_name}.nmconnection"
-  $_file_ensure = $ensure ? {
-    absent  => 'absent',
-    default => 'file', # present/active
-  }
   file { $_file:
-    ensure  => $_file_ensure,
+    ensure  => stdlib::ensure($ensure != 'absent', 'file'),
     owner   => 'root',
     group   => 'root',
     mode    => '0600',
