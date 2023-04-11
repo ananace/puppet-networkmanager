@@ -52,9 +52,4 @@ class networkmanager (
       }
     }
   }
-
-  ensure_resources('networkmanager::connection', $connections)
-  $connection_settings.each |$key, $value| {
-    ensure_resource('networkmanager_connection_setting', $key, { value => $value })
-  }
 }

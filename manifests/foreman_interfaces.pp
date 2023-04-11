@@ -1,4 +1,10 @@
 class networkmanager::foreman_interfaces {
+  # Temporary fix until foreman_interfaces moves to another place
+  ensure_resources('networkmanager::connection', $connections)
+  $connection_settings.each |$key, $value| {
+    ensure_resource('networkmanager_connection_setting', $key, { value => $value })
+  }
+
   networkmanager::munge_foreman_interfaces().each |$identifier, $iface| {
     if $iface['attached_to'] != undef {
       $_ensure = 'present'
