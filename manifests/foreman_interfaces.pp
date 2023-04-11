@@ -1,7 +1,7 @@
 class networkmanager::foreman_interfaces {
   # Temporary fix until foreman_interfaces moves to another place
-  ensure_resources('networkmanager::connection', $connections)
-  $connection_settings.each |$key, $value| {
+  ensure_resources('networkmanager::connection', lookup('networkmanager::connections', undef, undef, {}))
+  lookup('networkmanager::connection_settings', undef, undef, {}).each |$key, $value| {
     ensure_resource('networkmanager_connection_setting', $key, { value => $value })
   }
 
