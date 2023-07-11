@@ -3,6 +3,9 @@ class networkmanager (
   Boolean $manage_nm = true,
   Boolean $purge_connections = false,
   Boolean $purge_legacy = false,
+
+  Hash[String,Hash[String,Data]] $connections = {},
+  Hash[String,Data] $connection_settings = {},
 ) {
   if $manage_nm {
     service { 'NetworkManager':

@@ -2,3 +2,7 @@
 include:
   - project: 'puppet-infra/shared-ci-piplines'
     file: '/puppet-module-pipeline.yaml'
+  - local: .local-ci.yml
+    rules:
+      - exists:
+          - .local-ci.yml
