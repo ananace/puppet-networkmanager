@@ -1,4 +1,10 @@
 class networkmanager::foreman_interfaces {
+  # Temporary fix until foreman_interfaces moves to another place
+  ensure_resources('networkmanager::connection', lookup('networkmanager::connections', undef, undef, {}))
+  lookup('networkmanager::connection_settings', undef, undef, {}).each |$key, $value| {
+    ensure_resource('networkmanager_connection_setting', $key, { value => $value })
+  }
+
   networkmanager::munge_foreman_interfaces().each |$identifier, $iface| {
     if $iface['attached_to'] != undef {
       $_ensure = 'present'
@@ -20,7 +26,7 @@ class networkmanager::foreman_interfaces {
       ip4_addresses     => $iface['cidrs4'],
       ip4_gateway       => $iface['gateway4'],
       ip4_dns           => $iface['dns4'],
-      ip4_dns_search    => ($iface['dhcp4'] ? { undef => undef, default => $::domainname }),
+      ip4_dns_search    => ($iface['dhcp4'] ? { undef => undef, default => $facts['networking']['domain'] }),
       ip4_method        => ($iface['roaming'] ? {
           true => 'auto',
           default => ($iface['dhcp4'] ? {
@@ -36,7 +42,7 @@ class networkmanager::foreman_interfaces {
       ip6_addresses     => $iface['cidrs6'],
       ip6_gateway       => $iface['gateway6'],
       ip6_dns           => $iface['dns6'],
-      ip6_dns_search    => ($iface['dhcp6'] ? { undef => undef, default => $::domainname }),
+      ip6_dns_search    => ($iface['dhcp6'] ? { undef => undef, default => $facts['networking']['domain'] }),
       ip6_method        => ($iface['roaming'] ? {
           true => 'auto',
           default => ($iface['dhcp6'] ? {

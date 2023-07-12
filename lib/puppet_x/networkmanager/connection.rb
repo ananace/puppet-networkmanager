@@ -3,7 +3,7 @@
 require 'puppet/util/inifile'
 
 module PuppetX # rubocop:disable Style/ClassAndModuleChildren
-  module Networkmanager # rubocop:disable Style/ClassAndModuleChildren
+  module Networkmanager
     # Networkmanager connection wrapper
     #
     # To reduce to-file flushes
