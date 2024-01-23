@@ -10,12 +10,14 @@ Facter.add(:networkmanager) do
 
   setcode do
     version = Facter::Core::Execution.execute("#{@nm_cmd} --version").strip
-    status = Facter::Core::Execution.execute("#{@nmcli_cmd} general status").strip.split("\n")
+    status = Facter::Core::Execution.execute("#{@nmcli_cmd} general status", on_fail: nil)&.strip&.split("\n")
 
-    status = Hash[status.first.split.map(&:downcase).zip(status.last.split)]
+    status = Hash[status.first.split.map(&:downcase).zip(status.last.split)] unless status.nil?
+    status ||= {}
 
     {
       version: version,
+      running: !status.nil?,
       status: status
     }
   end
