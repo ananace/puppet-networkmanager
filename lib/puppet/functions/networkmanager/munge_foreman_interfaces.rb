@@ -45,7 +45,7 @@ Puppet::Functions.create_function(:'networkmanager::munge_foreman_interfaces') d
           data['tag'] = iface['tag'] unless (iface['tag'] || '') == ''
           if iface['type'] == 'Interface'
             # Pull interface attachment from non-managed interfaces if necessary
-            data['mac'] ||= hash.dig(iface['attached_to'], 'mac') || host_interfaces.find { |name, _| name == iface['attached_to'] }&.[]('mac')
+            data['mac'] ||= hash.dig(iface['attached_to'], 'mac') || host_interfaces.find { |name, _| name == iface['attached_to'] }&.last&.[]('mac')
             data['tag'] ||= iface.dig('subnet', 'vlanid') unless (iface['subnet'] || '') == ''
             data['tag'] ||= iface.dig('subnet6', 'vlanid') unless (iface['subnet6'] || '') == ''
             data['parent'] ||= iface['attached_to']
