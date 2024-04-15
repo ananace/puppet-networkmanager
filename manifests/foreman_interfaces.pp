@@ -70,7 +70,13 @@ class networkmanager::foreman_interfaces {
           }
         } else {
           $type = 'networkmanager::infiniband'
-          $addn_params = {}
+          $addn_params = {
+            pkey   => (($iface['tag'] || $iface['vlan']) ?
+              undef   => undef,
+              default => Integer("0x${pick($iface['tag'], $iface['vlan'])}"),
+            ),
+            parent => $iface['parent'],
+          }
         }
       }
 

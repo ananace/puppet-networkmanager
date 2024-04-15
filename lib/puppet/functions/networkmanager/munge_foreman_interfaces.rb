@@ -44,9 +44,10 @@ Puppet::Functions.create_function(:'networkmanager::munge_foreman_interfaces') d
           data = (hash[identifier] ||= {})
           data['tag'] = iface['tag'] unless (iface['tag'] || '') == ''
           if iface['type'] == 'Interface'
-            data['mac'] = hash[iface['attached_to']]['mac']
+            data['mac'] ||= hash[iface['attached_to']]['mac']
             data['tag'] ||= iface['subnet']['vlanid'] unless (iface['subnet'] || '') == ''
             data['tag'] ||= iface['subnet6']['vlanid'] unless (iface['subnet6'] || '') == ''
+            data['parent'] ||= iface['attached_to']
           elsif iface['type'] == 'Bond'
             data['mac'] = iface['mac'] unless (iface['mac'] || '') == ''
             data['mode'] = iface['mode']

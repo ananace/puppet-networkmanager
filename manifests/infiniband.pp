@@ -67,10 +67,10 @@ define networkmanager::infiniband (
       networkmanager_connection_setting {
         "${connection_name}/infiniband/p-key": value => $pkey;
       }
-    }
-    if $parent {
-      networkmanager_connection_setting {
-        "${connection_name}/infiniband/parent": value => $parent;
+      if $parent {
+        networkmanager_connection_setting {
+          "${connection_name}/infiniband/parent": value => $parent;
+        }
       }
     }
     if $mtu {
