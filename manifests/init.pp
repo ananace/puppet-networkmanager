@@ -23,6 +23,9 @@ class networkmanager (
     purge   => $purge_connections,
     recurse => true,
   }
+  file { '/etc/NetworkManager/conf.d':
+    ensure => directory,
+  }
   if $purge_legacy {
     file { '/etc/NetworkManager/conf.d/NetworkManager.conf':
       ensure  => file,
