@@ -35,8 +35,14 @@ class networkmanager (
       mode    => '0644',
       notify  => Service['NetworkManager'],
     }
-    service { 'network':
-      enable => false,
+    if fact('os.family') == 'Suse' {
+      service { 'wicked':
+        enable => false,
+      }
+    } else {
+      service { 'network':
+        enable => false,
+      }
     }
     tidy { '/etc/sysconfig/network-scripts/':
       recurse => true,
