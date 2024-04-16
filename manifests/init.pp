@@ -36,7 +36,7 @@ class networkmanager (
       notify  => Service['NetworkManager'],
     }
     service { 'network':
-      enable    => false,
+      enable => false,
     }
     tidy { '/etc/sysconfig/network-scripts/':
       recurse => true,
