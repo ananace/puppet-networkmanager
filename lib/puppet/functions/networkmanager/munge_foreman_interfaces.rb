@@ -44,9 +44,11 @@ Puppet::Functions.create_function(:'networkmanager::munge_foreman_interfaces') d
           data = (hash[identifier] ||= {})
           data['tag'] = iface['tag'] unless (iface['tag'] || '') == ''
           if iface['type'] == 'Interface'
-            data['mac'] = hash[iface['attached_to']]['mac']
-            data['tag'] ||= iface['subnet']['vlanid'] unless (iface['subnet'] || '') == ''
-            data['tag'] ||= iface['subnet6']['vlanid'] unless (iface['subnet6'] || '') == ''
+            # Pull interface attachment from non-managed interfaces if necessary
+            data['mac'] ||= hash.dig(iface['attached_to'], 'mac') || host_interfaces.find { |name, _| name == iface['attached_to'] }&.last&.[]('mac')
+            data['tag'] ||= iface.dig('subnet', 'vlanid') unless (iface['subnet'] || '') == ''
+            data['tag'] ||= iface.dig('subnet6', 'vlanid') unless (iface['subnet6'] || '') == ''
+            data['parent'] ||= iface['attached_to']
           elsif iface['type'] == 'Bond'
             data['mac'] = iface['mac'] unless (iface['mac'] || '') == ''
             data['mode'] = iface['mode']
@@ -126,14 +128,14 @@ Puppet::Functions.create_function(:'networkmanager::munge_foreman_interfaces') d
     subnet = data[:raw_addresses].find(&filter)&.fetch(:subnet, nil)
     return unless subnet
 
-    data["dhcp#{version}"] = data[:raw_addresses].select(&filter).all? { |a| a[:subnet]['boot_mode'] == 'DHCP' }
+    data["dhcp#{version}"] = data[:raw_addresses].select(&filter).all? { |a| a.dig(:subnet, 'boot_mode') == 'DHCP' }
     data["mtu#{version}"] = subnet['mtu'] unless (subnet['mtu'] || '') == ''
 
     data["gateway#{version}"] = subnet['gateway'] unless (subnet['gateway'] || '') == ''
     dnses = data[:raw_addresses].select(&filter).map { |a|
       addr = []
-      addr << a[:subnet]['dns_primary'] unless (a[:subnet]['dns_primary'] || '') == ''
-      addr << a[:subnet]['dns_secondary'] unless (a[:subnet]['dns_secondary'] || '') == ''
+      addr << a.dig(:subnet, 'dns_primary') unless (a.dig(:subnet, 'dns_primary') || '') == ''
+      addr << a.dig(:subnet, 'dns_secondary') unless (a.dig(:subnet, 'dns_secondary') || '') == ''
       addr
     }.flatten.uniq
     data["dns#{version}"] = dnses unless dnses.empty?
