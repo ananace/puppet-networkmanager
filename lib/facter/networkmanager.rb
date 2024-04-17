@@ -12,7 +12,7 @@ Facter.add(:networkmanager) do
     version = Facter::Core::Execution.execute("#{@nm_cmd} --version").strip
     status = Facter::Core::Execution.execute("#{@nmcli_cmd} general status", on_fail: nil)&.strip&.split("\n")
 
-    status = nil if status&.first =~ /NetworkManager is not running/
+    status = nil if status&.first&.include? 'NetworkManager is not running'
 
     status = Hash[status.first.split.map(&:downcase).zip(status.last.split)] unless status.nil?
     status ||= {}
