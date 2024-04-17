@@ -23,6 +23,9 @@ class networkmanager (
     purge   => $purge_connections,
     recurse => true,
   }
+  file { '/etc/NetworkManager/conf.d':
+    ensure => directory,
+  }
   if $purge_legacy {
     file { '/etc/NetworkManager/conf.d/NetworkManager.conf':
       ensure  => file,
@@ -32,8 +35,14 @@ class networkmanager (
       mode    => '0644',
       notify  => Service['NetworkManager'],
     }
-    service { 'network':
-      enable    => false,
+    if fact('os.family') == 'Suse' {
+      service { 'wicked':
+        enable => false,
+      }
+    } else {
+      service { 'network':
+        enable => false,
+      }
     }
     tidy { '/etc/sysconfig/network-scripts/':
       recurse => true,

@@ -2,11 +2,15 @@ define networkmanager::infiniband (
   String $mac,
   String $identifier = $title,
   String $connection_name = $title,
-  Optional[Integer[1280,65520]] $mtu = 2044,
+  Optional[Integer[1280,65520]] $mtu = undef,
 
   Enum[present,absent,active] $ensure = 'present',
   Boolean $autoconnect = true,
   Boolean $purge_settings = true,
+
+  Enum[datagram,connected] $transport_mode = 'datagram',
+  Optional[Integer[-1,65535]] $pkey = undef,
+  Optional[String[1]] $parent = undef,
 
   Optional[Enum[disabled,shared,manual,auto]] $ip4_method = undef,
   Optional[Variant[Stdlib::IP::Address::V4::CIDR, Array[Stdlib::IP::Address::V4::CIDR]]] $ip4_addresses = undef,
@@ -56,8 +60,18 @@ define networkmanager::infiniband (
   if $ensure != absent {
     networkmanager_connection_setting {
       "${connection_name}/connection/interface-name": value => $identifier;
-      "${connection_name}/infiniband/transport-mode": value => 'datagram';
+      "${connection_name}/infiniband/transport-mode": value => $transport_mode;
       "${connection_name}/infiniband/mac-address": value    => $mac;
+    }
+    if $pkey {
+      networkmanager_connection_setting {
+        "${connection_name}/infiniband/p-key": value => $pkey;
+      }
+      if $parent {
+        networkmanager_connection_setting {
+          "${connection_name}/infiniband/parent": value => $parent;
+        }
+      }
     }
     if $mtu {
       networkmanager_connection_setting { "${connection_name}/infiniband/mtu":
