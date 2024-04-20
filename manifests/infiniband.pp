@@ -12,7 +12,7 @@ define networkmanager::infiniband (
   Optional[Integer[-1,65535]] $pkey = undef,
   Optional[String[1]] $parent = undef,
 
-  Optional[Enum[disabled,shared,manual,auto]] $ip4_method = undef,
+  Optional[Enum[disabled,'link-local',shared,manual,auto]] $ip4_method = undef,
   Optional[Variant[Stdlib::IP::Address::V4::CIDR, Array[Stdlib::IP::Address::V4::CIDR]]] $ip4_addresses = undef,
   Optional[Stdlib::IP::Address::V4::Nosubnet] $ip4_gateway = undef,
   Optional[Array[Stdlib::IP::Address::V4::Nosubnet]] $ip4_dns = undef,
