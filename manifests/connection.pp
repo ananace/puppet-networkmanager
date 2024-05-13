@@ -7,7 +7,7 @@ define networkmanager::connection (
   Networkmanager::Connectionensure $ensure = 'present',
   Boolean $purge_settings = true,
 
-  Optional[Enum[disabled,'link-local',shared,manual,auto]] $ip4_method = undef,
+  Networkmanager::Connectionip4method $ip4_method = undef,
   Optional[Variant[Stdlib::IP::Address::V4::CIDR, Array[Stdlib::IP::Address::V4::CIDR]]] $ip4_addresses = undef,
   Optional[Stdlib::IP::Address::V4::Nosubnet] $ip4_gateway = undef,
   Optional[Array[Stdlib::IP::Address::V4::Nosubnet]] $ip4_dns = undef,
