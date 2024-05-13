@@ -4,7 +4,7 @@ define networkmanager::connection (
   Boolean $autoconnect = true,
   Boolean $bare = false,
 
-  Enum[present,absent,active] $ensure = 'present',
+  Networkmanager::Connectionensure $ensure = 'present',
   Boolean $purge_settings = true,
 
   Optional[Enum[disabled,'link-local',shared,manual,auto]] $ip4_method = undef,

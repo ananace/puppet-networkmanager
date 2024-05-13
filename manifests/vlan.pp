@@ -6,7 +6,7 @@ define networkmanager::vlan (
   Optional[Integer[1280]] $mtu = undef,
   Optional[String[1]] $parent = undef,
 
-  Enum[present,absent,active] $ensure = 'present',
+  Networkmanager::Connectionensure $ensure = 'present',
   Boolean $autoconnect = true,
   Boolean $purge_settings = true,
 

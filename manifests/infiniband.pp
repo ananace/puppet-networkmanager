@@ -4,7 +4,7 @@ define networkmanager::infiniband (
   String $connection_name = $title,
   Optional[Integer[1280,65520]] $mtu = undef,
 
-  Enum[present,absent,active] $ensure = 'present',
+  Networkmanager::Connectionensure $ensure = 'present',
   Boolean $autoconnect = true,
   Boolean $purge_settings = true,
 
