@@ -19,7 +19,7 @@ define networkmanager::bridge (
   Optional[Boolean] $ip4_may_fail = undef,
   Optional[Boolean] $ip4_never_default = undef,
 
-  Optional[Enum[disabled,dhcp,'link-local',manual,auto,ignore]] $ip6_method = undef,
+  Networkmanager::Connectionip6method $ip6_method = undef,
   Optional[Variant[Stdlib::IP::Address::V6::CIDR, Array[Stdlib::IP::Address::V6::CIDR]]] $ip6_addresses = undef,
   Optional[Stdlib::IP::Address::V6::Nosubnet] $ip6_gateway = undef,
   Optional[Array[Stdlib::IP::Address::V6::Nosubnet]] $ip6_dns = undef,
