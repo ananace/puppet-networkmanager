@@ -8,7 +8,7 @@ define networkmanager::ethernet (
   Boolean $autoconnect = true,
   Boolean $purge_settings = true,
 
-  Networkmanager::Connectionip4method $ip4_method = undef,
+  Optional[Networkmanager::Connectionip4method] $ip4_method = undef,
   Optional[Variant[Stdlib::IP::Address::V4::CIDR, Array[Stdlib::IP::Address::V4::CIDR]]] $ip4_addresses = undef,
   Optional[Stdlib::IP::Address::V4::Nosubnet] $ip4_gateway = undef,
   Optional[Array[Stdlib::IP::Address::V4::Nosubnet]] $ip4_dns = undef,
