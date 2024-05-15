@@ -6,11 +6,11 @@ define networkmanager::vlan (
   Optional[Integer[1280]] $mtu = undef,
   Optional[String[1]] $parent = undef,
 
-  Enum[present,absent,active] $ensure = 'present',
+  Networkmanager::Connectionensure $ensure = 'present',
   Boolean $autoconnect = true,
   Boolean $purge_settings = true,
 
-  Optional[Enum[disabled,'link-local',shared,manual,auto]] $ip4_method = undef,
+  Optional[Networkmanager::Connectionip4method] $ip4_method = undef,
   Optional[Variant[Stdlib::IP::Address::V4::CIDR, Array[Stdlib::IP::Address::V4::CIDR]]] $ip4_addresses = undef,
   Optional[Stdlib::IP::Address::V4::Nosubnet] $ip4_gateway = undef,
   Optional[Array[Stdlib::IP::Address::V4::Nosubnet]] $ip4_dns = undef,
@@ -19,7 +19,7 @@ define networkmanager::vlan (
   Optional[Boolean] $ip4_may_fail = undef,
   Optional[Boolean] $ip4_never_default = undef,
 
-  Optional[Enum[disabled,dhcp,'link-local',manual,auto,ignore]] $ip6_method = undef,
+  Optional[Networkmanager::Connectionip6method] $ip6_method = undef,
   Optional[Variant[Stdlib::IP::Address::V6::CIDR, Array[Stdlib::IP::Address::V6::CIDR]]] $ip6_addresses = undef,
   Optional[Stdlib::IP::Address::V6::Nosubnet] $ip6_gateway = undef,
   Optional[Array[Stdlib::IP::Address::V6::Nosubnet]] $ip6_dns = undef,
