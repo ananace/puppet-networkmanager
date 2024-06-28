@@ -58,7 +58,7 @@ class networkmanager::foreman_interfaces {
 
     case $iface['type'] {
       'Interface': {
-        if length($iface['mac']) == 17 {
+        if $iface['mac'] == undef or length($iface['mac']) <= 17 {
           if $iface['virtual'] {
             $type = 'networkmanager::vlan'
             $addn_params = {
