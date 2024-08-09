@@ -5,5 +5,6 @@
     "ms-vscode.powershell",
     "EditorConfig.EditorConfig",
     "glenbuktenica.unicode-substitutions"
+    "Shopify.ruby-lsp"
   ]
 }
