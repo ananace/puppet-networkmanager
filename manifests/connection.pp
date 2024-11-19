@@ -7,11 +7,14 @@ define networkmanager::connection (
   Networkmanager::Connectionensure $ensure = 'present',
   Boolean $purge_settings = true,
 
+  Optional[Integer[-999,999]] $autoconnect_priority = undef,
+
   Optional[Networkmanager::Connectionip4method] $ip4_method = undef,
   Optional[Variant[Stdlib::IP::Address::V4::CIDR, Array[Stdlib::IP::Address::V4::CIDR]]] $ip4_addresses = undef,
   Optional[Stdlib::IP::Address::V4::Nosubnet] $ip4_gateway = undef,
   Optional[Array[Stdlib::IP::Address::V4::Nosubnet]] $ip4_dns = undef,
   Optional[Array[Stdlib::IP::Address::V4::CIDR]] $ip4_routes = undef,
+  Optional[Integer[-1]] $ip4_route_metric = undef,
   Optional[String] $ip4_dns_search = undef,
   Optional[Boolean] $ip4_may_fail = undef,
   Optional[Boolean] $ip4_never_default = undef,
@@ -21,6 +24,7 @@ define networkmanager::connection (
   Optional[Stdlib::IP::Address::V6::Nosubnet] $ip6_gateway = undef,
   Optional[Array[Stdlib::IP::Address::V6::Nosubnet]] $ip6_dns = undef,
   Optional[Array[Stdlib::IP::Address::V6::CIDR]] $ip6_routes = undef,
+  Optional[Integer[-1]] $ip6_route_metric = undef,
   Optional[String] $ip6_dns_search = undef,
   Optional[Boolean] $ip6_may_fail = undef,
   Optional[Boolean] $ip6_never_default = undef,
@@ -51,6 +55,12 @@ define networkmanager::connection (
     networkmanager_connection_setting {
       "${connection_name}/connection/autoconnect": value => $autoconnect;
       "${connection_name}/connection/type": value        => $type;
+    }
+
+    if $autoconnect_priority {
+      networkmanager_connection_setting {
+        "${connection_name}/connection/autoconnect-priority": value => $autoconnect_priority;
+      }
     }
 
     if !$bare {
@@ -90,6 +100,11 @@ define networkmanager::connection (
           }
         }
       }
+      if $ip4_route_metric {
+        networkmanager_connection_setting { "${connection_name}/ipv4/route-metric":
+          value => $ip4_route_metric,
+        }
+      }
       if $ip4_never_default != undef {
         networkmanager_connection_setting { "${connection_name}/ipv4/never-default":
           value => $ip4_never_default,
@@ -125,6 +140,11 @@ define networkmanager::connection (
           networkmanager_connection_setting { "${connection_name}/ipv6/route${$idx + 1}":
             value => "${route},::,1",
           }
+        }
+      }
+      if $ip6_route_metric {
+        networkmanager_connection_setting { "${connection_name}/ipv6/route-metric":
+          value => $ip6_route_metric,
         }
       }
       if $ip6_never_default != undef {
