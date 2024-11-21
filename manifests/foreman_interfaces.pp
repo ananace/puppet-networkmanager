@@ -37,6 +37,10 @@ class networkmanager::foreman_interfaces {
           ),
         }
       ),
+      ip4_route_metric  => ($iface['primary'] ? {
+        true    => 50,
+        default => 100,
+      }),
       ip4_never_default => !$iface['primary'],
 
       ip6_addresses     => $iface['cidrs6'],
@@ -53,6 +57,10 @@ class networkmanager::foreman_interfaces {
           ),
         }
       ),
+      ip6_route_metric  => ($iface['primary'] ? {
+        true    => 50,
+        default => 100,
+      }),
       ip6_never_default => !$iface['primary'],
     }
 
