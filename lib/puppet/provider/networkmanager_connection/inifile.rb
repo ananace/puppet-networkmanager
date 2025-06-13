@@ -52,8 +52,9 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
     block.call
 
     # Check if the connection is still valid
-    session = Puppet.runtime[:http].create_session
-    service = Puppet::HTTP::Service.create_service(@client, session, :puppetserver)
+    client = Puppet.runtime[:http]
+    session = client.create_session
+    service = Puppet::HTTP::Service.create_service(client, session, :puppetserver)
     service.get_simple_status
 
     # Remove the checkpoint object, to keep the configuration
