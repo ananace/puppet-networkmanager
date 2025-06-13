@@ -15,6 +15,7 @@ require 'securerandom'
 
 Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
   commands nmcli: '/usr/bin/nmcli'
+  commands dbus_send: '/usr/bin/dbus-send'
 
   def nmcli_safe(*args)
     cmd = Puppet::Provider::Command.new(
@@ -25,6 +26,41 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
       failonfail: false,
     )
     cmd.execute(args)
+  end
+
+  def dbus_call(method, *args)
+    dbus_object = '/org/freedesktop/NetworkManager'
+    dbus_service = 'org.freedesktop.NetworkManager'
+
+    dbus_send '--system', '--dest', dbus_service, '--print-reply', dbus_object, "#{dbus_object}.#{method}", *args
+  end
+
+  def with_checkpoint(timeout: 15, &block)
+    checkpoint_flags = 0
+    checkpoint_flags |= 0x02 # NM_CHECKPOINT_CREATE_FLAG_DELETE_NEW_CONNECTIONS
+    checkpoint_flags |= 0x04 # NM_CHECKPOINT_CREATE_FLAG_DISCONNECT_NEW_DEVICES
+
+    interface_list = 'array:objpath:'
+    # TODO: Figure out relevant interfaces and discover their device paths
+    # if settings['connection/interface-name']
+    #   interface_list += ...
+    # end
+
+    ret = dbus_call :CheckpointCreate, interface_list, "uint32:#{timeout}", "uint32:#{flags}"
+    checkpoint_path = ret.split('"')[1]
+
+    block.call
+
+    # Check if the connection is still valid
+    session = Puppet.runtime[:http].create_session
+    service = Puppet::HTTP::Service.create_service(@client, session, :puppetserver)
+    service.get_simple_status
+
+    # Remove the checkpoint object, to keep the configuration
+    dbus_call :CheckpointDestroy, "objpath:#{checkpoint_path}"
+  rescue StandardError
+    dbus_call :CheckpointRollback, "objpath:#{checkpoint_path}" if checkpoint_path
+    raise
   end
 
   def exists?
@@ -88,13 +124,16 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
     connection.destroy
   end
 
-  def activate(force = false)
-    return unless create || force
+  def activate
+    # Force a load even if the connection doesn't look dirty
+    create || load!
 
-    if uuid
-      nmcli :connection, :up, :uuid, uuid
-    else
-      nmcli :connection, :up, :id, resource[:name]
+    with_checkpoint do
+      if uuid
+        nmcli :connection, :up, :uuid, uuid
+      else
+        nmcli :connection, :up, :id, resource[:name]
+      end
     end
   end
 
