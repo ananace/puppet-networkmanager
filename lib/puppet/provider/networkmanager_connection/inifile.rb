@@ -67,12 +67,21 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
 
     return false unless dirty || !loaded?
 
+    load!
+
+    true
+  rescue StandardError
+    connection.revert!
+    raise
+  ensure
+    connection.delete_backup!
+  end
+
+  def load!
     ret = nmcli :connection, :load, file_path
     raise Puppet::Error, ret if ret&.downcase&.include? 'could not load file'
 
     @connection_loaded = true
-
-    true
   end
 
   def destroy

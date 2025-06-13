@@ -16,6 +16,7 @@ module PuppetX # rubocop:disable Style/ClassAndModuleChildren
 
       def initialize(path)
         @path = path
+        @file_exists = File.exist?(path)
       end
 
       def dirty?
@@ -67,8 +68,35 @@ module PuppetX # rubocop:disable Style/ClassAndModuleChildren
       def flush(clean: true, comment: true)
         cleanup_sections if clean
         ensure_comment if comment
+
+        if @file_exists
+          bak = "#{path}.bak"
+          FileUtils.cp(@path, bak)
+          @bak = bak
+        end
+
         ini_file.store
         @ini_file = nil
+      end
+
+      def revert!
+        if !@file_exists
+          FileUtils::rm_f(path)
+          delete_backup!
+          return
+        end
+
+        raise 'No backup available' unless @bak
+
+        FileUtils.mv(@bak, @path, force: true)
+        @bak = nil
+      end
+
+      def delete_backup!
+        return unless @bak
+
+        FileUtils.rm(@bak)
+        @bak = nil
       end
 
       private
