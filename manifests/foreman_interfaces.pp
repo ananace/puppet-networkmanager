@@ -81,6 +81,7 @@ class networkmanager::foreman_interfaces {
           $addn_params = {
             pkey   => (($iface['tag'] or $iface['vlan']) ? {
                 undef     => undef,
+                false     => undef,
                 String[0] => undef,
                 default   => Integer("0x${pick($iface['tag'], $iface['vlan'])}"),
               }

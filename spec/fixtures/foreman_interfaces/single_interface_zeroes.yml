@@ -1,5 +1,8 @@
 facts:
   networking:
+    domain: example.com
+    fqdn: single_interface_zeroes.example.com
+    ip: 10.244.1.1
     interfaces:
       eno1:
         bindings:
