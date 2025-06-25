@@ -241,3 +241,125 @@ foreman_interfaces:
     provider: IPMI
     username: admin
     password: password
+resources:
+  Networkmanager_connection_setting:
+    enp2s0f0/connection/interface-name:
+      :name: enp2s0f0/connection/interface-name
+      :value: enp2s0f0
+    enp2s0f0/ethernet/mac-address:
+      :name: enp2s0f0/ethernet/mac-address
+      :value: 3C:4A:92:F6:CE:10
+    enp2s0f0/ethernet/mtu:
+      :name: enp2s0f0/ethernet/mtu
+      :value: 1500
+    enp2s0f0.1/connection/interface-name:
+      :name: enp2s0f0.1/connection/interface-name
+      :value: enp2s0f0.1
+    enp2s0f0.1/vlan/id:
+      :name: enp2s0f0.1/vlan/id
+      :value: 1
+    enp2s0f0.1/vlan/interface-name:
+      :name: enp2s0f0.1/vlan/interface-name
+      :value: enp2s0f0.1
+    enp2s0f0.1/ethernet/mac-address:
+      :name: enp2s0f0.1/ethernet/mac-address
+      :value: 3C:4A:92:F6:CE:10
+    enp2s0f0.1/ethernet/mtu:
+      :name: enp2s0f0.1/ethernet/mtu
+      :value: 1500
+    enp2s0f0/connection/autoconnect:
+      :name: enp2s0f0/connection/autoconnect
+      :value: true
+    enp2s0f0/connection/type:
+      :name: enp2s0f0/connection/type
+      :value: ethernet
+    enp2s0f0/ipv4/method:
+      :name: enp2s0f0/ipv4/method
+      :value: manual
+    enp2s0f0/ipv6/method:
+      :name: enp2s0f0/ipv6/method
+      :value: manual
+    enp2s0f0/ipv4/address1:
+      :name: enp2s0f0/ipv4/address1
+      :value: 10.216.252.20/24,10.216.252.1
+    enp2s0f0/ipv4/may-fail:
+      :name: enp2s0f0/ipv4/may-fail
+      :value: false
+    enp2s0f0/ipv4/dns:
+      :name: enp2s0f0/ipv4/dns
+      :value: 10.216.252.21;10.216.252.23
+    enp2s0f0/ipv4/dns-search:
+      :name: enp2s0f0/ipv4/dns-search
+      :value: example.com
+    enp2s0f0/ipv4/route-metric:
+      :name: enp2s0f0/ipv4/route-metric
+      :value: 50
+    enp2s0f0/ipv4/never-default:
+      :name: enp2s0f0/ipv4/never-default
+      :value: false
+    enp2s0f0/ipv6/address1:
+      :name: enp2s0f0/ipv6/address1
+      :value: fcdd:ef55:17:f080::20/64,fcdd:ef55:17:f080::1
+    enp2s0f0/ipv6/may-fail:
+      :name: enp2s0f0/ipv6/may-fail
+      :value: false
+    enp2s0f0/ipv6/dns:
+      :name: enp2s0f0/ipv6/dns
+      :value: fcdd:ef55:17:f080::17;fcdd:ef55:17:f080::19
+    enp2s0f0/ipv6/dns-search:
+      :name: enp2s0f0/ipv6/dns-search
+      :value: example.com
+    enp2s0f0/ipv6/route-metric:
+      :name: enp2s0f0/ipv6/route-metric
+      :value: 50
+    enp2s0f0/ipv6/never-default:
+      :name: enp2s0f0/ipv6/never-default
+      :value: false
+    enp2s0f0.1/connection/autoconnect:
+      :name: enp2s0f0.1/connection/autoconnect
+      :value: true
+    enp2s0f0.1/connection/type:
+      :name: enp2s0f0.1/connection/type
+      :value: vlan
+    enp2s0f0.1/ipv4/method:
+      :name: enp2s0f0.1/ipv4/method
+      :value: manual
+    enp2s0f0.1/ipv6/method:
+      :name: enp2s0f0.1/ipv6/method
+      :value: ignore
+    enp2s0f0.1/ipv4/address1:
+      :name: enp2s0f0.1/ipv4/address1
+      :value: 172.31.0.107/24,172.31.0.1
+    enp2s0f0.1/ipv4/may-fail:
+      :name: enp2s0f0.1/ipv4/may-fail
+      :value: false
+    enp2s0f0.1/ipv4/dns:
+      :name: enp2s0f0.1/ipv4/dns
+      :value: 172.31.0.127;172.31.0.129
+    enp2s0f0.1/ipv4/dns-search:
+      :name: enp2s0f0.1/ipv4/dns-search
+      :value: example.com
+    enp2s0f0.1/ipv4/route-metric:
+      :name: enp2s0f0.1/ipv4/route-metric
+      :value: 100
+    enp2s0f0.1/ipv4/never-default:
+      :name: enp2s0f0.1/ipv4/never-default
+      :value: true
+    enp2s0f0.1/ipv6/may-fail:
+      :name: enp2s0f0.1/ipv6/may-fail
+      :value: true
+    enp2s0f0.1/ipv6/route-metric:
+      :name: enp2s0f0.1/ipv6/route-metric
+      :value: 100
+    enp2s0f0.1/ipv6/never-default:
+      :name: enp2s0f0.1/ipv6/never-default
+      :value: true
+  Networkmanager_connection:
+    enp2s0f0:
+      :name: enp2s0f0
+      :ensure: active
+      :purge_settings: true
+    enp2s0f0.1:
+      :name: enp2s0f0.1
+      :ensure: active
+      :purge_settings: true

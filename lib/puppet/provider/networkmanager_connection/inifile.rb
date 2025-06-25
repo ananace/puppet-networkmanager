@@ -59,7 +59,8 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
     false
   end
 
-  def create
+  def create(handle_backup: true, inject_settings: false)
+    self.settings = resource[:settings] if resource[:settings] && inject_settings
     ensure_default_settings
 
     dirty = connection.dirty?
@@ -71,15 +72,15 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
 
     true
   rescue StandardError
-    connection.revert!
+    connection.revert! if handle_backup
     raise
   ensure
-    connection.delete_backup!
+    connection.delete_backup! if handle_backup
   end
 
   def load!
     ret = nmcli :connection, :load, file_path
-    raise Puppet::Error, ret if ret&.downcase&.include? 'could not load file'
+    raise Puppet::Error, ret if ret&.downcase&.include? 'could not load'
 
     @connection_loaded = true
   end
@@ -88,9 +89,9 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
     connection.destroy
   end
 
-  def activate
+  def activate(inject_settings: false)
     # Force a load even if the connection doesn't look dirty
-    create || load!
+    create(inject_settings: inject_settings) || load!
 
     if uuid
       nmcli :connection, :up, :uuid, uuid
@@ -186,6 +187,8 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
   private
 
   def connection
-    @connection ||= PuppetX::Networkmanager::Connection[file_path]
+    PuppetX::Networkmanager::Connection[file_path].tap do |conn|
+      conn.is_managed = true
+    end
   end
 end

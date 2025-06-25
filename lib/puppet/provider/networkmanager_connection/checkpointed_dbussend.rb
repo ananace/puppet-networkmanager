@@ -25,10 +25,7 @@ Puppet::Type.type(:networkmanager_connection).provide(:checkpointed_dbussend, pa
     block.call
 
     # Check if the connection is still valid
-    client = Puppet.runtime[:http]
-    session = client.create_session
-    service = Puppet::HTTP::Service.create_service(client, session, :puppetserver)
-    service.get_simple_status
+    verify_connection
 
     # Remove the checkpoint object, to keep the configuration
     dbus_call :CheckpointDestroy, "objpath:#{checkpoint_path}"
@@ -37,9 +34,16 @@ Puppet::Type.type(:networkmanager_connection).provide(:checkpointed_dbussend, pa
     raise
   end
 
+  def verify_connection
+    client = Puppet.runtime[:http]
+    session = client.create_session
+    service = Puppet::HTTP::Service.create_service(client, session, :puppetserver)
+    service.get_simple_status
+  end
+
   def activate
     # Force a load even if the connection doesn't look dirty
-    create || load!
+    create(handle_backup: false) || load!
 
     with_checkpoint do
       if uuid
@@ -48,5 +52,11 @@ Puppet::Type.type(:networkmanager_connection).provide(:checkpointed_dbussend, pa
         nmcli :connection, :up, :id, resource[:name]
       end
     end
+  # Move backup handling to the activate method, to not keep unusable connections on disk
+  rescue StandardError
+    connection.revert!
+    raise
+  ensure
+    connection.delete_backup!
   end
 end

@@ -64,11 +64,9 @@ Puppet::Type.type(:networkmanager_connection_setting).provide(:inifile) do
 
   private
 
-  # TODO: A better way to do this
   def flush
-    # return if resource&.catalog&.resources&.any? { |r| r.is_a? Puppet::Type::Networkmanager_connection && r.name == connection_name }
-
-    connection.flush
+    # Skip writing per-setting if the underlying connection is managed in the catalog
+    connection.flush unless connection.is_managed
   end
 
   def remove_section(section)
@@ -80,6 +78,6 @@ Puppet::Type.type(:networkmanager_connection_setting).provide(:inifile) do
   end
 
   def connection
-    @connection ||= PuppetX::Networkmanager::Connection[file_path]
+    PuppetX::Networkmanager::Connection[file_path]
   end
 end
