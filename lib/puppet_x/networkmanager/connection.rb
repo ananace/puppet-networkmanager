@@ -82,8 +82,8 @@ module PuppetX # rubocop:disable Style/ClassAndModuleChildren
       end
 
       def revert!
-        if !@file_exists
-          FileUtils::rm_f(path)
+        unless @file_exists
+          FileUtils.rm_f(path)
           delete_backup!
           return
         end

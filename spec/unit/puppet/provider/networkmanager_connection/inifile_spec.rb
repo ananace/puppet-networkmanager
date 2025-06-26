@@ -238,8 +238,7 @@ describe Puppet::Type.type(:networkmanager_connection).provider(:inifile) do
       allow(execresult).to receive(:exitstatus).and_return(0)
 
       allow_any_instance_of(described_class).to receive(:nmcli_safe).with(:connection, :show, :uuid, uuid).and_return(execresult) # rubocop:disable RSpec/AnyInstance
-
-      allow_any_instance_of(described_class).to receive(:nmcli).with(:connection, :show, '--active', :uuid, uuid).and_return(false)
+      allow_any_instance_of(described_class).to receive(:nmcli).with(:connection, :show, '--active', :uuid, uuid).and_return(false) # rubocop:disable RSpec/AnyInstance
     end
 
     it 'generates a valid connection with no prior art' do

@@ -30,11 +30,13 @@ describe 'NetworkManager integration test' do
   end
 
   before(:each) do
+    # rubocop:disable RSpec/AnyInstance
     allow_any_instance_of(Puppet::Type.type(:networkmanager_connection).provider(:inifile)).to receive(:uuid).and_return(uuid)
 
     allow_any_instance_of(Puppet::Type.type(:networkmanager_connection).provider(:inifile)).to receive(:nmcli)
     allow_any_instance_of(Puppet::Type.type(:networkmanager_connection).provider(:checkpointed_dbussend)).to receive(:dbus_call).and_return('"placeholder"')
     allow_any_instance_of(Puppet::Type.type(:networkmanager_connection).provider(:checkpointed_dbussend)).to receive(:verify_connection)
+    # rubocop:enable RSpec/AnyInstance
   end
 
   after(:each) do
@@ -42,10 +44,8 @@ describe 'NetworkManager integration test' do
   end
 
   context 'when applied correctly' do
-    nmconn_file = tmpfilename('nm-connection')
-
     it do
-      transaction = catalogue.apply
+      catalogue.apply
 
       expect(Dir["#{basepath}/*"].count).to eq(2)
 
@@ -54,7 +54,8 @@ describe 'NetworkManager integration test' do
       conn1 = File.read(path1)
       conn2 = File.read(path2)
 
-      expect(conn1).to eq(<<~CONN1
+      expect(conn1).to eq(
+        <<~CONN1,
         # Managed by Puppet
 
         [connection]
@@ -88,7 +89,8 @@ describe 'NetworkManager integration test' do
         CONN1
       )
 
-      expect(conn2).to eq(<<~CONN2
+      expect(conn2).to eq(
+        <<~CONN2,
         # Managed by Puppet
 
         [connection]
@@ -130,8 +132,6 @@ describe 'NetworkManager integration test' do
   end
 
   context 'when applied incorrectly' do
-    nmconn_file = tmpfilename('nm-connection')
-
     it do
       before = <<~CONN1
         # Managed by Puppet
@@ -173,9 +173,9 @@ describe 'NetworkManager integration test' do
       conn1 = File.read(path1)
       expect(conn1).to eq(before)
 
-      allow_any_instance_of(Puppet::Type.type(:networkmanager_connection).provider(:inifile)).to receive(:nmcli).with(:connection, :load, path1).and_raise(StandardError, 'Fake load error')
+      allow_any_instance_of(Puppet::Type.type(:networkmanager_connection).provider(:inifile)).to receive(:nmcli).with(:connection, :load, path1).and_raise(StandardError, 'Fake load error') # rubocop:disable RSpec/AnyInstance
 
-      transaction = catalogue.apply
+      catalogue.apply
 
       expect(Dir["#{basepath}/*"].count).to eq(2)
 
@@ -183,7 +183,8 @@ describe 'NetworkManager integration test' do
       conn2 = File.read(path2)
 
       expect(conn1).to eq(before)
-      expect(conn2).to eq(<<~CONN2
+      expect(conn2).to eq(
+        <<~CONN2,
         # Managed by Puppet
 
         [connection]
@@ -225,8 +226,6 @@ describe 'NetworkManager integration test' do
   end
 
   context 'when activation results in broken link' do
-    nmconn_file = tmpfilename('nm-connection')
-
     it do
       before = <<~CONN1
         # Managed by Puppet
@@ -263,9 +262,9 @@ describe 'NetworkManager integration test' do
       path1 = File.join(basepath, 'enp2s0f0.nmconnection')
       File.write path1, before
 
-      allow_any_instance_of(Puppet::Type.type(:networkmanager_connection).provider(:checkpointed_dbussend)).to receive(:verify_connection).and_raise(StandardError, 'Fake connection error')
+      allow_any_instance_of(Puppet::Type.type(:networkmanager_connection).provider(:checkpointed_dbussend)).to receive(:verify_connection).and_raise(StandardError, 'Fake connection error') # rubocop:disable RSpec/AnyInstance
 
-      transaction = catalogue.apply
+      catalogue.apply
 
       conn1 = File.read(path1)
 

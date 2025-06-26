@@ -8,7 +8,7 @@ Puppet::Type.type(:networkmanager_connection).provide(:checkpointed_dbussend, pa
     dbus_send '--system', "--dest=#{dbus_service}", '--print-reply', dbus_object, "#{dbus_object}.#{method}", *args
   end
 
-  def with_checkpoint(timeout: 15, &block)
+  def with_checkpoint(timeout: 15, &_block)
     checkpoint_flags = 0
     checkpoint_flags |= 0x02 # NM_CHECKPOINT_CREATE_FLAG_DELETE_NEW_CONNECTIONS
     checkpoint_flags |= 0x04 # NM_CHECKPOINT_CREATE_FLAG_DISCONNECT_NEW_DEVICES
@@ -22,7 +22,7 @@ Puppet::Type.type(:networkmanager_connection).provide(:checkpointed_dbussend, pa
     ret = dbus_call :CheckpointCreate, interface_list, "uint32:#{timeout}", "uint32:#{checkpoint_flags}"
     checkpoint_path = ret.split('"')[1]
 
-    block.call
+    yield
 
     # Check if the connection is still valid
     verify_connection
