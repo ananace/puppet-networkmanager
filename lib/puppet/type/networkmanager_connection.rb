@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'puppet/parameter/boolean'
+
 Puppet::Type.newtype(:networkmanager_connection) do
   desc <<~DOC
   Examples:
@@ -37,7 +39,8 @@ Puppet::Type.newtype(:networkmanager_connection) do
 
   ensurable do
     newvalue(:present) do
-      provider.create
+      # Ensure all settings are set when creating a new connection
+      provider.create(inject_settings: true)
     end
     newvalue(:absent) do
       provider.destroy
@@ -63,9 +66,9 @@ Puppet::Type.newtype(:networkmanager_connection) do
   end
 
   def refresh
-    return unless @parameters[:ensure].value == :active
+    return unless @parameters[:ensure].value == :active || provider.active?
 
-    provider.activate(true)
+    provider.activate
   end
 
   newparam(:name, namevar: true) do
