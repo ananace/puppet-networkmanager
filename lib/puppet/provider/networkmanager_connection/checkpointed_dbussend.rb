@@ -5,7 +5,7 @@ Puppet::Type.type(:networkmanager_connection).provide(:checkpointed_dbussend, pa
     dbus_object = '/org/freedesktop/NetworkManager'
     dbus_service = 'org.freedesktop.NetworkManager'
 
-    dbus_send '--system', "--dest=#{dbus_service}", '--print-reply', dbus_object, "#{dbus_object}.#{method}", *args
+    dbus_send '--system', "--dest=#{dbus_service}", '--print-reply', dbus_object, "#{dbus_service}.#{method}", *args
   end
 
   def with_checkpoint(timeout: 15, &_block)
@@ -43,14 +43,16 @@ Puppet::Type.type(:networkmanager_connection).provide(:checkpointed_dbussend, pa
 
   def activate
     # Force a load even if the connection doesn't look dirty
-    create(handle_backup: false) || load!
-
     with_checkpoint do
+      create(skip_backup: true) || load!
+
       if uuid
         nmcli :connection, :up, :uuid, uuid
       else
         nmcli :connection, :up, :id, resource[:name]
       end
+
+      Puppet.debug "Activated NM connection #{resource[:name]}"
     end
   # Move backup handling to the activate method, to not keep unusable connections on disk
   rescue StandardError

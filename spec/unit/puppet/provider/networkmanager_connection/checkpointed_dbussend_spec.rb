@@ -37,6 +37,7 @@ describe Puppet::Type.type(:networkmanager_connection).provider(:checkpointed_db
     end
 
     it 'uses nmcli to activate the connection, with a checkpoint taken and then removed after success' do
+      allow(resource).to receive(:[]).with(:name).and_return(name)
       allow(resource).to receive(:[]).with(:uuid).and_return(uuid)
       allow(resource).to receive(:[]).with(:path).and_return(parameters[:path])
 
@@ -60,6 +61,7 @@ describe Puppet::Type.type(:networkmanager_connection).provider(:checkpointed_db
     end
 
     it 'uses nmcli to activate the connection, with a checkpoint taken and then rolled back on failure' do
+      allow(resource).to receive(:[]).with(:name).and_return(name)
       allow(resource).to receive(:[]).with(:uuid).and_return(uuid)
       allow(resource).to receive(:[]).with(:path).and_return(parameters[:path])
 

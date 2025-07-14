@@ -27,6 +27,18 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
     cmd.execute(args)
   end
 
+  def self.instances
+    Dir['/etc/NetworkManager/system-connections/*.nmconnection'].map do |file|
+      conn = PuppetX::Networkmanager::Connection.new(file)
+
+      new(
+        name: conn.get_setting('connection', 'id'),
+        uuid: conn.get_setting('connection', 'uuid'),
+        path: file,
+      )
+    end
+  end
+
   def exists?
     File.exist? file_path
   end
@@ -59,28 +71,33 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
     false
   end
 
-  def create(handle_backup: true, inject_settings: false)
+  def create(skip_backup: false, inject_settings: false)
+    Puppet.debug "Saving connection #{resource[:name]} (backup: #{!skip_backup})"
     self.settings = resource[:settings] if resource[:settings] && inject_settings
     ensure_default_settings
 
     dirty = connection.dirty?
     connection.flush
 
-    return false unless dirty || !loaded?
+    return false if !dirty && loaded?
 
     load!
 
     true
   rescue StandardError
-    connection.revert! if handle_backup
+    connection.revert! unless skip_backup
     raise
   ensure
-    connection.delete_backup! if handle_backup
+    connection.delete_backup! unless skip_backup
   end
 
   def load!
     ret = nmcli :connection, :load, file_path
     raise Puppet::Error, ret if ret&.downcase&.include? 'could not load'
+
+    ret_text = ret&.strip
+    ret_text = " (#{ret_text})" if ret_text&.size || 0 > 0
+    Puppet.debug "Loaded NM connection #{file_path}#{ret_text}"
 
     @connection_loaded = true
   end
@@ -98,6 +115,8 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
     else
       nmcli :connection, :up, :id, resource[:name]
     end
+
+    Puppet.debug "Activated NM connection #{resource[:name]}"
   end
 
   def file_path

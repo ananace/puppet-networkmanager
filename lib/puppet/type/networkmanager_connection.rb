@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'puppet/parameter/boolean'
+
 Puppet::Type.newtype(:networkmanager_connection) do
   desc <<~DOC
   Examples:
