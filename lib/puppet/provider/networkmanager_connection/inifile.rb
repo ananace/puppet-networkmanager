@@ -72,7 +72,6 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
   end
 
   def create(skip_backup: false, inject_settings: false)
-    Puppet.debug "Saving connection #{resource[:name]} (backup: #{!skip_backup})"
     self.settings = resource[:settings] if resource[:settings] && inject_settings
     ensure_default_settings
 
@@ -85,6 +84,7 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
 
     true
   rescue StandardError
+    Puppet.debug "Failed to load NM connection #{resource[:name]}, rolling back"
     connection.revert! unless skip_backup
     raise
   ensure
@@ -94,10 +94,6 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
   def load!
     ret = nmcli :connection, :load, file_path
     raise Puppet::Error, ret if ret&.downcase&.include? 'could not load'
-
-    ret_text = ret&.strip
-    ret_text = " (#{ret_text})" if (ret_text&.size || 0) > 0
-    Puppet.debug "Loaded NM connection #{file_path}#{ret_text}"
 
     @connection_loaded = true
   end
@@ -120,11 +116,10 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
       else
         nmcli :connection, :up, :id, resource[:name]
       end
-
-      Puppet.debug "Activated NM connection #{resource[:name]}"
     end
   # Handle backup reverting in the activate method, to not keep unusable connections on disk
   rescue StandardError
+    Puppet.debug "Failed to activate/verify NM connection #{resource[:name]}, rolling back"
     connection.revert!
     raise
   ensure
