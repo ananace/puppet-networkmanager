@@ -96,7 +96,7 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
     raise Puppet::Error, ret if ret&.downcase&.include? 'could not load'
 
     ret_text = ret&.strip
-    ret_text = " (#{ret_text})" if ret_text&.size || 0 > 0
+    ret_text = " (#{ret_text})" if (ret_text&.size || 0) > 0
     Puppet.debug "Loaded NM connection #{file_path}#{ret_text}"
 
     @connection_loaded = true
@@ -106,17 +106,29 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
     connection.destroy
   end
 
+  def with_checkpoint(*)
+    yield
+  end
+
   def activate(inject_settings: false)
-    # Force a load even if the connection doesn't look dirty
-    create(inject_settings: inject_settings) || load!
+    with_checkpoint do
+      # Force a load even if the connection doesn't look dirty
+      create(skip_backup: true, inject_settings: inject_settings) || load!
 
-    if uuid
-      nmcli :connection, :up, :uuid, uuid
-    else
-      nmcli :connection, :up, :id, resource[:name]
+      if uuid
+        nmcli :connection, :up, :uuid, uuid
+      else
+        nmcli :connection, :up, :id, resource[:name]
+      end
+
+      Puppet.debug "Activated NM connection #{resource[:name]}"
     end
-
-    Puppet.debug "Activated NM connection #{resource[:name]}"
+  # Handle backup reverting in the activate method, to not keep unusable connections on disk
+  rescue StandardError
+    connection.revert!
+    raise
+  ensure
+    connection.delete_backup!
   end
 
   def file_path

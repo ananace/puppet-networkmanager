@@ -13,13 +13,7 @@ Puppet::Type.type(:networkmanager_connection).provide(:checkpointed_dbussend, pa
     checkpoint_flags |= 0x02 # NM_CHECKPOINT_CREATE_FLAG_DELETE_NEW_CONNECTIONS
     checkpoint_flags |= 0x04 # NM_CHECKPOINT_CREATE_FLAG_DISCONNECT_NEW_DEVICES
 
-    interface_list = 'array:objpath:'
-    # TODO: Figure out relevant interfaces and discover their device paths
-    # if settings['connection/interface-name']
-    #   interface_list += ...
-    # end
-
-    ret = dbus_call :CheckpointCreate, interface_list, "uint32:#{timeout}", "uint32:#{checkpoint_flags}"
+    ret = dbus_call :CheckpointCreate, 'array:objpath:', "uint32:#{timeout}", "uint32:#{checkpoint_flags}"
     checkpoint_path = ret.split('"')[1]
 
     yield
@@ -39,26 +33,5 @@ Puppet::Type.type(:networkmanager_connection).provide(:checkpointed_dbussend, pa
     session = client.create_session
     service = Puppet::HTTP::Service.create_service(client, session, :puppetserver)
     service.get_simple_status
-  end
-
-  def activate
-    # Force a load even if the connection doesn't look dirty
-    with_checkpoint do
-      create(skip_backup: true) || load!
-
-      if uuid
-        nmcli :connection, :up, :uuid, uuid
-      else
-        nmcli :connection, :up, :id, resource[:name]
-      end
-
-      Puppet.debug "Activated NM connection #{resource[:name]}"
-    end
-  # Move backup handling to the activate method, to not keep unusable connections on disk
-  rescue StandardError
-    connection.revert!
-    raise
-  ensure
-    connection.delete_backup!
   end
 end
