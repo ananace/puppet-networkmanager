@@ -27,6 +27,18 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
     cmd.execute(args)
   end
 
+  def self.instances
+    Dir['/etc/NetworkManager/system-connections/*.nmconnection'].map do |file|
+      conn = PuppetX::Networkmanager::Connection.new(file)
+
+      new(
+        name: conn.get_setting('connection', 'id'),
+        uuid: conn.get_setting('connection', 'uuid'),
+        path: file,
+      )
+    end
+  end
+
   def exists?
     File.exist? file_path
   end
@@ -59,34 +71,59 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
     false
   end
 
-  def create
+  def create(skip_backup: false, inject_settings: false)
+    self.settings = resource[:settings] if resource[:settings] && inject_settings
     ensure_default_settings
 
     dirty = connection.dirty?
     connection.flush
 
-    return false unless dirty || !loaded?
+    return false if !dirty && loaded?
 
-    ret = nmcli :connection, :load, file_path
-    raise Puppet::Error, ret if ret&.downcase&.include? 'could not load file'
-
-    @connection_loaded = true
+    load!
 
     true
+  rescue StandardError
+    Puppet.debug "Failed to load NM connection #{resource[:name]}, rolling back"
+    connection.revert! unless skip_backup
+    raise
+  ensure
+    connection.delete_backup! unless skip_backup
+  end
+
+  def load!
+    ret = nmcli :connection, :load, file_path
+    raise Puppet::Error, ret if ret&.downcase&.include? 'could not load'
+
+    @connection_loaded = true
   end
 
   def destroy
     connection.destroy
   end
 
-  def activate(force = false)
-    return unless create || force
+  def with_checkpoint(*)
+    yield
+  end
 
-    if uuid
-      nmcli :connection, :up, :uuid, uuid
-    else
-      nmcli :connection, :up, :id, resource[:name]
+  def activate(inject_settings: false)
+    with_checkpoint do
+      # Force a load even if the connection doesn't look dirty
+      create(skip_backup: true, inject_settings: inject_settings) || load!
+
+      if uuid
+        nmcli :connection, :up, :uuid, uuid
+      else
+        nmcli :connection, :up, :id, resource[:name]
+      end
     end
+  # Handle backup reverting in the activate method, to not keep unusable connections on disk
+  rescue StandardError
+    Puppet.debug "Failed to activate/verify NM connection #{resource[:name]}, rolling back"
+    connection.revert!
+    raise
+  ensure
+    connection.delete_backup!
   end
 
   def file_path
@@ -176,6 +213,8 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
   private
 
   def connection
-    @connection ||= PuppetX::Networkmanager::Connection[file_path]
+    PuppetX::Networkmanager::Connection[file_path].tap do |conn|
+      conn.is_managed = true
+    end
   end
 end

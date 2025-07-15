@@ -1,5 +1,8 @@
 facts:
   networking:
+    domain: example.com
+    fqdn: host.example.com
+    ip: 1.2.3.4
     interfaces:
       enp5s0f0:
         mac: "00:11:22:33:44:aa"
@@ -323,6 +326,7 @@ result:
   enp5s0f0.1000:
     type: Interface
     virtual: true
+    parent: enp5s0f0
     primary: false
     mac: 00:11:22:33:44:aa
     tag: 1000
