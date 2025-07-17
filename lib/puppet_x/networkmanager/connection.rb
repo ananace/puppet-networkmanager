@@ -12,10 +12,12 @@ module PuppetX # rubocop:disable Style/ClassAndModuleChildren
         (@connections ||= {})[path] ||= new(path)
       end
 
-      attr_accessor :path
+      attr_accessor :path, :is_managed
 
       def initialize(path)
         @path = path
+        @file_exists = File.exist?(path)
+        @is_managed = false
       end
 
       def dirty?
@@ -64,11 +66,38 @@ module PuppetX # rubocop:disable Style/ClassAndModuleChildren
         store[setting] = value
       end
 
-      def flush(clean: true, comment: true)
+      def flush(clean: true, comment: true, backup: true)
+        if backup && @file_exists && !@bak
+          bak = "#{path}-#{Time.now.to_i}"
+          FileUtils.cp(@path, bak)
+          @bak = bak
+        end
+
         cleanup_sections if clean
         ensure_comment if comment
+
         ini_file.store
         @ini_file = nil
+      end
+
+      def revert!
+        unless @file_exists
+          FileUtils.rm_f(path)
+          delete_backup!
+          return
+        end
+
+        raise 'No backup available' unless @bak
+
+        FileUtils.mv(@bak, @path, force: true)
+        @bak = nil
+      end
+
+      def delete_backup!
+        return unless @bak
+
+        FileUtils.rm(@bak)
+        @bak = nil
       end
 
       private
