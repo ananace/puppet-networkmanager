@@ -9,12 +9,11 @@ Facter.add(:networkmanager) do
   confine { @nm_cmd }
 
   setcode do
-    version = Facter::Core::Execution.execute("#{@nm_cmd} --version").strip
-    status = Facter::Core::Execution.execute("#{@nmcli_cmd} general status", on_fail: nil)&.strip&.split("\n")
+    version = Facter::Core::Execution.execute("#{@nm_cmd} --version", on_fail: nil)&.strip
+    return {} unless version
 
-    status = nil if status&.first&.include? 'NetworkManager is not running'
-
-    status = Hash[status.first.split.map(&:downcase).zip(status.last.split)] unless status.nil?
+    key, value = Facter::Core::Execution.execute("#{@nmcli_cmd} general status", on_fail: nil)&.strip&.split("\n")
+    status = Hash[key.split(%r(\s{2,})).map(&:downcase).zip(value.split(%r(\s{2,}/)))] if key && value
     status ||= {}
 
     {
