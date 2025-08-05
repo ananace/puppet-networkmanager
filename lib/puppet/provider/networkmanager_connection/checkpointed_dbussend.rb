@@ -29,9 +29,20 @@ Puppet::Type.type(:networkmanager_connection).provide(:checkpointed_dbussend, pa
   end
 
   def verify_connection
-    client = Puppet.runtime[:http]
-    session = client.create_session
-    service = Puppet::HTTP::Service.create_service(client, session, :puppetserver)
-    service.get_simple_status
+    attempts = 0
+    loop do
+      attempts += 1
+
+      Puppet.debug "Connection verification attempt ##{attempts} after activating connection"
+      client = Puppet.runtime[:http]
+      session = client.create_session
+      service = Puppet::HTTP::Service.create_service(client, session, :puppetserver)
+      service.get_simple_status
+      return true
+    rescue StandardError
+      raise if attempts >= 5
+
+      sleep 1
+    end
   end
 end
