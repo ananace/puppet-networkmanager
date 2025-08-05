@@ -76,8 +76,8 @@ describe Puppet::Type.type(:networkmanager_connection).provider(:checkpointed_db
       expect(provider).to receive(:nmcli).with(:connection, :up, :uuid, uuid)
 
       service_mock = double
-      expect(Puppet::HTTP::Service).to receive(:create_service).and_return(service_mock)
-      expect(service_mock).to receive(:get_simple_status).and_raise(Net::OpenTimeout)
+      allow(Puppet::HTTP::Service).to receive(:create_service).and_return(service_mock)
+      allow(service_mock).to receive(:get_simple_status).and_raise(Net::OpenTimeout)
 
       expect(provider).to receive(:dbus_call).with(:CheckpointRollback, 'objpath:/org/freedesktop/NetworkManager/Checkpoint/2')
 
