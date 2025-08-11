@@ -40,9 +40,9 @@ Puppet::Type.type(:networkmanager_connection).provide(:checkpointed_dbussend, pa
       service.get_simple_status
       return true
     rescue StandardError
-      raise if attempts >= 5
+      raise if attempts >= 10
 
-      sleep 1
+      sleep 0.5
     end
   end
 end

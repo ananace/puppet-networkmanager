@@ -51,7 +51,7 @@ describe Puppet::Type.type(:networkmanager_connection).provider(:checkpointed_db
       expect(provider).to receive(:dbus_call).with(:CheckpointCreate, 'array:objpath:', 'uint32:15', 'uint32:6').and_return(dbus_return)
       expect(provider).to receive(:nmcli).with(:connection, :up, :uuid, uuid)
 
-      service_mock = double
+      service_mock = instance_double('Puppet::HTTP::Service::Puppetserver')
       expect(Puppet::HTTP::Service).to receive(:create_service).and_return(service_mock)
       expect(service_mock).to receive(:get_simple_status).and_return(true)
 
@@ -75,9 +75,43 @@ describe Puppet::Type.type(:networkmanager_connection).provider(:checkpointed_db
       expect(provider).to receive(:dbus_call).with(:CheckpointCreate, 'array:objpath:', 'uint32:15', 'uint32:6').and_return(dbus_return)
       expect(provider).to receive(:nmcli).with(:connection, :up, :uuid, uuid)
 
-      service_mock = double
+      service_mock = instance_double('Puppet::HTTP::Service::Puppetserver')
       allow(Puppet::HTTP::Service).to receive(:create_service).and_return(service_mock)
       allow(service_mock).to receive(:get_simple_status).and_raise(Net::OpenTimeout)
+
+      expect(File).to receive(:readlines).with('/etc/resolv.conf').and_return(["nameserver 1.2.3.4\n"]).twice
+      expect(File).not_to receive(:open).with('/etc/resolv.conf', 'a')
+
+      expect(provider).to receive(:dbus_call).with(:CheckpointRollback, 'objpath:/org/freedesktop/NetworkManager/Checkpoint/2')
+
+      expect { provider.activate }.to raise_error(Net::OpenTimeout)
+    end
+
+    it 'uses nmcli to activate the connection, with a checkpoint taken and then rolled back on failure, with resolv.conf repairs applied if broken' do
+      allow(resource).to receive(:[]).with(:name).and_return(name)
+      allow(resource).to receive(:[]).with(:uuid).and_return(uuid)
+      allow(resource).to receive(:[]).with(:path).and_return(parameters[:path])
+
+      allow(provider).to receive(:create)
+      allow(provider).to receive(:load!)
+
+      dbus_return = <<~EOF
+      method return time=1750674443.608379 sender=:1.5 -> destination=:1.41936 serial=1334191 reply_serial=2
+         object path "/org/freedesktop/NetworkManager/Checkpoint/2"
+      EOF
+      expect(provider).to receive(:dbus_call).with(:CheckpointCreate, 'array:objpath:', 'uint32:15', 'uint32:6').and_return(dbus_return)
+      expect(provider).to receive(:nmcli).with(:connection, :up, :uuid, uuid)
+
+      service_mock = instance_double('Puppet::HTTP::Service::Puppetserver')
+      allow(Puppet::HTTP::Service).to receive(:create_service).and_return(service_mock)
+      allow(service_mock).to receive(:get_simple_status).and_raise(Net::OpenTimeout)
+
+      expect(File).to receive(:readlines).with('/etc/resolv.conf').and_return(["nameserver 1.2.3.4\n"], [])
+
+      file_mock = instance_double('File')
+      expect(File).to receive(:open).with('/etc/resolv.conf', 'a').and_yield(file_mock)
+      expect(file_mock).to receive(:<<).with("\n").ordered.and_return(file_mock)
+      expect(file_mock).to receive(:<<).with("nameserver 1.2.3.4\n").ordered
 
       expect(provider).to receive(:dbus_call).with(:CheckpointRollback, 'objpath:/org/freedesktop/NetworkManager/Checkpoint/2')
 
