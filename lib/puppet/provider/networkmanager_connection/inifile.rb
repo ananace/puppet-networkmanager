@@ -126,7 +126,7 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
     # Check that the revert hasn't left resolv.conf in a broken state,
     # this can happen when going from no NM state directly to a failed initial connection
     revertedconf = File.readlines('/etc/resolv.conf')
-    File.open('/etc/resolv.conf', "a") { |file| file << "\n" << nameservers.join } unless revertedconf.any? { |l| l.start_with? 'nameserver ' }
+    File.open('/etc/resolv.conf', 'a') { |file| file << "\n" << nameservers.join } unless revertedconf.any? { |l| l.start_with? 'nameserver ' }
 
     raise
   ensure

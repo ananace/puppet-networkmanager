@@ -51,7 +51,7 @@ describe Puppet::Type.type(:networkmanager_connection).provider(:checkpointed_db
       expect(provider).to receive(:dbus_call).with(:CheckpointCreate, 'array:objpath:', 'uint32:15', 'uint32:6').and_return(dbus_return)
       expect(provider).to receive(:nmcli).with(:connection, :up, :uuid, uuid)
 
-      service_mock = double('Puppet::HTTP::Service')
+      service_mock = instance_double('Puppet::HTTP::Service::Puppetserver')
       expect(Puppet::HTTP::Service).to receive(:create_service).and_return(service_mock)
       expect(service_mock).to receive(:get_simple_status).and_return(true)
 
@@ -75,7 +75,7 @@ describe Puppet::Type.type(:networkmanager_connection).provider(:checkpointed_db
       expect(provider).to receive(:dbus_call).with(:CheckpointCreate, 'array:objpath:', 'uint32:15', 'uint32:6').and_return(dbus_return)
       expect(provider).to receive(:nmcli).with(:connection, :up, :uuid, uuid)
 
-      service_mock = double('Puppet::HTTP::Service')
+      service_mock = instance_double('Puppet::HTTP::Service::Puppetserver')
       allow(Puppet::HTTP::Service).to receive(:create_service).and_return(service_mock)
       allow(service_mock).to receive(:get_simple_status).and_raise(Net::OpenTimeout)
 
@@ -102,13 +102,13 @@ describe Puppet::Type.type(:networkmanager_connection).provider(:checkpointed_db
       expect(provider).to receive(:dbus_call).with(:CheckpointCreate, 'array:objpath:', 'uint32:15', 'uint32:6').and_return(dbus_return)
       expect(provider).to receive(:nmcli).with(:connection, :up, :uuid, uuid)
 
-      service_mock = double('Puppet::HTTP::Service')
+      service_mock = instance_double('Puppet::HTTP::Service::Puppetserver')
       allow(Puppet::HTTP::Service).to receive(:create_service).and_return(service_mock)
       allow(service_mock).to receive(:get_simple_status).and_raise(Net::OpenTimeout)
 
       expect(File).to receive(:readlines).with('/etc/resolv.conf').and_return(["nameserver 1.2.3.4\n"], [])
 
-      file_mock = double('File')
+      file_mock = instance_double('File')
       expect(File).to receive(:open).with('/etc/resolv.conf', 'a').and_yield(file_mock)
       expect(file_mock).to receive(:<<).with("\n").ordered.and_return(file_mock)
       expect(file_mock).to receive(:<<).with("nameserver 1.2.3.4\n").ordered
