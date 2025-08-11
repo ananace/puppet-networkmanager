@@ -107,6 +107,7 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
   end
 
   def activate(inject_settings: false)
+    nameservers = File.readlines('/etc/resolv.conf').select { |l| l.start_with? 'nameserver ' }
     with_checkpoint do
       # Force a load even if the connection doesn't look dirty
       create(skip_backup: true, inject_settings: inject_settings) || load!
@@ -121,6 +122,12 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
   rescue StandardError
     Puppet.debug "Failed to activate/verify NM connection #{resource[:name]}, rolling back"
     connection.revert!
+
+    # Check that the revert hasn't left resolv.conf in a broken state,
+    # this can happen when going from no NM state directly to a failed initial connection
+    revertedconf = File.readlines('/etc/resolv.conf')
+    File.open('/etc/resolv.conf', 'a') { |file| file << "\n" << nameservers.join } unless revertedconf.any? { |l| l.start_with? 'nameserver ' }
+
     raise
   ensure
     connection.delete_backup!
