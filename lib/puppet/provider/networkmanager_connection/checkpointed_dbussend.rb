@@ -43,13 +43,6 @@ Puppet::Type.type(:networkmanager_connection).provide(:checkpointed_dbussend, pa
   def verify_connection(checkpoint_path)
     attempts = 0
     loop do
-      begin
-        # Read property from checkpoint to see if it exists
-        dbus_call :Get, 'string:org.freedesktop.NetworkManager.Checkpoint', 'string:Created', dbus_object: checkpoint_path, method_service: 'org.freedesktop.DBus.Properties'
-      rescue StandardError
-        raise Puppet::Error, 'Timeout triggered checkpoint rollback'
-      end
-
       attempts += 1
       Puppet.debug 'Connection verification test after activating connection'
       client = Puppet.runtime[:http]
@@ -58,9 +51,16 @@ Puppet::Type.type(:networkmanager_connection).provide(:checkpointed_dbussend, pa
       service.get_simple_status
       return true
     rescue StandardError
-      raise if attempts > 5
+      begin
+        # Read property from checkpoint to see if it exists
+        dbus_call :Get, 'string:org.freedesktop.NetworkManager.Checkpoint', 'string:Created', dbus_object: checkpoint_path, method_service: 'org.freedesktop.DBus.Properties'
+      rescue StandardError
+        raise Puppet::Error, 'Timeout triggered checkpoint rollback'
+      end
 
-      sleep 0.5 # Retry until NetworkManager rolls back checkpoint or 5 attempts
+      raise if attempts > 10
+
+      sleep 0.5 # Retry until NetworkManager rolls back checkpoint or over 10 attempts have been made
     end
   end
 end
