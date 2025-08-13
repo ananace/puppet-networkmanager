@@ -107,6 +107,9 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
   end
 
   def activate(inject_settings: false)
+    return if @activated_this_session
+
+    @activated_this_session = true
     nameservers = File.readlines('/etc/resolv.conf').select { |l| l.start_with? 'nameserver ' }
     with_checkpoint do
       # Force a load even if the connection doesn't look dirty

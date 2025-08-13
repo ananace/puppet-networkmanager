@@ -13,7 +13,7 @@ Facter.add(:networkmanager) do
     return {} unless version
 
     key, value = Facter::Core::Execution.execute("#{@nmcli_cmd} general status", on_fail: nil)&.strip&.split("\n")
-    status = Hash[key.split(%r(\s{2,})).map(&:downcase).zip(value.split(%r(\s{2,}/)))] if key && value
+    status = Hash[key.split(%r(\s{2,})).map(&:downcase).zip(value.split(%r(\s{2,})))] if key && value
     status ||= {}
 
     {
