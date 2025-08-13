@@ -23,12 +23,7 @@ Puppet::Type.type(:networkmanager_connection).provide(:checkpointed_dbussend, pa
     verify_connection checkpoint_path
 
     # Remove the checkpoint object, to keep the configuration
-    begin
-      # Avoid stomping the actual connection error if the checkpoint times out
-      dbus_call :CheckpointDestroy, "objpath:#{checkpoint_path}"
-    rescue StandardError
-      Puppet.debug "Checkpoint didn't exist on destruction attempt" # Checkpoint was removed/rolled back automatically
-    end
+    dbus_call :CheckpointDestroy, "objpath:#{checkpoint_path}"
   rescue StandardError
     # Avoid stomping the actual connection error if the checkpoint times out
     begin
