@@ -157,6 +157,7 @@ describe Puppet::Type.type(:networkmanager_connection).provider(:inifile) do
       provider.activate
 
       provider.instance_variable_set :@connection_loaded, false
+      provider.instance_variable_set :@activated_this_session, false
 
       execresult = double
       allow(execresult).to receive(:exitstatus).and_return(10)
