@@ -24,12 +24,11 @@ Puppet::Type.type(:networkmanager_connection).provide(:checkpointed_dbussend, pa
 
     # Remove the checkpoint object, to keep the configuration
     dbus_call :CheckpointDestroy, "objpath:#{checkpoint_path}"
-  rescue StandardError => ex
-    Puppet.debug "Connection failed with #{ex.class}: #{ex}"
+  rescue StandardError
     begin
       dbus_call :CheckpointRollback, "objpath:#{checkpoint_path}" if checkpoint_path
     rescue StandardError
-      raise Puppet::Error, 'Timeout triggered checkpoint rollback'
+      Puppet.debug 'Checkpoint was rolled back in the background, ignoring failure to roll back manually'
     end
 
     raise
@@ -37,8 +36,11 @@ Puppet::Type.type(:networkmanager_connection).provide(:checkpointed_dbussend, pa
 
   def verify_connection(checkpoint_path)
     attempts = 0
+    # Retry until NetworkManager rolls back checkpoint or over 10 attempts have been made
     loop do
+      sleep 0.5 if attempts > 0
       attempts += 1
+
       Puppet.debug 'Connection verification test after activating connection'
       client = Puppet.runtime[:http]
       session = client.create_session
@@ -46,16 +48,17 @@ Puppet::Type.type(:networkmanager_connection).provide(:checkpointed_dbussend, pa
       service.get_simple_status
       return true
     rescue StandardError
-      begin
-        # Read property from checkpoint to see if it exists
-        dbus_call :Get, 'string:org.freedesktop.NetworkManager.Checkpoint', 'string:Created', dbus_object: checkpoint_path, method_service: 'org.freedesktop.DBus.Properties'
-      rescue StandardError
-        raise Puppet::Error, 'Timeout triggered checkpoint rollback'
-      end
-
-      raise if attempts > 10
-
-      sleep 0.5 # Retry until NetworkManager rolls back checkpoint or over 10 attempts have been made
+      raise if attempts >= 5
+    ensure
+      # Test if the checkpoint still exists, in case the verification succeeded because of a rollback
+      test_checkpoint(checkpoint_path)
     end
+  end
+
+  def test_checkpoint(checkpoint_path)
+    # Read property from checkpoint to see if it exists
+    dbus_call :Get, 'string:org.freedesktop.NetworkManager.Checkpoint', 'string:Created', dbus_object: checkpoint_path, method_service: 'org.freedesktop.DBus.Properties'
+  rescue StandardError
+    raise Puppet::Error, 'Timeout triggered checkpoint rollback'
   end
 end
