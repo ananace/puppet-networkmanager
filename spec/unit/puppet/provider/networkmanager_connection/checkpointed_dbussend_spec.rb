@@ -51,7 +51,13 @@ describe Puppet::Type.type(:networkmanager_connection).provider(:checkpointed_db
       expect(provider).to receive(:dbus_call).with(:CheckpointCreate, 'array:objpath:', 'uint32:15', 'uint32:6').and_return(dbus_return)
       expect(provider).to receive(:nmcli).with(:connection, :up, :uuid, uuid)
 
-      allow(provider).to receive(:dbus_call).with(:Get, 'string:org.freedesktop.NetworkManager.Checkpoint', 'string:Created', dbus_object: '/org/freedesktop/NetworkManager/Checkpoint/1', method_service: 'org.freedesktop.DBus.Properties')
+      allow(provider).to receive(:dbus_call).with(
+        :Get,
+        'string:org.freedesktop.NetworkManager.Checkpoint',
+        'string:Created',
+        dbus_object: '/org/freedesktop/NetworkManager/Checkpoint/1',
+        method_service: 'org.freedesktop.DBus.Properties',
+      )
       service_mock = instance_double('Puppet::HTTP::Service::Puppetserver')
       expect(Puppet::HTTP::Service).to receive(:create_service).and_return(service_mock)
       expect(service_mock).to receive(:get_simple_status).and_return(true)
@@ -77,7 +83,13 @@ describe Puppet::Type.type(:networkmanager_connection).provider(:checkpointed_db
       expect(provider).to receive(:nmcli).with(:connection, :up, :uuid, uuid)
 
       allow(provider).to receive(:sleep)
-      allow(provider).to receive(:dbus_call).with(:Get, 'string:org.freedesktop.NetworkManager.Checkpoint', 'string:Created', dbus_object: '/org/freedesktop/NetworkManager/Checkpoint/2', method_service: 'org.freedesktop.DBus.Properties')
+      allow(provider).to receive(:dbus_call).with(
+        :Get,
+        'string:org.freedesktop.NetworkManager.Checkpoint',
+        'string:Created',
+        dbus_object: '/org/freedesktop/NetworkManager/Checkpoint/2',
+        method_service: 'org.freedesktop.DBus.Properties',
+      )
       service_mock = instance_double('Puppet::HTTP::Service::Puppetserver')
       allow(Puppet::HTTP::Service).to receive(:create_service).and_return(service_mock)
       allow(service_mock).to receive(:get_simple_status).and_raise(Net::OpenTimeout)
@@ -106,7 +118,13 @@ describe Puppet::Type.type(:networkmanager_connection).provider(:checkpointed_db
       expect(provider).to receive(:nmcli).with(:connection, :up, :uuid, uuid)
 
       allow(provider).to receive(:sleep)
-      allow(provider).to receive(:dbus_call).with(:Get, 'string:org.freedesktop.NetworkManager.Checkpoint', 'string:Created', dbus_object: '/org/freedesktop/NetworkManager/Checkpoint/2', method_service: 'org.freedesktop.DBus.Properties')
+      allow(provider).to receive(:dbus_call).with(
+        :Get,
+        'string:org.freedesktop.NetworkManager.Checkpoint',
+        'string:Created',
+        dbus_object: '/org/freedesktop/NetworkManager/Checkpoint/2',
+        method_service: 'org.freedesktop.DBus.Properties',
+      )
       service_mock = instance_double('Puppet::HTTP::Service::Puppetserver')
       allow(Puppet::HTTP::Service).to receive(:create_service).and_return(service_mock)
       allow(service_mock).to receive(:get_simple_status).and_raise(Net::OpenTimeout)

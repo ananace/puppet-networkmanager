@@ -29,6 +29,7 @@ Puppet::Type.type(:networkmanager_connection).provide(:checkpointed_dbussend, pa
     begin
       dbus_call :CheckpointRollback, "objpath:#{checkpoint_path}" if checkpoint_path
     rescue StandardError
+      Puppet.debug 'Checkpoint was automatically rolled back during verification'
     end
 
     raise
@@ -45,7 +46,7 @@ Puppet::Type.type(:networkmanager_connection).provide(:checkpointed_dbussend, pa
       end
 
       attempts += 1
-      Puppet.debug "Connection verification test after activating connection"
+      Puppet.debug 'Connection verification test after activating connection'
       client = Puppet.runtime[:http]
       session = client.create_session
       service = Puppet::HTTP::Service.create_service(client, session, :puppetserver)
