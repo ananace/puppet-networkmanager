@@ -26,7 +26,7 @@ module PuppetX # rubocop:disable Style/ClassAndModuleChildren
 
       def destroy
         ini_file.sections.each { |s| s.destroy = true }
-        flush
+        save
       end
 
       def settings
@@ -66,7 +66,7 @@ module PuppetX # rubocop:disable Style/ClassAndModuleChildren
         store[setting] = value
       end
 
-      def flush(clean: true, comment: true, backup: true)
+      def save(clean: true, comment: true, backup: true)
         if backup && @file_exists && !@bak
           bak = "#{path}-#{Time.now.to_i}"
           FileUtils.cp(@path, bak)

@@ -28,6 +28,9 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
   end
 
   def self.instances
+    # Ensure there's a cache of nameservers
+    cached_nameservers
+
     Dir['/etc/NetworkManager/system-connections/*.nmconnection'].map do |file|
       conn = PuppetX::Networkmanager::Connection.new(file)
 
@@ -76,7 +79,7 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
     ensure_default_settings
 
     dirty = connection.dirty?
-    connection.flush
+    connection.save
 
     return false if !dirty && loaded?
 
@@ -110,7 +113,6 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
     return if @activated_this_session
 
     @activated_this_session = true
-    nameservers = File.readlines('/etc/resolv.conf').select { |l| l.start_with? 'nameserver ' }
     with_checkpoint do
       # Force a load even if the connection doesn't look dirty
       create(skip_backup: true, inject_settings: inject_settings) || load!
@@ -125,14 +127,6 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
   rescue StandardError
     Puppet.debug "Failed to activate/verify NM connection #{resource[:name]}, rolling back"
     connection.revert!
-
-    # Check that the revert hasn't left resolv.conf in a broken state,
-    # this can happen when going from no NM state directly to a failed initial connection
-    revertedconf = File.readlines('/etc/resolv.conf')
-    unless revertedconf.any? { |l| l.start_with? 'nameserver ' }
-      Puppet.debug "Revert left /etc/resolv.conf without nameservers, adding #{nameservers}"
-      File.open('/etc/resolv.conf', 'a') { |file| file << "\n" << nameservers.join }
-    end
 
     raise
   ensure
@@ -220,6 +214,24 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
       create
     else
       activate
+    end
+  end
+
+  # Lifecycle handling
+  #
+  def self.cached_nameservers
+    @nameservers ||= File.readlines('/etc/resolv.conf').select { |l| l.start_with? 'nameserver ' }.map(&:strip)
+  end
+
+  def post_resource_eval
+    resolvconf = File.readlines('/etc/resolv.conf')
+    return if resolvconf.any? { |l| l.start_with? 'nameserver ' }
+
+    to_add = self.class.cached_nameservers
+    Puppet.debug "Catalog application left /etc/resolv.conf without nameservers, adding #{to_add}"
+    File.open('/etc/resolv.conf', 'a') do |file|
+      file << "\n"
+      to_add.each { |line| file << "#{line}\n" }
     end
   end
 
