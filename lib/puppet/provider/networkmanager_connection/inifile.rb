@@ -113,6 +113,7 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
     return if @activated_this_session
 
     @activated_this_session = true
+    self.class.cached_nameservers # Ensure nameservers have been cached
     with_checkpoint do
       # Force a load even if the connection doesn't look dirty
       create(skip_backup: true, inject_settings: inject_settings) || load!
@@ -220,6 +221,7 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
   # Lifecycle handling
   #
   def self.cached_nameservers
+    @nameservers = nil if @nameservers&.empty?
     @nameservers ||= File.readlines('/etc/resolv.conf').select { |l| l.start_with? 'nameserver ' }.map(&:strip)
   end
 
