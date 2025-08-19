@@ -125,8 +125,8 @@ describe 'NetworkManager integration test' do
       )
 
     ensure
-      File.delete path1 rescue nil
-      File.delete path2 rescue nil
+      File.delete path1
+      File.delete path2
     end
   end
 
@@ -219,8 +219,8 @@ describe 'NetworkManager integration test' do
       )
 
     ensure
-      File.delete path1 rescue nil
-      File.delete path2 rescue nil
+      File.delete path1
+      File.delete path2
     end
   end
 
@@ -271,7 +271,7 @@ describe 'NetworkManager integration test' do
       expect(conn1).to eq(before)
       expect(Dir["#{basepath}/*"].count).to eq(1)
     ensure
-      File.delete path1 rescue nil
+      File.delete path1
     end
   end
 end

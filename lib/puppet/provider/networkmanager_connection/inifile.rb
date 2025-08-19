@@ -225,12 +225,14 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
 
   def post_resource_eval
     resolvconf = File.readlines('/etc/resolv.conf')
-    return true if resolvconf.any? { |l| l.start_with? 'nameserver ' }
+    return if resolvconf.any? { |l| l.start_with? 'nameserver ' }
 
     to_add = self.class.cached_nameservers
     Puppet.debug "Catalog application left /etc/resolv.conf without nameservers, adding #{to_add}"
-    File.open('/etc/resolv.conf', 'a') { |file| file << "\n"; to_add.each { |line| file << "#{line}\n" } }
-    true
+    File.open('/etc/resolv.conf', 'a') do |file|
+      file << "\n"
+      to_add.each { |line| file << "#{line}\n" }
+    end
   end
 
   private
