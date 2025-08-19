@@ -94,12 +94,15 @@ describe Puppet::Type.type(:networkmanager_connection).provider(:checkpointed_db
       allow(Puppet::HTTP::Service).to receive(:create_service).and_return(service_mock)
       allow(service_mock).to receive(:get_simple_status).and_raise(Net::OpenTimeout)
 
-      expect(File).to receive(:readlines).with('/etc/resolv.conf').and_return(["nameserver 1.2.3.4\n"]).twice
+      allow(File).to receive(:readlines).with('/etc/resolv.conf').and_return(["nameserver 1.2.3.4\n"])
       expect(File).not_to receive(:open).with('/etc/resolv.conf', 'a')
 
       expect(provider).to receive(:dbus_call).with(:CheckpointRollback, 'objpath:/org/freedesktop/NetworkManager/Checkpoint/2')
 
+      provider.class.cached_nameservers
       expect { provider.activate }.to raise_error(Net::OpenTimeout)
+      provider.post_resource_eval
+      provider.class.instance_variable_set :@nameservers, nil
     end
 
     it 'uses nmcli to activate the connection, with a checkpoint taken and then rolled back on failure, with resolv.conf repairs applied if broken' do
@@ -138,7 +141,10 @@ describe Puppet::Type.type(:networkmanager_connection).provider(:checkpointed_db
 
       expect(provider).to receive(:dbus_call).with(:CheckpointRollback, 'objpath:/org/freedesktop/NetworkManager/Checkpoint/2')
 
+      provider.class.cached_nameservers
       expect { provider.activate }.to raise_error(Net::OpenTimeout)
+      provider.post_resource_eval
+      provider.class.instance_variable_set :@nameservers, nil
     end
   end
 end
