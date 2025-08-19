@@ -101,7 +101,7 @@ describe Puppet::Type.type(:networkmanager_connection).provider(:checkpointed_db
 
       provider.class.cached_nameservers
       expect { provider.activate }.to raise_error(Net::OpenTimeout)
-      provider.post_resource_eval
+      provider.class.post_resource_eval
       provider.class.instance_variable_set :@nameservers, nil
     end
 
@@ -143,7 +143,7 @@ describe Puppet::Type.type(:networkmanager_connection).provider(:checkpointed_db
 
       provider.class.cached_nameservers
       expect { provider.activate }.to raise_error(Net::OpenTimeout)
-      provider.post_resource_eval
+      provider.class.post_resource_eval
       provider.class.instance_variable_set :@nameservers, nil
     end
   end
