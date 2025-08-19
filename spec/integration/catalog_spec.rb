@@ -32,7 +32,6 @@ describe 'NetworkManager integration test' do
   before(:each) do
     # rubocop:disable RSpec/AnyInstance
     allow_any_instance_of(Puppet::Type.type(:networkmanager_connection).provider(:inifile)).to receive(:uuid).and_return(uuid)
-
     allow_any_instance_of(Puppet::Type.type(:networkmanager_connection).provider(:inifile)).to receive(:nmcli)
     allow_any_instance_of(Puppet::Type.type(:networkmanager_connection).provider(:checkpointed_dbussend)).to receive(:dbus_call).and_return('"placeholder"')
     allow_any_instance_of(Puppet::Type.type(:networkmanager_connection).provider(:checkpointed_dbussend)).to receive(:verify_connection)
