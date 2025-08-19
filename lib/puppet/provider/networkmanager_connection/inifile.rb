@@ -223,11 +223,11 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
     @nameservers ||= File.readlines('/etc/resolv.conf').select { |l| l.start_with? 'nameserver ' }.map(&:strip)
   end
 
-  def post_resource_eval
+  def self.post_resource_eval
     resolvconf = File.readlines('/etc/resolv.conf')
     return if resolvconf.any? { |l| l.start_with? 'nameserver ' }
 
-    to_add = self.class.cached_nameservers
+    to_add = cached_nameservers
     Puppet.debug "Catalog application left /etc/resolv.conf without nameservers, adding #{to_add}"
     File.open('/etc/resolv.conf', 'a') do |file|
       file << "\n"
