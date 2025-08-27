@@ -18,6 +18,8 @@ Puppet::Type.newtype(:networkmanager_connection) do
 
   Puppet::Type.type(:networkmanager_connection_setting)
 
+  attr_reader :settings_purgeable
+
   def generate
     res = []
 
@@ -99,6 +101,12 @@ Puppet::Type.newtype(:networkmanager_connection) do
 
   newparam(:purge_settings, boolean: true, parent: Puppet::Parameter::Boolean) do
     defaultto false
+
+    def retrieve
+      return false if @resource[:purge_settings] == false
+
+      provider.resource.settings_purgeable ? :purgeable : true
+    end
   end
 
   autorequire(:service) do
@@ -117,6 +125,7 @@ Puppet::Type.newtype(:networkmanager_connection) do
     externally_managed += provider.default_settings.keys.map { |s| "#{self[:name]}/#{s}" }
 
     provider.settings.keys.reject { |p| externally_managed.include? "#{self[:name]}/#{p}" }.map do |purge|
+      @settings_purgeable = true
       section, setting = purge.split('/')
       Puppet::Type.type(:networkmanager_connection_setting).new(
         name: "#{self[:name]}/#{purge}",
