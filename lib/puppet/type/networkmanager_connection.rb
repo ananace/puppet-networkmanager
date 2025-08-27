@@ -99,13 +99,18 @@ Puppet::Type.newtype(:networkmanager_connection) do
     end
   end
 
-  newproperty(:purge_settings, boolean: true, parent: Puppet::Parameter::Boolean) do
-    defaultto false
+  newproperty(:purge_settings) do
+    defaultto :false
+
+    newvalue :false
+    newvalue :true do
+      true
+    end
 
     def retrieve
-      return false if @resource[:purge_settings] == false
+      return :false if @resource[:purge_settings] == :false
 
-      provider.resource.settings_purgeable ? :purgeable : true
+      provider.resource.settings_purgeable ? :purgeable : :true
     end
   end
 
