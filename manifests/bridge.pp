@@ -9,7 +9,7 @@ define networkmanager::bridge (
   Optional[Integer[-999,999]] $autoconnect_priority = undef,
   Boolean $purge_settings = true,
 
-  Boolean $stp = true,
+  Optional[Boolean] $stp = undef,
   Hash[String,Data] $options = {},
   Array[String] $slaves = [],
 
@@ -66,7 +66,11 @@ define networkmanager::bridge (
   if $ensure != absent {
     networkmanager_connection_setting {
       "${connection_name}/connection/interface-name": value => $identifier;
-      "${connection_name}/bridge/stp": value                => $stp;
+    }
+    if $stp != undef {
+      networkmanager_connection_setting {
+        "${connection_name}/bridge/stp": value => $stp;
+      }
     }
     if $mac {
       networkmanager_connection_setting {
