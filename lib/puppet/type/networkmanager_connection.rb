@@ -66,9 +66,11 @@ Puppet::Type.newtype(:networkmanager_connection) do
   end
 
   def refresh
-    return unless @parameters[:ensure].value == :active || provider.active?
-
-    provider.activate
+    if @parameters[:ensure].value == :active || provider.active?
+      provider.activate
+    else
+      provider.create
+    end
   end
 
   newparam(:name, namevar: true) do
