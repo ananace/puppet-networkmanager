@@ -64,12 +64,8 @@ define networkmanager::bond (
   }
 
   if $ensure != absent {
-    $_bondconfig = $options + {
-      mode => $mode,
-    }
     networkmanager_connection_setting {
       "${connection_name}/connection/interface-name": value => $identifier;
-      "${connection_name}/bond/options": value              => $_bondconfig;
     }
     if $mac {
       networkmanager_connection_setting {
@@ -79,6 +75,12 @@ define networkmanager::bond (
     if $mtu {
       networkmanager_connection_setting {
         "${connection_name}/ethernet/mtu": value => $mtu,
+      }
+    }
+    $_bondconfig = $options + { mode => $mode }
+    $_bondconfig.each |$key, $value| {
+      networkmanager_connection_setting {
+        "${connection_name}/bond/${key}": value => $value,
       }
     }
   }
