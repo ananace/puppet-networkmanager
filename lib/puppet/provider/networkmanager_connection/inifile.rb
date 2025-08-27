@@ -102,7 +102,7 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
   end
 
   def reload_connection
-    if resource[:ensure].value == :active || active?
+    if resource[:ensure] == :active || active?
       activate
     else
       create
