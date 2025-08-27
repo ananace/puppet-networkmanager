@@ -109,8 +109,6 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
       else
         nmcli :connection, :delete, :id, resource[:name]
       end
-
-      connection.destroy
     end
   end
 
