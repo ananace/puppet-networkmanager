@@ -130,7 +130,7 @@ describe 'networkmanager::foreman_interfaces' do
       is_expected.to contain_networkmanager__ethernet('eno1')
         .with_mac('5C:52:62:56:8A:C4')
         .without_ip4_addresses
-        .with_ip4_dns_search('example.com')
+        .with_ip4_dns_search(['example.com'])
         .without_ip4_dns
         .with_ip4_method('auto')
         .with_ip4_never_default(false)
