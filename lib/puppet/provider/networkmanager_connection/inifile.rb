@@ -167,12 +167,6 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
 
     store = connection.get_section('connection', create: true)
     store['uuid'] = uuid
-
-    if resource[:ensure] == :present
-      create
-    else
-      activate
-    end
   end
 
   def all_settings
@@ -229,12 +223,6 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
       next if connection.get_setting(section, setting) == value.to_s
 
       connection.set_setting(section, setting, value)
-    end
-
-    if resource[:ensure] == :present
-      create
-    else
-      activate
     end
   end
 
