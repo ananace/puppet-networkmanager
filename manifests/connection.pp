@@ -30,8 +30,6 @@ define networkmanager::connection (
 ) {
   $_ip4_addresses = flatten([pick($ip4_addresses, [])])
   $_ip6_addresses = flatten([pick($ip6_addresses, [])])
-  $_ip4_dns_search = flatten(pick($ip4_dns_search, []))
-  $_ip6_dns_search = flatten(pick($ip6_dns_search, []))
 
   if length($_ip4_addresses) > 0 {
     $_ip4_method = pick($ip4_method, 'manual')
@@ -89,9 +87,9 @@ define networkmanager::connection (
           "${connection_name}/ipv4/dns": value => $ip4_dns,
         }
       }
-      if length($_ip4_dns_search) > 0 {
+      if $ip4_dns_search {
         networkmanager_connection_setting {
-          "${connection_name}/ipv4/dns-search": value => $_ip4_dns_search,
+          "${connection_name}/ipv4/dns-search": value => $ip4_dns_search,
         }
       }
       if $ip4_routes {
@@ -131,9 +129,9 @@ define networkmanager::connection (
           "${connection_name}/ipv6/dns": value => $ip6_dns,
         }
       }
-      if length($_ip6_dns_search) > 0 {
+      if $ip6_dns_search {
         networkmanager_connection_setting {
-          "${connection_name}/ipv6/dns-search": value => $_ip6_dns_search,
+          "${connection_name}/ipv6/dns-search": value => $ip6_dns_search,
         }
       }
       if $ip6_routes {
