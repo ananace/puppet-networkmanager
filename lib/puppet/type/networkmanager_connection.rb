@@ -68,7 +68,7 @@ Puppet::Type.newtype(:networkmanager_connection) do
   end
 
   def refresh
-    provider.reload
+    provider.reload_connection
   end
 
   newparam(:name, namevar: true) do

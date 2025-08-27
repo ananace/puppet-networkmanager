@@ -101,7 +101,7 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
     @connection_loaded = true
   end
 
-  def reload
+  def reload_connection
     if @parameters[:ensure].value == :active || provider.active?
       provider.activate
     else
@@ -110,8 +110,8 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
   end
 
   # Trigger a refresh-like reload if settings are purged
-  def purge_settings=(_)
-    reload
+  def flush
+    reload_connection
   end
 
   def destroy
