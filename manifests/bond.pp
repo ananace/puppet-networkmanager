@@ -17,7 +17,7 @@ define networkmanager::bond (
   Optional[Variant[Stdlib::IP::Address::V4::CIDR, Array[Stdlib::IP::Address::V4::CIDR]]] $ip4_addresses = undef,
   Optional[Stdlib::IP::Address::V4::Nosubnet] $ip4_gateway = undef,
   Optional[Array[Stdlib::IP::Address::V4::Nosubnet]] $ip4_dns = undef,
-  Optional[String] $ip4_dns_search = undef,
+  Optional[Variant[Stdlib::Fqdn, Array[Stdlib::Fqdn]]] $ip4_dns_search = undef,
   Optional[Array[Stdlib::IP::Address::V4::CIDR]] $ip4_routes = undef,
   Optional[Integer[-1]] $ip4_route_metric = undef,
   Optional[Boolean] $ip4_may_fail = undef,
@@ -27,7 +27,7 @@ define networkmanager::bond (
   Optional[Variant[Stdlib::IP::Address::V6::CIDR, Array[Stdlib::IP::Address::V6::CIDR]]] $ip6_addresses = undef,
   Optional[Stdlib::IP::Address::V6::Nosubnet] $ip6_gateway = undef,
   Optional[Array[Stdlib::IP::Address::V6::Nosubnet]] $ip6_dns = undef,
-  Optional[String] $ip6_dns_search = undef,
+  Optional[Variant[Stdlib::Fqdn, Array[Stdlib::Fqdn]]] $ip6_dns_search = undef,
   Optional[Array[Stdlib::IP::Address::V6::CIDR]] $ip6_routes = undef,
   Optional[Integer[-1]] $ip6_route_metric = undef,
   Optional[Boolean] $ip6_may_fail = undef,
@@ -64,24 +64,21 @@ define networkmanager::bond (
   }
 
   if $ensure != absent {
+    $_bondconfig = $options + {
+      mode => $mode,
+    }
     networkmanager_connection_setting {
       "${connection_name}/connection/interface-name": value => $identifier;
-      "${connection_name}/bond/mode": value                 => $mode;
+      "${connection_name}/bond/options": value              => $_bondconfig;
     }
-    $options.each |$option, $value| {
-      networkmanager_connection_setting {
-        "${connection_name}/bond/${option}": value => $value;
-      }
-    }
-
     if $mac {
       networkmanager_connection_setting {
         "${connection_name}/ethernet/mac-address": value => $mac;
       }
     }
     if $mtu {
-      networkmanager_connection_setting { "${connection_name}/ethernet/mtu":
-        value => $mtu,
+      networkmanager_connection_setting {
+        "${connection_name}/ethernet/mtu": value => $mtu,
       }
     }
   }

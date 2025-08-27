@@ -9,6 +9,7 @@ define networkmanager::bridge (
   Optional[Integer[-999,999]] $autoconnect_priority = undef,
   Boolean $purge_settings = true,
 
+  Boolean $stp = true,
   Hash[String,Data] $options = {},
   Array[String] $slaves = [],
 
@@ -16,7 +17,8 @@ define networkmanager::bridge (
   Optional[Variant[Stdlib::IP::Address::V4::CIDR, Array[Stdlib::IP::Address::V4::CIDR]]] $ip4_addresses = undef,
   Optional[Stdlib::IP::Address::V4::Nosubnet] $ip4_gateway = undef,
   Optional[Array[Stdlib::IP::Address::V4::Nosubnet]] $ip4_dns = undef,
-  Optional[String] $ip4_dns_search = undef,
+  Optional[Variant[Stdlib::Fqdn, Array[Stdlib::Fqdn]]] $ip4_dns_search = undef,
+  Optional[Array[Stdlib::IP::Address::V4::CIDR]] $ip4_routes = undef,
   Optional[Integer[-1]] $ip4_route_metric = undef,
   Optional[Boolean] $ip4_may_fail = undef,
   Optional[Boolean] $ip4_never_default = undef,
@@ -25,7 +27,8 @@ define networkmanager::bridge (
   Optional[Variant[Stdlib::IP::Address::V6::CIDR, Array[Stdlib::IP::Address::V6::CIDR]]] $ip6_addresses = undef,
   Optional[Stdlib::IP::Address::V6::Nosubnet] $ip6_gateway = undef,
   Optional[Array[Stdlib::IP::Address::V6::Nosubnet]] $ip6_dns = undef,
-  Optional[String] $ip6_dns_search = undef,
+  Optional[Variant[Stdlib::Fqdn, Array[Stdlib::Fqdn]]] $ip6_dns_search = undef,
+  Optional[Array[Stdlib::IP::Address::V6::CIDR]] $ip6_routes = undef,
   Optional[Integer[-1]] $ip6_route_metric = undef,
   Optional[Boolean] $ip6_may_fail = undef,
   Optional[Boolean] $ip6_never_default = undef,
@@ -44,6 +47,7 @@ define networkmanager::bridge (
     ip4_gateway          => $ip4_gateway,
     ip4_dns              => $ip4_dns,
     ip4_dns_search       => $ip4_dns_search,
+    ip4_routes           => $ip4_routes,
     ip4_route_metric     => $ip4_route_metric,
     ip4_may_fail         => $ip4_may_fail,
     ip4_never_default    => $ip4_never_default,
@@ -53,6 +57,7 @@ define networkmanager::bridge (
     ip6_gateway          => $ip6_gateway,
     ip6_dns              => $ip6_dns,
     ip6_dns_search       => $ip6_dns_search,
+    ip6_routes           => $ip6_routes,
     ip6_route_metric     => $ip6_route_metric,
     ip6_may_fail         => $ip6_may_fail,
     ip6_never_default    => $ip6_never_default,
@@ -61,21 +66,22 @@ define networkmanager::bridge (
   if $ensure != absent {
     networkmanager_connection_setting {
       "${connection_name}/connection/interface-name": value => $identifier;
+      "${connection_name}/bridge/stp": value                => $stp;
     }
     if $mac {
       networkmanager_connection_setting {
         "${connection_name}/bridge/mac-address": value => $mac;
       }
     }
-    $options.each |$option, $value| {
+    if $mtu {
       networkmanager_connection_setting {
-        "${connection_name}/bridge/${option}": value => $value;
+        "${connection_name}/ethernet/mtu": value => $mtu,
       }
     }
 
-    if $mtu {
-      networkmanager_connection_setting { "${connection_name}/ethernet/mtu":
-        value => $mtu,
+    $options.each |$option, $value| {
+      networkmanager_connection_setting {
+        "${connection_name}/bridge/${option}": value => $value;
       }
     }
   }
