@@ -102,7 +102,16 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
   end
 
   def destroy
-    connection.destroy
+    self.class.cached_nameservers # Ensure nameservers have been cached
+    with_checkpoint do
+      if uuid
+        nmcli :connection, :delete, :uuid, uuid
+      else
+        nmcli :connection, :delete, :id, resource[:name]
+      end
+
+      connection.destroy
+    end
   end
 
   def with_checkpoint(*)
