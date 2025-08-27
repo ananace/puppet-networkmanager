@@ -101,6 +101,19 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
     @connection_loaded = true
   end
 
+  def reload
+    if @parameters[:ensure].value == :active || provider.active?
+      provider.activate
+    else
+      provider.create
+    end
+  end
+
+  # Trigger a refresh-like reload if settings are purged
+  def purge_settings=(_)
+    reload
+  end
+
   def destroy
     self.class.cached_nameservers # Ensure nameservers have been cached
     with_checkpoint do
