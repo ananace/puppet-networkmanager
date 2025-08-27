@@ -119,7 +119,7 @@ Puppet::Type.newtype(:networkmanager_connection) do
     provider.settings.keys.reject { |p| externally_managed.include? "#{self[:name]}/#{p}" }.map do |purge|
       section, setting = purge.split('/')
       Puppet::Type.type(:networkmanager_connection_setting).new(
-        name: "Purge #{purge}",
+        name: "#{self[:name]}/#{purge}",
         connection: self[:name],
         section: section,
         setting: setting,
