@@ -99,7 +99,7 @@ Puppet::Type.newtype(:networkmanager_connection) do
     end
   end
 
-  newparam(:purge_settings, boolean: true, parent: Puppet::Parameter::Boolean) do
+  newproperty(:purge_settings, boolean: true, parent: Puppet::Parameter::Boolean) do
     defaultto false
 
     def retrieve
