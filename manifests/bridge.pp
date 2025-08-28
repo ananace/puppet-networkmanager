@@ -99,7 +99,7 @@ define networkmanager::bridge (
       connection_name => $name,
       bare            => true,
     }
-    if $slave_ensure != absent {
+    if $ensure != absent {
       networkmanager_connection_setting {
         "${name}/connection/interface-name": value => $slave;
         "${name}/connection/slave-type": value     => 'bridge';
