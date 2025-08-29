@@ -16,7 +16,7 @@ require 'securerandom'
 Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
   commands nmcli: '/usr/bin/nmcli'
 
-  def nmcli_safe(*args)
+  def self.nmcli_safe(*args)
     cmd = Puppet::Provider::Command.new(
       :nmcli,
       'nmcli',
@@ -27,16 +27,33 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
     cmd.execute(args)
   end
 
+  def nmcli_safe(*args)
+    self.class.nmcli_safe(*args)
+  end
+
   def self.instances
     # Ensure there's a cache of nameservers
     cached_nameservers
 
     discovered_connections = {}
-    # TODO: load active connections
-    # data = nmcli_safe :connection, :show
-    # if data.exitstatus.zero?
-    #   data.stdout
-    # end
+    active_connections = nmcli_safe '--terse', '--fields', 'name,uuid,filename', :connection, :show
+    if active_connections.exitstatus.zero?
+      active_connections.stdout.each_line do |line|
+        parts = line.strip.split ':'
+
+        name = parts.shift
+        name = "#{name[0..-2]}:#{parts.shift}" while name.end_with?('\\')
+        uuid, path = *parts
+        # TODO: Should ephemeral connections be handled?
+        next if path.start_with? '/run'
+
+        (discovered_connections[uuid] ||= {}).merge!(
+          name: name,
+          uuid: uuid,
+          path: path,
+        )
+      end
+    end
 
     Dir['/etc/NetworkManager/system-connections/*.nmconnection'].each do |file|
       conn_file = PuppetX::Networkmanager::Connection.new(file)
