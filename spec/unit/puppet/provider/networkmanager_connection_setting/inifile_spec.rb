@@ -378,7 +378,6 @@ describe Puppet::Type.type(:networkmanager_connection_setting).provider(:inifile
         parameters[:value] = 1500
 
         logs = catalog.apply.report.logs
-        puts logs.inspect
         expect(logs.first.source).to eq('/Networkmanager_connection_setting[em1/ethernet/mtu]/value')
         expect(logs.first.message).to eq('value changed 1200 to 1500')
 

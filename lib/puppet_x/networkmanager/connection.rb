@@ -12,10 +12,11 @@ module PuppetX # rubocop:disable Style/ClassAndModuleChildren
         (@connections ||= {})[path] ||= new(path)
       end
 
-      attr_accessor :path, :is_managed
+      attr_accessor :path, :write_path, :is_managed
 
       def initialize(path)
         @path = path
+        @write_path = path
         @file_exists = File.exist?(path)
         @is_managed = false
       end
@@ -153,9 +154,14 @@ module PuppetX # rubocop:disable Style/ClassAndModuleChildren
 
       def ini_file
         @ini_file ||= begin
-          file = Puppet::Util::IniConfig::PhysicalFile.new(path)
+          file = Puppet::Util::IniConfig::PhysicalFile.new(write_path)
           file.destroy_empty = true
-          file.read if File.exist? path
+          if path == write_path
+            file.read if File.exist? path
+          elsif File.exist? path
+            data = File.read(path)
+            file.send :parse, data
+          end
           file
         end
       end
