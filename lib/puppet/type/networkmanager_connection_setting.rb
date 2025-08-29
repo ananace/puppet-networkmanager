@@ -58,7 +58,16 @@ Puppet::Type.newtype(:networkmanager_connection_setting) do
 
     def should_to_s(value)
       if @resource[:show_diff] == :true
-        value.inspect
+        if value.is_a? Array
+          value.inspect
+        else
+          value = PuppetX::Networkmanager::Connection.deserialize_value(value)
+          if value.is_a?(Array) || value.is_a?(String)
+            value.inspect
+          else
+            value
+          end
+        end
       elsif @resource[:show_diff] == :md5
         "{md5}#{Digest::MD5.hexdigest(value.to_s)}"
       else
@@ -67,7 +76,7 @@ Puppet::Type.newtype(:networkmanager_connection_setting) do
     end
 
     def is_to_s(value) # rubocop:disable Naming/PredicateName
-      should_to_s(value)
+      should_to_s(PuppetX::Networkmanager::Connection.serialize_value(value))
     end
 
     def insync?(current)
@@ -75,7 +84,7 @@ Puppet::Type.newtype(:networkmanager_connection_setting) do
 
       current = current.first if current.is_a?(Array) && current.size == 1
 
-      current == should
+      PuppetX::Networkmanager::Connection.serialize_value(current) == PuppetX::Networkmanager::Connection.serialize_value(should)
     end
 
     def should

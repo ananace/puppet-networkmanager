@@ -35,6 +35,7 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
     # TODO: load active connections
     # data = nmcli_safe :connection, :show
     # if data.exitstatus.zero?
+    #   data.stdout
     # end
 
     Dir['/etc/NetworkManager/system-connections/*.nmconnection'].each do |file|
