@@ -31,15 +31,24 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
     # Ensure there's a cache of nameservers
     cached_nameservers
 
-    Dir['/etc/NetworkManager/system-connections/*.nmconnection'].map do |file|
-      conn = PuppetX::Networkmanager::Connection.new(file)
+    discovered_connections = {}
+    # TODO: load active connections
+    # data = nmcli_safe :connection, :show
+    # if data.exitstatus.zero?
+    # end
 
-      new(
+    Dir['/etc/NetworkManager/system-connections/*.nmconnection'].each do |file|
+      conn_file = PuppetX::Networkmanager::Connection.new(file)
+      conn = {
         name: conn.get_setting('connection', 'id'),
         uuid: conn.get_setting('connection', 'uuid'),
         path: file,
-      )
+      }
+
+      (discovered_connections[conn[:uuid]] ||= {}).merge! conn
     end
+
+    discovered_connections.map { |_, data| new(data) }
   end
 
   def exists?
@@ -102,7 +111,9 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
   end
 
   def reload_connection
-    if resource[:ensure] == :active || active?
+    if resource[:ensure] == :absent
+      destroy if loaded?
+    elsif resource[:ensure] == :active || active?
       activate
     else
       create

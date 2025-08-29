@@ -81,10 +81,13 @@ Puppet::Type.type(:networkmanager_connection_setting).provide(:inifile) do
     PuppetX::Networkmanager::Connection[file_path]
   end
 
+  def connection_resource
+    resource&.catalog&.resources
+            &.select { |r| r.is_a? Puppet::Type::Networkmanager_connection }
+            &.find { |r| r[:name] == connection_name }
+  end
+
   def connection_is_managed
-    connection_resource = resource&.catalog&.resources
-                                  &.select { |r| r.is_a? Puppet::Type::Networkmanager_connection }
-                                  &.find { |r| r[:name] == connection_name }
     connection.is_managed || connection_resource
   end
 end
