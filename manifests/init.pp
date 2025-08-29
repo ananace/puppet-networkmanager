@@ -18,6 +18,12 @@ class networkmanager (
     }
   }
 
+  if $purge_connections {
+    Networkmanager_connection {
+      ensure => absent,
+    }
+  }
+
   file { '/etc/NetworkManager/system-connections':
     ensure  => directory,
     purge   => $purge_connections,

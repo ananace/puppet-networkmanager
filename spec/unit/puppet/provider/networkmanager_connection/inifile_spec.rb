@@ -44,7 +44,7 @@ describe Puppet::Type.type(:networkmanager_connection).provider(:inifile) do
       DOC
 
       allow(Dir).to receive(:[]).with('/etc/NetworkManager/system-connections/*.nmconnection').and_return([nmconn_file])
-      exec_mock = double()
+      exec_mock = double
       allow(provider.class).to receive(:nmcli_safe).with('--terse', '--fields', 'name,uuid,filename', :connection, :show).and_return(exec_mock)
       allow(exec_mock).to receive(:exitstatus).and_return(0)
       allow(exec_mock).to receive(:stdout).and_return <<~STDOUT
@@ -58,9 +58,21 @@ describe Puppet::Type.type(:networkmanager_connection).provider(:inifile) do
       instances = provider.class.instances
       expect(instances.size).to eq(3)
 
-      expect(instances[0].instance_variable_get(:@property_hash)).to eq(name: 'Wired connection', uuid: '90565afc-51e5-39bc-bcc4-8b9a0213e4aa', path: '/etc/NetworkManager/system-connections/Wired connection.nmconnection')
-      expect(instances[1].instance_variable_get(:@property_hash)).to eq(name: 'Bond connection 1:1', uuid: '499673a4-4f5f-465c-bdbd-798e6c368692', path: '/etc/NetworkManager/system-connections/Bond connection 1.nmconnection')
-      expect(instances[2].instance_variable_get(:@property_hash)).to eq(name: 'Wired Connection 1', uuid: 'c2fec85c-d2ba-4db9-bed3-cf0471623963', path: nmconn_file)
+      expect(instances[0].instance_variable_get(:@property_hash)).to eq(
+        name: 'Wired connection',
+        uuid: '90565afc-51e5-39bc-bcc4-8b9a0213e4aa',
+        path: '/etc/NetworkManager/system-connections/Wired connection.nmconnection',
+      )
+      expect(instances[1].instance_variable_get(:@property_hash)).to eq(
+        name: 'Bond connection 1:1',
+        uuid: '499673a4-4f5f-465c-bdbd-798e6c368692',
+        path: '/etc/NetworkManager/system-connections/Bond connection 1.nmconnection',
+      )
+      expect(instances[2].instance_variable_get(:@property_hash)).to eq(
+        name: 'Wired Connection 1',
+        uuid: 'c2fec85c-d2ba-4db9-bed3-cf0471623963',
+        path: nmconn_file,
+      )
     end
 
     it 'uses nmcli to activate the connection' do

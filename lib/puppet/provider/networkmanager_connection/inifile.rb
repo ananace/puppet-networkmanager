@@ -36,9 +36,9 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
     cached_nameservers
 
     discovered_connections = {}
-    data = nmcli_safe '--terse', '--fields', 'name,uuid,filename', :connection, :show
-    if data.exitstatus.zero?
-      data.stdout.each_line do |line|
+    active_connections = nmcli_safe '--terse', '--fields', 'name,uuid,filename', :connection, :show
+    if active_connections.exitstatus.zero?
+      active_connections.stdout.each_line do |line|
         parts = line.strip.split ':'
 
         name = parts.shift
@@ -48,9 +48,9 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
         next if path.start_with? '/run'
 
         (discovered_connections[uuid] ||= {}).merge!(
-          name:,
-          uuid:,
-          path:
+          name: name,
+          uuid: uuid,
+          path: path,
         )
       end
     end
