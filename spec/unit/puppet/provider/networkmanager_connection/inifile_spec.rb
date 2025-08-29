@@ -75,7 +75,7 @@ describe Puppet::Type.type(:networkmanager_connection).provider(:inifile) do
       expect(resource).to receive(:catalog).and_return(catalog)
 
       provider.settings = nmconn_settings
-      # provider.activate # called implicitly
+      provider.flush
 
       data = File.read nmconn_file
       expect(data).to eq <<~DOC
@@ -113,7 +113,7 @@ describe Puppet::Type.type(:networkmanager_connection).provider(:inifile) do
       DOC
 
       provider.settings = nmconn_settings
-      # provider.activate # called implicitly
+      provider.flush
 
       data = File.read nmconn_file
       expect(data).to eq <<~DOC

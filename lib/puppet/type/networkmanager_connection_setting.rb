@@ -47,23 +47,20 @@ Puppet::Type.newtype(:networkmanager_connection_setting) do
     desc 'The setting to modify'
   end
 
-  newproperty(:value) do
+  newproperty(:value, array_matching: :all) do
     desc 'The value of the setting'
 
     munge do |value|
       value = value.unwrap if value.respond_to? :unwrap
-      if ([true, false].include? value) || value.is_a?(Numeric) || !value.respond_to?(:strip)
-        value.to_s
-      else
-        value.strip.to_s
-      end
+
+      PuppetX::Networkmanager::Connection.serialize_value(value)
     end
 
-    def should_to_s(newvalue)
+    def should_to_s(value)
       if @resource[:show_diff] == :true
-        "'#{newvalue}'"
+        value.inspect
       elsif @resource[:show_diff] == :md5
-        "'{md5}#{Digest::MD5.hexdigest(newvalue.to_s)}'"
+        "{md5}#{Digest::MD5.hexdigest(value.to_s)}"
       else
         '[redacted sensitive information]'
       end
@@ -76,7 +73,16 @@ Puppet::Type.newtype(:networkmanager_connection_setting) do
     def insync?(current)
       return true unless @resource[:replace]
 
+      current = current.first if current.is_a?(Array) && current.size == 1
+
       current == should
+    end
+
+    def should
+      real = super
+      real = real.first if real.size == 1
+
+      real
     end
   end
 

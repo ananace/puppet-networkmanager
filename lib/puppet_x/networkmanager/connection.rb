@@ -34,7 +34,7 @@ module PuppetX # rubocop:disable Style/ClassAndModuleChildren
         ini_file.sections.each do |section|
           section.entries
                  .select { |e| e.is_a? Array }
-                 .each { |(setting, value)| found["#{section.name}/#{setting}"] = deserialize_value(value) }
+                 .each { |(setting, value)| found["#{section.name}/#{setting}"] = self.class.deserialize_value(value) }
         end
         found
       end
@@ -43,7 +43,7 @@ module PuppetX # rubocop:disable Style/ClassAndModuleChildren
         store = ini_file.get_section(section)
         return unless store
 
-        deserialize_value(store[setting])
+        self.class.deserialize_value(store[setting])
       end
 
       def get_section(section, create: false)
@@ -63,7 +63,7 @@ module PuppetX # rubocop:disable Style/ClassAndModuleChildren
 
       def set_setting(section, setting, value)
         store = ini_file.get_section(section) || ini_file.add_section(section)
-        value = serialize_value(value)
+        value = self.class.serialize_value(value)
         store[setting] = value
       end
 
@@ -101,23 +101,29 @@ module PuppetX # rubocop:disable Style/ClassAndModuleChildren
         @bak = nil
       end
 
-      private
-
-      def deserialize_value(value)
+      def self.deserialize_value(value)
         return if value.nil?
+        return true if value == 'true'
+        return false if value == 'false'
+        return value.to_i if value.match? %r{^[-+]?\d+$}
+        return value.to_f if value.match? %r{^[-+]?\d+\.\d+$}
         return JSON.parse(value) if value.strip.start_with? '{'
-        return value.split(';').map { |v| deserialize_value(v) } if value.include? ';'
+        return value.split(';').map { |v| deserialize_value(v) }.compact if value.include? ';'
 
         value
       end
 
-      def serialize_value(value)
+      def self.serialize_value(value)
         return if value.nil?
+        return value.to_s if [true, false].include?(value) || value.is_a?(Numeric)
         return value.to_json if value.is_a? Hash
-        return value.map { |v| serialize_value(v) }.join ';' if value.is_a? Array
+        return serialize_value(value.first) if value.is_a?(Array) && value.size == 1
+        return "#{value.map { |v| serialize_value(v) }.join ';'};" if value.is_a? Array
 
-        value
+        value.to_s.strip
       end
+
+      private
 
       def cleanup_sections
         ini_file.sections.each do |section|
