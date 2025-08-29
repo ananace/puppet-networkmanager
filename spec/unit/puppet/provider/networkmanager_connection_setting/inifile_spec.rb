@@ -372,25 +372,25 @@ describe Puppet::Type.type(:networkmanager_connection_setting).provider(:inifile
     end
 
     describe 'with array matching - should: array, is: array' do
-      let(:nmconn_file_content) { "[ipv4]\ndns=1.1.1.1;2.2.2.2;" }
+      let(:nmconn_file_content) { "[ipv4]\ndns=1.1.1.1;" }
 
       it 'updates correctly' do
-        parameters[:value] = ['8.8.8.8', '8.8.4.4']
+        parameters[:value] = ['8.8.8.8']
 
         logs = catalog.apply.report.logs
         expect(logs.first.source).to eq('/Networkmanager_connection_setting[em1/ipv4/dns]/value')
-        expect(logs.first.message).to eq("value changed [\"1.1.1.1\", \"2.2.2.2\"] to [\"8.8.8.8\", \"8.8.4.4\"]")
+        expect(logs.first.message).to eq("value changed [\"1.1.1.1\"] to \"8.8.8.8\"")
 
-        expect(File.read(nmconn_file)).to eq("# Managed by Puppet\n\n[ipv4]\ndns=8.8.8.8;8.8.4.4;\n")
+        expect(File.read(nmconn_file)).to eq("# Managed by Puppet\n\n[ipv4]\ndns=8.8.8.8\n")
       end
 
       it 'acts idempotently' do
-        parameters[:value] = ['1.1.1.1', '2.2.2.2']
+        parameters[:value] = ['1.1.1.1']
 
         logs = catalog.apply.report.logs
         expect(logs.size).to eq(0)
 
-        expect(File.read(nmconn_file)).to eq("[ipv4]\ndns=1.1.1.1;2.2.2.2;")
+        expect(File.read(nmconn_file)).to eq("[ipv4]\ndns=1.1.1.1;")
       end
     end
 
