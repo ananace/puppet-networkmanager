@@ -266,7 +266,7 @@ describe Puppet::Type.type(:networkmanager_connection_setting).provider(:inifile
         logs = catalog.apply.report.logs
 
         expect(logs.first.source).to eq('/Networkmanager_connection_setting[em1/connection/type]/value')
-        expect(logs.first.message).to eq("value changed \"ethernet\" to \"vlan\"")
+        expect(logs.first.message).to eq('value changed "ethernet" to "vlan"')
       end
     end
 
@@ -299,7 +299,7 @@ describe Puppet::Type.type(:networkmanager_connection_setting).provider(:inifile
         logs = catalog.apply.report.logs
 
         expect(logs.first.source).to eq('/Networkmanager_connection_setting[em1/ipv4/dns]/value')
-        expect(logs.first.message).to eq("value changed [\"1.2.3.4\", \"1.2.3.5\"] to [\"8.8.8.8\", \"8.8.4.4\"]")
+        expect(logs.first.message).to eq('value changed ["1.2.3.4", "1.2.3.5"] to ["8.8.8.8", "8.8.4.4"]')
       end
     end
   end
@@ -314,7 +314,6 @@ describe Puppet::Type.type(:networkmanager_connection_setting).provider(:inifile
     end
 
     let(:nmconn_file) { tmpfilename('nm-connection') }
-    let(:nmconn_file_content) { }
     let(:resource) { Puppet::Type::Networkmanager_connection_setting.new(parameters) }
     let(:provider) { described_class.new(resource) }
     let(:catalog) { Puppet::Resource::Catalog.new.tap { |c| c.add_resource(resource) } }
@@ -333,7 +332,7 @@ describe Puppet::Type.type(:networkmanager_connection_setting).provider(:inifile
 
         logs = catalog.apply.report.logs
         expect(logs.first.source).to eq('/Networkmanager_connection_setting[em1/ipv4/dns]/value')
-        expect(logs.first.message).to eq("value changed \"1.1.1.1\" to \"8.8.8.8\"")
+        expect(logs.first.message).to eq('value changed "1.1.1.1" to "8.8.8.8"')
 
         expect(File.read(nmconn_file)).to eq("# Managed by Puppet\n\n[ipv4]\ndns=8.8.8.8\n")
       end
@@ -356,7 +355,7 @@ describe Puppet::Type.type(:networkmanager_connection_setting).provider(:inifile
 
         logs = catalog.apply.report.logs
         expect(logs.first.source).to eq('/Networkmanager_connection_setting[em1/ipv4/dns]/value')
-        expect(logs.first.message).to eq("value changed [\"1.1.1.1\"] to \"8.8.8.8\"")
+        expect(logs.first.message).to eq('value changed ["1.1.1.1"] to "8.8.8.8"')
 
         expect(File.read(nmconn_file)).to eq("# Managed by Puppet\n\n[ipv4]\ndns=8.8.8.8\n")
       end
@@ -379,7 +378,7 @@ describe Puppet::Type.type(:networkmanager_connection_setting).provider(:inifile
 
         logs = catalog.apply.report.logs
         expect(logs.first.source).to eq('/Networkmanager_connection_setting[em1/ipv4/dns]/value')
-        expect(logs.first.message).to eq("value changed [\"1.1.1.1\"] to \"8.8.8.8\"")
+        expect(logs.first.message).to eq('value changed ["1.1.1.1"] to "8.8.8.8"')
 
         expect(File.read(nmconn_file)).to eq("# Managed by Puppet\n\n[ipv4]\ndns=8.8.8.8\n")
       end
@@ -402,7 +401,7 @@ describe Puppet::Type.type(:networkmanager_connection_setting).provider(:inifile
 
         logs = catalog.apply.report.logs
         expect(logs.first.source).to eq('/Networkmanager_connection_setting[em1/ipv4/dns]/value')
-        expect(logs.first.message).to eq("value changed \"1.1.1.1\" to \"8.8.8.8\"")
+        expect(logs.first.message).to eq('value changed "1.1.1.1" to "8.8.8.8"')
 
         expect(File.read(nmconn_file)).to eq("# Managed by Puppet\n\n[ipv4]\ndns=8.8.8.8\n")
       end

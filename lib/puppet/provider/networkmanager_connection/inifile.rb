@@ -40,8 +40,8 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
     Dir['/etc/NetworkManager/system-connections/*.nmconnection'].each do |file|
       conn_file = PuppetX::Networkmanager::Connection.new(file)
       conn = {
-        name: conn.get_setting('connection', 'id'),
-        uuid: conn.get_setting('connection', 'uuid'),
+        name: conn_file.get_setting('connection', 'id'),
+        uuid: conn_file.get_setting('connection', 'uuid'),
         path: file,
       }
 

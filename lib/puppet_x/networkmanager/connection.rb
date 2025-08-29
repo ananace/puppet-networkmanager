@@ -105,8 +105,8 @@ module PuppetX # rubocop:disable Style/ClassAndModuleChildren
         return if value.nil?
         return true if value == 'true'
         return false if value == 'false'
-        return value.to_i if value =~ /^[-+]?\d+$/
-        return value.to_f if value =~ /^[-+]?\d+\.\d+$/
+        return value.to_i if value.match? %r{^[-+]?\d+$}
+        return value.to_f if value.match? %r{^[-+]?\d+\.\d+$}
         return JSON.parse(value) if value.strip.start_with? '{'
         return value.split(';').map { |v| deserialize_value(v) }.compact if value.include? ';'
 
