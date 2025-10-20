@@ -12,10 +12,11 @@ module PuppetX # rubocop:disable Style/ClassAndModuleChildren
         (@connections ||= {})[path] ||= new(path)
       end
 
-      attr_accessor :path, :is_managed
+      attr_accessor :path, :write_path, :is_managed
 
       def initialize(path)
         @path = path
+        @write_path = path
         @file_exists = File.exist?(path)
         @is_managed = false
       end
@@ -34,7 +35,7 @@ module PuppetX # rubocop:disable Style/ClassAndModuleChildren
         ini_file.sections.each do |section|
           section.entries
                  .select { |e| e.is_a? Array }
-                 .each { |(setting, value)| found["#{section.name}/#{setting}"] = value }
+                 .each { |(setting, value)| found["#{section.name}/#{setting}"] = self.class.deserialize_value(value) }
         end
         found
       end
@@ -43,7 +44,7 @@ module PuppetX # rubocop:disable Style/ClassAndModuleChildren
         store = ini_file.get_section(section)
         return unless store
 
-        store[setting]
+        self.class.deserialize_value(store[setting])
       end
 
       def get_section(section, create: false)
@@ -63,6 +64,7 @@ module PuppetX # rubocop:disable Style/ClassAndModuleChildren
 
       def set_setting(section, setting, value)
         store = ini_file.get_section(section) || ini_file.add_section(section)
+        value = self.class.serialize_value(value)
         store[setting] = value
       end
 
@@ -100,6 +102,28 @@ module PuppetX # rubocop:disable Style/ClassAndModuleChildren
         @bak = nil
       end
 
+      def self.deserialize_value(value)
+        return if value.nil?
+        return true if value == 'true'
+        return false if value == 'false'
+        return value.to_i if value.match? %r{^[-+]?\d+$}
+        return value.to_f if value.match? %r{^[-+]?\d+\.\d+$}
+        return JSON.parse(value) if value.strip.start_with? '{'
+        return value.split(';').map { |v| deserialize_value(v) }.compact if value.include? ';'
+
+        value
+      end
+
+      def self.serialize_value(value)
+        return if value.nil?
+        return value.to_s if [true, false].include?(value) || value.is_a?(Numeric)
+        return value.to_json if value.is_a? Hash
+        return serialize_value(value.first) if value.is_a?(Array) && value.size == 1
+        return "#{value.map { |v| serialize_value(v) }.join ';'};" if value.is_a? Array
+
+        value.to_s.strip
+      end
+
       private
 
       def cleanup_sections
@@ -130,9 +154,14 @@ module PuppetX # rubocop:disable Style/ClassAndModuleChildren
 
       def ini_file
         @ini_file ||= begin
-          file = Puppet::Util::IniConfig::PhysicalFile.new(path)
+          file = Puppet::Util::IniConfig::PhysicalFile.new(write_path)
           file.destroy_empty = true
-          file.read if File.exist? path
+          if path == write_path
+            file.read if File.exist? path
+          elsif File.exist? path
+            data = File.read(path)
+            file.send :parse, data
+          end
           file
         end
       end

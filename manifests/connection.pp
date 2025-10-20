@@ -12,7 +12,7 @@ define networkmanager::connection (
   Optional[Variant[Stdlib::IP::Address::V4::CIDR, Array[Stdlib::IP::Address::V4::CIDR]]] $ip4_addresses = undef,
   Optional[Stdlib::IP::Address::V4::Nosubnet] $ip4_gateway = undef,
   Optional[Array[Stdlib::IP::Address::V4::Nosubnet]] $ip4_dns = undef,
-  Optional[String] $ip4_dns_search = undef,
+  Optional[Variant[Stdlib::Fqdn, Array[Stdlib::Fqdn]]] $ip4_dns_search = undef,
   Optional[Array[Stdlib::IP::Address::V4::CIDR]] $ip4_routes = undef,
   Optional[Integer[-1]] $ip4_route_metric = undef,
   Optional[Boolean] $ip4_may_fail = undef,
@@ -22,7 +22,7 @@ define networkmanager::connection (
   Optional[Variant[Stdlib::IP::Address::V6::CIDR, Array[Stdlib::IP::Address::V6::CIDR]]] $ip6_addresses = undef,
   Optional[Stdlib::IP::Address::V6::Nosubnet] $ip6_gateway = undef,
   Optional[Array[Stdlib::IP::Address::V6::Nosubnet]] $ip6_dns = undef,
-  Optional[String] $ip6_dns_search = undef,
+  Optional[Variant[Stdlib::Fqdn, Array[Stdlib::Fqdn]]] $ip6_dns_search = undef,
   Optional[Array[Stdlib::IP::Address::V6::CIDR]] $ip6_routes = undef,
   Optional[Integer[-1]] $ip6_route_metric = undef,
   Optional[Boolean] $ip6_may_fail = undef,
@@ -79,34 +79,34 @@ define networkmanager::connection (
           }
         }
       }
-      networkmanager_connection_setting { "${connection_name}/ipv4/may-fail":
-        value => $_ip4_may_fail,
+      networkmanager_connection_setting {
+        "${connection_name}/ipv4/may-fail": value => $_ip4_may_fail,
       }
       if $ip4_dns {
-        networkmanager_connection_setting { "${connection_name}/ipv4/dns":
-          value => $ip4_dns.join(';'),
+        networkmanager_connection_setting {
+          "${connection_name}/ipv4/dns": value => $ip4_dns,
         }
       }
       if $ip4_dns_search {
-        networkmanager_connection_setting { "${connection_name}/ipv4/dns-search":
-          value => $ip4_dns_search,
+        networkmanager_connection_setting {
+          "${connection_name}/ipv4/dns-search": value => $ip4_dns_search,
         }
       }
       if $ip4_routes {
         $ip4_routes.each |$idx, $route| {
-          networkmanager_connection_setting { "${connection_name}/ipv4/route${$idx + 1}":
-            value => "${route},0.0.0.0,1",
+          networkmanager_connection_setting {
+            "${connection_name}/ipv4/route${$idx + 1}": value => "${route},0.0.0.0,1",
           }
         }
       }
       if $ip4_route_metric {
-        networkmanager_connection_setting { "${connection_name}/ipv4/route-metric":
-          value => $ip4_route_metric,
+        networkmanager_connection_setting {
+          "${connection_name}/ipv4/route-metric": value => $ip4_route_metric,
         }
       }
       if $ip4_never_default != undef {
-        networkmanager_connection_setting { "${connection_name}/ipv4/never-default":
-          value => $ip4_never_default,
+        networkmanager_connection_setting {
+          "${connection_name}/ipv4/never-default": value => $ip4_never_default,
         }
       }
 
@@ -121,34 +121,34 @@ define networkmanager::connection (
           }
         }
       }
-      networkmanager_connection_setting { "${connection_name}/ipv6/may-fail":
-        value => $_ip6_may_fail,
+      networkmanager_connection_setting {
+        "${connection_name}/ipv6/may-fail": value => $_ip6_may_fail,
       }
       if $ip6_dns {
-        networkmanager_connection_setting { "${connection_name}/ipv6/dns":
-          value => $ip6_dns.join(';'),
+        networkmanager_connection_setting {
+          "${connection_name}/ipv6/dns": value => $ip6_dns,
         }
       }
       if $ip6_dns_search {
-        networkmanager_connection_setting { "${connection_name}/ipv6/dns-search":
-          value => $ip6_dns_search,
+        networkmanager_connection_setting {
+          "${connection_name}/ipv6/dns-search": value => $ip6_dns_search,
         }
       }
       if $ip6_routes {
         $ip6_routes.each |$idx, $route| {
-          networkmanager_connection_setting { "${connection_name}/ipv6/route${$idx + 1}":
-            value => "${route},::,1",
+          networkmanager_connection_setting {
+            "${connection_name}/ipv6/route${$idx + 1}": value => "${route},::,1",
           }
         }
       }
       if $ip6_route_metric {
-        networkmanager_connection_setting { "${connection_name}/ipv6/route-metric":
-          value => $ip6_route_metric,
+        networkmanager_connection_setting {
+          "${connection_name}/ipv6/route-metric": value => $ip6_route_metric,
         }
       }
       if $ip6_never_default != undef {
-        networkmanager_connection_setting { "${connection_name}/ipv6/never-default":
-          value => $ip6_never_default,
+        networkmanager_connection_setting {
+          "${connection_name}/ipv6/never-default": value => $ip6_never_default,
         }
       }
     }

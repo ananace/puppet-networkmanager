@@ -30,7 +30,7 @@ describe 'networkmanager::bridge' do
       ['em1', 'em2'].each do |slave|
         it do
           is_expected.to contain_networkmanager_connection("bridgeslave-namevar-#{slave}")
-            .with_ensure('present')
+            .with_ensure('active')
             .with_purge_settings(true)
         end
         it do
