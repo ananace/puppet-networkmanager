@@ -53,7 +53,7 @@ define networkmanager::connection (
   if $ensure != absent {
     networkmanager_connection_setting {
       "${connection_name}/connection/autoconnect": value => $autoconnect;
-      "${connection_name}/connection/type": value        => $type;
+      "${connection_name}/connection/type": value => $type;
     }
 
     if $autoconnect_priority {

@@ -64,8 +64,8 @@ define networkmanager::vlan (
   if $ensure != absent {
     networkmanager_connection_setting {
       "${connection_name}/connection/interface-name": value => $identifier;
-      "${connection_name}/vlan/id": value                   => $vlanid;
-      "${connection_name}/vlan/interface-name": value       => $identifier;
+      "${connection_name}/vlan/id": value => $vlanid;
+      "${connection_name}/vlan/interface-name": value => $identifier;
     }
     if $parent {
       networkmanager_connection_setting {

@@ -100,8 +100,8 @@ define networkmanager::bond (
     if $slave_ensure != absent {
       networkmanager_connection_setting {
         "${name}/connection/interface-name": value => $slave;
-        "${name}/connection/slave-type": value     => 'bond';
-        "${name}/connection/master": value         => $identifier;
+        "${name}/connection/slave-type": value => 'bond';
+        "${name}/connection/master": value => $identifier;
       }
     }
   }
