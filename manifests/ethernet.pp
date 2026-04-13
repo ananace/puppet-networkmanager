@@ -62,7 +62,7 @@ define networkmanager::ethernet (
   if $ensure != absent {
     networkmanager_connection_setting {
       "${connection_name}/connection/interface-name": value => $identifier;
-      "${connection_name}/ethernet/mac-address": value      => $mac;
+      "${connection_name}/ethernet/mac-address": value => $mac;
     }
     if $mtu {
       networkmanager_connection_setting {

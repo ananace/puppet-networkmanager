@@ -67,7 +67,7 @@ define networkmanager::infiniband (
     networkmanager_connection_setting {
       "${connection_name}/connection/interface-name": value => $identifier;
       "${connection_name}/infiniband/transport-mode": value => $transport_mode;
-      "${connection_name}/infiniband/mac-address": value    => $mac;
+      "${connection_name}/infiniband/mac-address": value => $mac;
     }
     if $pkey {
       networkmanager_connection_setting {

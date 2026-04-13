@@ -70,7 +70,7 @@ define networkmanager::team (
   if $ensure != absent {
     networkmanager_connection_setting {
       "${connection_name}/connection/interface-name": value => $identifier;
-      "${connection_name}/team/config": value               => $config;
+      "${connection_name}/team/config": value => $config;
     }
     if $mac {
       networkmanager_connection_setting {
@@ -99,8 +99,8 @@ define networkmanager::team (
     if $ensure != absent {
       networkmanager_connection_setting {
         "${name}/connection/interface-name": value => $slave;
-        "${name}/connection/slave-type": value     => 'team';
-        "${name}/connection/master": value         => $identifier;
+        "${name}/connection/slave-type": value => 'team';
+        "${name}/connection/master": value => $identifier;
       }
     }
   }

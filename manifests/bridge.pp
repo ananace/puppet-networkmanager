@@ -102,8 +102,8 @@ define networkmanager::bridge (
     if $ensure != absent {
       networkmanager_connection_setting {
         "${name}/connection/interface-name": value => $slave;
-        "${name}/connection/slave-type": value     => 'bridge';
-        "${name}/connection/master": value         => $identifier;
+        "${name}/connection/slave-type": value => 'bridge';
+        "${name}/connection/master": value => $identifier;
       }
     }
   }
