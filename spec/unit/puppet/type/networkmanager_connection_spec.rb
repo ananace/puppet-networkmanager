@@ -115,6 +115,7 @@ describe Puppet::Type.type(:networkmanager_connection) do
       [proxy]
       DOC
 
+      allow(resource.provider).to receive(:nmcli).with(:connection, :show, '--active', :uuid, uuid)
       expect(resource.provider).to receive(:nmcli).with(:connection, :load, nmconn_file)
       allow(resource.provider).to receive(:exists?).and_return(true)
 

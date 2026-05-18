@@ -16,7 +16,7 @@ require 'securerandom'
 Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
   commands nmcli: '/usr/bin/nmcli'
 
-  def nmcli_safe(*args)
+  def self.nmcli_safe(*args)
     cmd = Puppet::Provider::Command.new(
       :nmcli,
       'nmcli',
@@ -27,19 +27,46 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
     cmd.execute(args)
   end
 
+  def nmcli_safe(*args)
+    self.class.nmcli_safe(*args)
+  end
+
   def self.instances
     # Ensure there's a cache of nameservers
     cached_nameservers
 
-    Dir['/etc/NetworkManager/system-connections/*.nmconnection'].map do |file|
-      conn = PuppetX::Networkmanager::Connection.new(file)
+    discovered_connections = {}
+    active_connections = nmcli_safe '--terse', '--fields', 'name,uuid,filename', :connection, :show
+    if active_connections.exitstatus.zero?
+      active_connections.stdout.each_line do |line|
+        parts = line.strip.split ':'
 
-      new(
-        name: conn.get_setting('connection', 'id'),
-        uuid: conn.get_setting('connection', 'uuid'),
-        path: file,
-      )
+        name = parts.shift
+        name = "#{name[0..-2]}:#{parts.shift}" while name.end_with?('\\')
+        uuid, path = *parts
+        # TODO: Should ephemeral connections be handled?
+        next if path.start_with? '/run'
+
+        (discovered_connections[uuid] ||= {}).merge!(
+          name: name,
+          uuid: uuid,
+          path: path,
+        )
+      end
     end
+
+    Dir['/etc/NetworkManager/system-connections/*.nmconnection'].each do |file|
+      conn_file = PuppetX::Networkmanager::Connection.new(file)
+      conn = {
+        name: conn_file.get_setting('connection', 'id'),
+        uuid: conn_file.get_setting('connection', 'uuid'),
+        path: file,
+      }
+
+      (discovered_connections[conn[:uuid]] ||= {}).merge! conn
+    end
+
+    discovered_connections.map { |_, data| new(data) }
   end
 
   def exists?
@@ -101,8 +128,30 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
     @connection_loaded = true
   end
 
+  def reload_connection
+    if resource[:ensure] == :absent
+      destroy if loaded?
+    elsif resource[:ensure] == :active || active?
+      activate
+    else
+      create
+    end
+  end
+
+  # Trigger a refresh-like reload if settings are purged
+  def flush
+    reload_connection
+  end
+
   def destroy
-    connection.destroy
+    self.class.cached_nameservers # Ensure nameservers have been cached
+    with_checkpoint do
+      if uuid
+        nmcli :connection, :delete, :uuid, uuid
+      else
+        nmcli :connection, :delete, :id, resource[:name]
+      end
+    end
   end
 
   def with_checkpoint(*)
@@ -147,12 +196,6 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
 
     store = connection.get_section('connection', create: true)
     store['uuid'] = uuid
-
-    if resource[:ensure] == :present
-      create
-    else
-      activate
-    end
   end
 
   def all_settings
@@ -209,12 +252,6 @@ Puppet::Type.type(:networkmanager_connection).provide(:inifile) do
       next if connection.get_setting(section, setting) == value.to_s
 
       connection.set_setting(section, setting, value)
-    end
-
-    if resource[:ensure] == :present
-      create
-    else
-      activate
     end
   end
 

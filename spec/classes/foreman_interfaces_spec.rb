@@ -31,7 +31,7 @@ describe 'networkmanager::foreman_interfaces' do
         .with_ip4_addresses(['1.2.3.4/8', '1.2.3.5/8'])
         .with_ip4_gateway('1.0.0.1')
         .with_ip4_dns(['1.0.1.1', '1.0.1.2'])
-        .with_ip4_dns_search('example.com')
+        .with_ip4_dns_search(['example.com'])
         .with_ip4_method('manual')
         .with_ip6_addresses(nil)
     end
@@ -60,11 +60,11 @@ describe 'networkmanager::foreman_interfaces' do
     end
     it do
       is_expected.to contain_networkmanager_connection_setting('enp5s0f0/ipv4/dns')
-        .with_value('1.0.1.1;1.0.1.2')
+        .with_value(['1.0.1.1', '1.0.1.2'])
     end
     it do
       is_expected.to contain_networkmanager_connection_setting('enp5s0f0/ipv4/dns-search')
-        .with_value('example.com')
+        .with_value(['example.com'])
     end
     it do
       is_expected.to contain_networkmanager_connection_setting('enp5s0f0/ipv4/may-fail')
@@ -130,7 +130,7 @@ describe 'networkmanager::foreman_interfaces' do
       is_expected.to contain_networkmanager__ethernet('eno1')
         .with_mac('5C:52:62:56:8A:C4')
         .without_ip4_addresses
-        .with_ip4_dns_search('example.com')
+        .with_ip4_dns_search(['example.com'])
         .without_ip4_dns
         .with_ip4_method('auto')
         .with_ip4_never_default(false)
